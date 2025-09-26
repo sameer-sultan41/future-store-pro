@@ -1,35 +1,32 @@
 "use server";
-import { SpecGroup } from "@prisma/client";
 
-import { db } from "@/shared/lib/db";
+import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 
 export const getCategorySpecs = async (categoryID: string) => {
   if (!categoryID || categoryID === "") return { error: "Invalid Category ID" };
 
-  const specifications: SpecGroup[] = [];
+  const specifications: { id: string; title: string; specs: string[] }[] = [];
   let shouldRepeat = true;
   let catIdToSearch: string | null = categoryID;
 
   const getSpecsAndParentID = async (catID: string) => {
-    const result = await db.category.findFirst({
-      where: {
-        id: catID,
-      },
-      select: {
-        parentID: true,
-        Category_SpecGroup: {
-          select: {
-            specGroup: {
-              select: {
-                id: true,
-                title: true,
-                specs: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select(`
+        parent_id,
+        category_spec_groups (
+          spec_groups (
+            id,
+            title,
+            specs
+          )
+        )
+      `)
+      .eq('id', catID)
+      .single();
+
+    if (error) return null;
     return result;
   };
 
@@ -37,11 +34,12 @@ export const getCategorySpecs = async (categoryID: string) => {
     if (catIdToSearch) {
       const result = await getSpecsAndParentID(catIdToSearch);
       if (!result) return false;
-      if (result.Category_SpecGroup.length > 0) {
-        result.Category_SpecGroup.forEach((specGroup) => specifications.unshift(specGroup.specGroup));
+      if (result.category_spec_groups && result.category_spec_groups.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result.category_spec_groups.forEach((item: any) => specifications.unshift(item.spec_groups));
       }
-      if (!result.parentID) return false;
-      catIdToSearch = result.parentID;
+      if (!result.parent_id) return false;
+      catIdToSearch = result.parent_id;
       return true;
     }
     return false;

@@ -1,19 +1,19 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
 
 import AdminSidebar from "@/domains/admin/components/sideBar";
-import { authOptions } from "@/shared/lib/authOptions";
+import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 
 export const metadata: Metadata = {
   title: "Admin",
 };
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/");
-  }
+  const supabase = createSupabaseServer();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) redirect("/");
   return (
     <div className="styles.adminLayout flex min-h-screen">
       <AdminSidebar />

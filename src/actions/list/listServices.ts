@@ -1,9 +1,9 @@
 "use server";
 import { z } from "zod";
 
-import { TFilters, TListItem } from "@/domains/store/productList/types";
+import { TFilters } from "@/domains/store/productList/types";
 import { TListSort } from "@/domains/store/productList/types/";
-import { db } from "@/shared/lib/db";
+import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TProductPath } from "@/shared/types/product";
 
 const ValidateSort = z.object({
@@ -34,12 +34,13 @@ export const getList = async (path: string, sortData: TListSort, filters: TFilte
 
 const getSubCategories = async (catID: string) => {
   try {
-    const result = await db.category.findMany({
-      where: {
-        parentID: catID,
-      },
-    });
-    if (!result) return null;
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select('name, url')
+      .eq('parent_id', catID);
+
+    if (error || !result) return null;
     const subCategories: TProductPath[] = [];
     result.forEach((cat) => {
       subCategories.push({
@@ -55,13 +56,17 @@ const getSubCategories = async (catID: string) => {
 
 const findCategoryFromPathArray = async (pathArray: string[]) => {
   try {
-    const result = await db.category.findMany();
-    if (!result) return "";
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select('id, parent_id, url');
+
+    if (error || !result) return "";
 
     let parentID: string | null = null;
     let categoryID = "";
     pathArray.forEach((path) => {
-      categoryID = result.filter((cat) => cat.parentID === parentID && cat.url === path)[0].id || "";
+      categoryID = result.filter((cat) => cat.parent_id === parentID && cat.url === path)[0]?.id || "";
       parentID = categoryID;
     });
     return categoryID;
@@ -73,12 +78,16 @@ const findCategoryFromPathArray = async (pathArray: string[]) => {
 const findCategoryChildren = async (catID: string, numberOfParents: number) => {
   try {
     if (numberOfParents === 3) return [catID];
-    const result = await db.category.findMany();
-    if (!result) return null;
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select('id, parent_id');
+
+    if (error || !result) return null;
 
     const tempChildren: string[] = [];
     result.forEach((cat) => {
-      if (cat.parentID === catID) {
+      if (cat.parent_id === catID) {
         tempChildren.push(cat.id);
       }
     });
@@ -86,7 +95,7 @@ const findCategoryChildren = async (catID: string, numberOfParents: number) => {
     if (numberOfParents === 1) {
       const lastChildren: string[] = [];
       result.forEach((cat) => {
-        if (cat.parentID && tempChildren.includes(cat.parentID)) {
+        if (cat.parent_id && tempChildren.includes(cat.parent_id)) {
           lastChildren.push(cat.id);
         }
       });
@@ -114,53 +123,60 @@ const getProductsByCategories = async (categories: string[], sortData: TListSort
   const isInitialPrice = filters.priceMinMax[1] === 0;
 
   try {
-    const result: TListItem[] | null = await db.product.findMany({
-      where: {
-        AND: [
-          {
-            categoryID: { in: categories },
-          },
-          isAvailable !== null
-            ? {
-                isAvailable: isAvailable,
-              }
-            : {},
-          brands
-            ? {
-                brandID: { in: brands },
-              }
-            : {},
-          !isInitialPrice
-            ? {
-                price: {
-                  gt: filters.priceMinMax[0],
-                  lte: filters.priceMinMax[1],
-                },
-              }
-            : {},
-        ],
+    const supabase = createSupabaseServer();
+    let query = supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        images,
+        price,
+        sale_price,
+        special_features,
+        is_available,
+        brands (
+          id,
+          name
+        )
+      `)
+      .in('category_id', categories);
+
+    if (isAvailable !== null) {
+      query = query.eq('is_available', isAvailable);
+    }
+
+    if (brands && brands.length > 0) {
+      query = query.in('brand_id', brands);
+    }
+
+    if (!isInitialPrice) {
+      query = query.gt('price', filters.priceMinMax[0]).lte('price', filters.priceMinMax[1]);
+    }
+
+    query = query.order(sortData.sortName, { ascending: sortData.sortType === 'asc' });
+
+    const { data: result, error } = await query;
+
+    if (error || !result) return null;
+    
+    // Transform to match expected format
+    const transformedResult = result.map(item => ({
+      id: item.id,
+      name: item.name,
+      images: item.images,
+      price: item.price,
+      salePrice: item.sale_price,
+      specialFeatures: item.special_features,
+      isAvailable: item.is_available,
+      brand: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        id: (item.brands as any).id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: (item.brands as any).name,
       },
-      select: {
-        id: true,
-        brand: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        images: true,
-        name: true,
-        price: true,
-        salePrice: true,
-        specialFeatures: true,
-        isAvailable: true,
-      },
-      orderBy: {
-        [sortData.sortName]: sortData.sortType,
-      },
-    });
-    if (!result) return null;
-    return result;
+    }));
+
+    return transformedResult;
   } catch {
     return null;
   }

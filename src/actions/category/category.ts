@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 
-import { db } from "@/shared/lib/db";
+import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TCategory, TGroupJSON } from "@/shared/types/categories";
 
 //eslint-disable-next-line
@@ -69,20 +69,50 @@ const convertToJson = (categoriesTable: TCategory[]): TGroupJSON[] => {
 
 export const getAllCategories = async () => {
   try {
-    const result: TGetAllCategories[] = await db.category.findMany();
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select('*');
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't read categories" };
-    return { res: result };
+    
+    // Transform to match expected format
+    const transformedResult = result.map(item => ({
+      id: item.id,
+      parentID: item.parent_id,
+      name: item.name,
+      url: item.url,
+      iconSize: item.icon_size,
+      iconUrl: item.icon_url,
+    }));
+    
+    return { res: transformedResult };
   } catch {
     return { error: "Cant read Category Groups" };
   }
 };
 export const getAllCategoriesJSON = async () => {
   try {
-    const result: TCategory[] = await db.category.findMany();
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select('*');
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't read categories" };
-    return { res: convertToJson(result) };
+    
+    // Transform to match expected format
+    const transformedResult = result.map(item => ({
+      id: item.id,
+      parentID: item.parent_id,
+      name: item.name,
+      url: item.url,
+      iconSize: item.icon_size,
+      iconUrl: item.icon_url,
+    }));
+    
+    return { res: convertToJson(transformedResult) };
   } catch {
     return { error: "Cant read Category Groups" };
   }
@@ -92,15 +122,20 @@ export const addCategory = async (data: TAddCategory) => {
   if (!AddCategory.safeParse(data).success) return { error: "Invalid Data!" };
 
   try {
-    const result = await db.category.create({
-      data: {
-        parentID: data.parentID,
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .insert({
+        parent_id: data.parentID,
         name: data.name,
         url: data.url,
-        iconSize: [...data.iconSize],
-        iconUrl: data.iconUrl,
-      },
-    });
+        icon_size: [...data.iconSize],
+        icon_url: data.iconUrl,
+      })
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
     if (!result) return { error: "cant add to database" };
     return { res: result };
   } catch (error) {
@@ -114,15 +149,18 @@ export const updateCategory = async (data: TUpdateCategory) => {
   const { id, iconSize, ...values } = data;
 
   try {
-    const result = await db.category.update({
-      where: {
-        id,
-      },
-      data: {
-        iconSize: [...iconSize],
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .update({
+        icon_size: [...iconSize],
         ...values,
-      },
-    });
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
     if (result) return { res: result };
     return { error: "Can't update it" };
   } catch (error) {
@@ -136,18 +174,24 @@ export const deleteCategory = async (id: string) => {
   if (!id) return { error: "Can't delete it!" };
 
   try {
-    const hasParent = await db.category.findFirst({
-      where: {
-        parentID: id,
-      },
-    });
-    if (!hasParent) {
-      const result = await db.category.delete({
-        where: {
-          id,
-        },
-      });
+    const supabase = createSupabaseServer();
+    const { data: hasParent, error: checkError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('parent_id', id)
+      .limit(1);
 
+    if (checkError) return { error: checkError.message };
+    
+    if (!hasParent || hasParent.length === 0) {
+      const { data: result, error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) return { error: error.message };
       if (!result) return { error: "Can't delete it!" };
       return { res: JSON.stringify(result) };
     }

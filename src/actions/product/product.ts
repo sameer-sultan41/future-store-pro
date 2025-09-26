@@ -1,13 +1,10 @@
 "use server";
-import { ProductSpec } from "@prisma/client";
 import { z } from "zod";
 
-import { db } from "@/shared/lib/db";
+import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import {
   TAddProductFormValues,
-  TCartListItemDB,
   TPath,
-  TProductListItem,
   TProductPageInfo,
   TSpecification,
 } from "@/shared/types/product";
@@ -38,29 +35,28 @@ export const addProduct = async (data: TAddProductFormValues) => {
   if (!ValidateAddProduct.safeParse(data).success) return { error: "Invalid Data!" };
 
   try {
+    const supabase = createSupabaseServer();
     const price = convertStringToFloat(data.price);
     const salePrice = data.salePrice ? convertStringToFloat(data.salePrice) : null;
 
-    const result = db.category.update({
-      where: {
-        id: data.categoryID,
-      },
-      data: {
-        products: {
-          create: {
-            name: data.name,
-            desc: data.desc,
-            brandID: data.brandID,
-            specialFeatures: data.specialFeatures,
-            isAvailable: data.isAvailable,
-            price: price,
-            salePrice: salePrice,
-            images: [...data.images],
-            specs: data.specifications,
-          },
-        },
-      },
-    });
+    const { data: result, error } = await supabase
+      .from('products')
+      .insert({
+        name: data.name,
+        description: data.desc,
+        brand_id: data.brandID,
+        special_features: data.specialFeatures,
+        is_available: data.isAvailable,
+        price: price,
+        sale_price: salePrice,
+        images: [...data.images],
+        specs: data.specifications,
+        category_id: data.categoryID,
+      })
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Insert Data" };
     return { res: result };
   } catch (error) {
@@ -70,21 +66,34 @@ export const addProduct = async (data: TAddProductFormValues) => {
 
 export const getAllProducts = async () => {
   try {
-    const result: TProductListItem[] | null = await db.product.findMany({
-      select: {
-        id: true,
-        name: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        categories (
+          id,
+          name
+        )
+      `);
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Get Data from Database!" };
-    return { res: result };
+    
+    // Transform to match expected format
+    const transformedResult = result.map(item => ({
+      id: item.id,
+      name: item.name,
+      category: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        id: (item.categories as any).id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: (item.categories as any).name,
+      },
+    }));
+    
+    return { res: transformedResult };
   } catch (error) {
     return { error: JSON.stringify(error) };
   }
@@ -94,41 +103,49 @@ export const getOneProduct = async (productID: string) => {
   if (!productID || productID === "") return { error: "Invalid Product ID!" };
 
   try {
-    const result = await db.product.findFirst({
-      where: {
-        id: productID,
-      },
-      select: {
-        id: true,
-        name: true,
-        desc: true,
-        images: true,
-        price: true,
-        salePrice: true,
-        specs: true,
-        specialFeatures: true,
-        isAvailable: true,
-        optionSets: true,
-        category: {
-          select: {
-            id: true,
-            parentID: true,
-          },
-        },
-      },
-    });
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        description,
+        images,
+        price,
+        sale_price,
+        specs,
+        special_features,
+        is_available,
+        option_sets,
+        categories (
+          id,
+          parent_id
+        )
+      `)
+      .eq('id', productID)
+      .single();
+
+    if (error) return { error: error.message };
     if (!result) return { error: "Invalid Data!" };
 
     const specifications = await generateSpecTable(result.specs);
     if (!specifications || specifications.length === 0) return { error: "Invalid Date" };
 
-    const pathArray: TPath[] | null = await getPathByCategoryID(result.category.id, result.category.parentID);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pathArray: TPath[] | null = await getPathByCategoryID((result.categories as any).id, (result.categories as any).parent_id);
     if (!pathArray || pathArray.length === 0) return { error: "Invalid Date" };
 
-    //eslint-disable-next-line
-    const { specs, ...others } = result;
+    // Transform to match expected format
     const mergedResult: TProductPageInfo = {
-      ...others,
+      id: result.id,
+      name: result.name,
+      desc: result.description,
+      images: result.images,
+      price: result.price,
+      salePrice: result.sale_price,
+      specialFeatures: result.special_features,
+      isAvailable: result.is_available,
+      optionSets: result.option_sets,
       specifications,
       path: pathArray,
     };
@@ -143,21 +160,31 @@ export const getCartProducts = async (productIDs: string[]) => {
   if (!productIDs || productIDs.length === 0) return { error: "Invalid Product List" };
 
   try {
-    const result: TCartListItemDB[] | null = await db.product.findMany({
-      where: {
-        id: { in: productIDs },
-      },
-      select: {
-        id: true,
-        name: true,
-        images: true,
-        price: true,
-        salePrice: true,
-      },
-    });
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        images,
+        price,
+        sale_price
+      `)
+      .in('id', productIDs);
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Get Data from Database!" };
-    return { res: result };
+    
+    // Transform to match expected format
+    const transformedResult = result.map(item => ({
+      id: item.id,
+      name: item.name,
+      images: item.images,
+      price: item.price,
+      salePrice: item.sale_price,
+    }));
+    
+    return { res: transformedResult };
   } catch (error) {
     return { error: JSON.stringify(error) };
   }
@@ -166,12 +193,15 @@ export const getCartProducts = async (productIDs: string[]) => {
 export const deleteProduct = async (productID: string) => {
   if (!productID || productID === "") return { error: "Invalid Data!" };
   try {
-    const result = await db.product.delete({
-      where: {
-        id: productID,
-      },
-    });
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productID)
+      .select()
+      .single();
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Delete!" };
     return { res: result };
   } catch (error) {
@@ -179,23 +209,24 @@ export const deleteProduct = async (productID: string) => {
   }
 };
 
-const generateSpecTable = async (rawSpec: ProductSpec[]) => {
+const generateSpecTable = async (rawSpec: { specGroupID: string; specValues: string[] }[]) => {
   try {
     const specGroupIDs = rawSpec.map((spec) => spec.specGroupID);
 
-    const result = await db.specGroup.findMany({
-      where: {
-        id: { in: specGroupIDs },
-      },
-    });
-    if (!result || result.length === 0) return null;
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('spec_groups')
+      .select('*')
+      .in('id', specGroupIDs);
+
+    if (error || !result || result.length === 0) return null;
 
     const specifications: TSpecification[] = [];
 
     rawSpec.forEach((spec) => {
       const groupSpecIndex = result.findIndex((g) => g.id === spec.specGroupID);
       const tempSpecs: { name: string; value: string }[] = [];
-      spec.specValues.forEach((s, index) => {
+      spec.specValues.forEach((s: string, index: number) => {
         tempSpecs.push({
           name: result[groupSpecIndex].specs[index] || "",
           value: s || "",
@@ -219,18 +250,19 @@ const getPathByCategoryID = async (categoryID: string, parentID: string | null) 
   try {
     if (!categoryID || categoryID === "") return null;
     if (!parentID || parentID === "") return null;
-    const result: TPath[] = await db.category.findMany({
-      where: {
-        OR: [{ id: categoryID }, { id: parentID }, { parentID: null }],
-      },
-      select: {
-        id: true,
-        parentID: true,
-        name: true,
-        url: true,
-      },
-    });
-    if (!result || result.length === 0) return null;
+    
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('categories')
+      .select(`
+        id,
+        parent_id,
+        name,
+        url
+      `)
+      .or(`id.eq.${categoryID},id.eq.${parentID},parent_id.is.null`);
+
+    if (error || !result || result.length === 0) return null;
 
     const path: TPath[] = [];
     let tempCatID: string | null = categoryID;
@@ -239,8 +271,13 @@ const getPathByCategoryID = async (categoryID: string, parentID: string | null) 
     const generatePath = () => {
       const foundCatIndex = result.findIndex((cat) => cat.id === tempCatID);
       if (foundCatIndex === -1) return;
-      path.unshift(result[foundCatIndex]);
-      tempCatID = result[foundCatIndex].parentID;
+      path.unshift({
+        id: result[foundCatIndex].id,
+        parentID: result[foundCatIndex].parent_id,
+        name: result[foundCatIndex].name,
+        url: result[foundCatIndex].url,
+      });
+      tempCatID = result[foundCatIndex].parent_id;
       if (!tempCatID) return;
       searchCount++;
       if (searchCount <= 3) generatePath();

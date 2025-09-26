@@ -1,18 +1,44 @@
-"use-client";
+"use client";
 
-import { useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useEffect, useState } from "react";
 
 import { ProfileIcon } from "@/shared/components/icons/svgIcons";
 import Button from "@/shared/components/UI/button";
 import { useToggleMenu } from "@/shared/hooks/useToggleMenu";
+import { createSupabaseClient } from "@/shared/lib/supabaseClient";
 import { cn } from "@/shared/utils/styling";
 
 const NavBarProfile = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useToggleMenu(false, menuRef);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const router = useRouter();
 
   const toggleMenu = () => {
     setIsActive((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const supabase = createSupabaseClient();
+    
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createSupabaseClient();
+    await supabase.auth.signOut();
+    router.push('/');
   };
 
   return (
@@ -35,8 +61,29 @@ const NavBarProfile = () => {
           isActive && "scale-100 visible opacity-100"
         )}
       >
-        <Button className="border-white font-semibold text-sm hover:bg-gray-100">Sign In</Button>
-        <Button className="border-white font-semibold text-sm hover:bg-gray-100">Sign Up</Button>
+        {user ? (
+          <>
+            <Button className="border-white font-semibold text-sm hover:bg-gray-100">
+              {user.email}
+            </Button>
+            <Button 
+              onClick={handleSignOut}
+              className="border-white font-semibold text-sm hover:bg-gray-100"
+            >
+              Sign Out
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              onClick={() => router.push('/login')}
+              className="border-white font-semibold text-sm hover:bg-gray-100"
+            >
+              Sign In
+            </Button>
+            <Button className="border-white font-semibold text-sm hover:bg-gray-100">Sign Up</Button>
+          </>
+        )}
       </div>
     </div>
   );

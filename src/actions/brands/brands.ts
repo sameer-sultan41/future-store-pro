@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 
-import { db } from "@/shared/lib/db";
+import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TBrand } from "@/shared/types";
 
 const ValidateUpdateBrand = z.object({
@@ -13,11 +13,16 @@ export const addBrand = async (brandName: string) => {
   if (!brandName || brandName === "") return { error: "Invalid Data!" };
 
   try {
-    const result = db.brand.create({
-      data: {
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('brands')
+      .insert({
         name: brandName,
-      },
-    });
+      })
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Insert Data" };
     return { res: result };
   } catch (error) {
@@ -27,8 +32,12 @@ export const addBrand = async (brandName: string) => {
 
 export const getAllBrands = async () => {
   try {
-    const result: TBrand[] | null = await db.brand.findMany();
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('brands')
+      .select('*');
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Get Data from Database!" };
     return { res: result };
   } catch (error) {
@@ -39,12 +48,15 @@ export const getAllBrands = async () => {
 export const deleteBrand = async (brandID: string) => {
   if (!brandID || brandID === "") return { error: "Invalid Data!" };
   try {
-    const result = await db.brand.delete({
-      where: {
-        id: brandID,
-      },
-    });
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('brands')
+      .delete()
+      .eq('id', brandID)
+      .select()
+      .single();
 
+    if (error) return { error: error.message };
     if (!result) return { error: "Can't Delete!" };
     return { res: result };
   } catch (error) {
@@ -56,16 +68,18 @@ export const updateBrand = async (data: TBrand) => {
   if (!ValidateUpdateBrand.safeParse(data).success) return { error: "Invalid Data!" };
 
   try {
-    const result = await db.brand.update({
-      where: {
-        id: data.id,
-      },
-      data: {
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from('brands')
+      .update({
         name: data.name,
-      },
-    });
+      })
+      .eq('id', data.id)
+      .select()
+      .single();
 
-    if (!result) return { error: "Can't Delete!" };
+    if (error) return { error: error.message };
+    if (!result) return { error: "Can't Update!" };
     return { res: result };
   } catch (error) {
     return { error: JSON.stringify(error) };

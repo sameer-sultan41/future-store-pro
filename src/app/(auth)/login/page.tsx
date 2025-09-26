@@ -1,9 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 import Button from "@/shared/components/UI/button";
+import { createSupabaseClient } from "@/shared/lib/supabaseClient";
 
 const Login = () => {
   const router = useRouter();
@@ -16,22 +16,26 @@ const Login = () => {
 
   const handleLogin = async () => {
     setLoading(true);
-    signIn("credentials", {
-      ...loginData,
-      redirect: false,
-    })
-      .then((callback) => {
-        if (callback?.ok) {
-          router.push("/admin");
-        }
-
-        if (callback?.error) {
-          setError(callback.error);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
+    setError("");
+    try {
+      const supabase = createSupabaseClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
       });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      if (data.session) {
+        router.push("/admin");
+      }
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
