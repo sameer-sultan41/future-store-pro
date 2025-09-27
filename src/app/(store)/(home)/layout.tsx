@@ -14,7 +14,7 @@ const StoreLayout = ({ children }: { children: React.ReactNode }) => {
         <StoreNavBar />
         {children}
         <StoreFooter />
-        <Warning />
+        {/* <Warning /> */}
       </Provider>
     </main>
   );
