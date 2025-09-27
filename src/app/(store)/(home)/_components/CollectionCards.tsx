@@ -1,6 +1,6 @@
-import { CollectionsData } from "../../constants";
+import { CollectionsData } from "../../../../domains/store/homePage/constants";
 
-import CollectionCard from "./collectionCard";
+import CollectionCard from "../../../../domains/store/homePage/components/collectionCards/collectionCard";
 
 export const CollectionCards = () => {
   return (
