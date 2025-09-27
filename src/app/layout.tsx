@@ -8,7 +8,7 @@ const outfitFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "BITEX",
+  title: "future",
   description: "Electronic Shop",
 };
 
