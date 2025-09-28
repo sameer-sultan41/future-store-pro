@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Box, Clock, Users, Headset } from "lucide-react";
 
 import AddVisit from "@/domains/store/shared/components/addVisit";
 import NavBarCategory from "@/domains/store/shared/components/navbar/navCategory";
@@ -57,6 +58,32 @@ const StoreNavBar = () => {
 					<Link href={"/"} className="mr-0 xl:mr-20 lg:mr-10">
 						<Image alt="future Logo" src={"/images/logo.png"} width={125} height={40} quality={100} />
 					</Link>
+					<nav className="header-nav flex gap-6 text-gray-700 font-medium text-sm">
+						<Link
+							href="#productsPanel"
+							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+						>
+							<Box className="w-5 h-5" /> Products
+						</Link>
+						<Link
+							href="#upcoming"
+							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+						>
+							<Clock className="w-5 h-5" /> Upcoming
+						</Link>
+						<Link
+							href="#forum"
+							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+						>
+							<Users className="w-5 h-5" /> Community
+						</Link>
+						<Link
+							href="#support"
+							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+						>
+							<Headset className="w-5 h-5" /> Support
+						</Link>
+					</nav>
 					<div className="h-11 relative flex-1 mx-6 sm:mx-10">
 						<input
 							type="text"
