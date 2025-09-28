@@ -13,7 +13,7 @@ import {
 import { threeSaleCards, twoSaleCards } from "@/domains/store/homePage/constants";
 
 export const metadata: Metadata = {
-  title: "BITEX - Homepage",
+  title: "Future Store - Homepage",
 };
 
 export default function Home() {

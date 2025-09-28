@@ -1,6 +1,5 @@
 "use client";
 
-import { ProductSpec, SpecGroup } from "@prisma/client";
 import { useEffect, useState } from "react";
 
 import { getAllBrands } from "@/actions/brands/brands";
@@ -23,6 +22,19 @@ const categoryListFirstItem: TDropDown = {
 const brandListFirstItem: TDropDown = {
   text: "Select A Brand....",
   value: "",
+};
+
+type ProductSpec = {
+  specGroupID: string; // ID of the specification group
+  specValues: string[]; // Array of specification values
+};
+
+type SpecGroup = {
+  id: string;
+  title: string;
+  specs: string[]; // Array of specifications
+  created_at: string; // Timestamp
+  updated_at: string; // Timestamp
 };
 
 type TProps = {
@@ -127,7 +139,15 @@ const ProductForm = ({ formValues: props, onChange }: TProps) => {
         specifications: JSON.parse(JSON.stringify(specArray)),
         categoryID: categoryID,
       });
-      setCategorySpecs(response.res);
+      setCategorySpecs(
+        response.res.map((item) => ({
+          id: item.id,
+          title: item.title,
+          specs: item.specs,
+          ...(item.created_at && { created_at: item.created_at }),
+          ...(item.updated_at && { updated_at: item.updated_at }),
+        }))
+      );
     }
   };
 
