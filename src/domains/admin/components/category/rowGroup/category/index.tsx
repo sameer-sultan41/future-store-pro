@@ -10,7 +10,7 @@ import {
   TGetAllCategories,
   TUpdateCategory,
 } from "@/actions/category/category";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import Popup from "@/shared/components/UI/popup";
 
 import AddCategory from "../addCategory";

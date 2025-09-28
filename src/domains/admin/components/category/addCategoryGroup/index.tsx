@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { TGetAllCategories, addCategory } from "@/actions/category/category";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import Popup from "@/shared/components/UI/popup";
 
 import GroupCategory from "../../forms/groupCategory";

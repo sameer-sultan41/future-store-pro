@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 
 import { ProfileIcon } from "@/shared/components/icons/svgIcons";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import { useToggleMenu } from "@/shared/hooks/useToggleMenu";
 import { createSupabaseClient } from "@/shared/lib/supabaseClient";
 import { cn } from "@/shared/utils/styling";

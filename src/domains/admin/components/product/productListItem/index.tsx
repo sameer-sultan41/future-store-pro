@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { deleteProduct } from "@/actions/product/product";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import Popup from "@/shared/components/UI/popup";
 import { TProductListItem } from "@/shared/types/product";
 

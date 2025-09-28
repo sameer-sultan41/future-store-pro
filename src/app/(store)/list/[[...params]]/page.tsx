@@ -14,7 +14,7 @@ import { DEFAULT_FILTERS, SORT_DATA, sortDropdownData } from "@/domains/store/pr
 import { TFilterBrands, TFilters, TListItem } from "@/domains/store/productList/types";
 import { TPageStatus } from "@/domains/store/productList/types/";
 import { getFiltersFromProductList } from "@/domains/store/productList/utils";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import DropDownList from "@/shared/components/UI/dropDown";
 import LineList from "@/shared/components/UI/lineList";
 import { IMAGE_BASE_URL } from "@/shared/constants/store";

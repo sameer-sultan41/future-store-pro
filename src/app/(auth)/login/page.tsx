@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import { createSupabaseClient } from "@/shared/lib/supabaseClient";
 
 const Login = () => {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { addSpecGroup } from "@/actions/category/categoryOptions";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import Input from "@/shared/components/UI/input";
 import { TSpecGroup } from "@/shared/types/common";
 

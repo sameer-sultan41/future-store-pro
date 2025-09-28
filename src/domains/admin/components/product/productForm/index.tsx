@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getAllBrands } from "@/actions/brands/brands";
 import { getAllCategoriesJSON } from "@/actions/category/category";
 import { getCategorySpecs } from "@/actions/category/specifications";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import DropDownList from "@/shared/components/UI/dropDown";
 import Input from "@/shared/components/UI/input";
 import { TBrand } from "@/shared/types";
