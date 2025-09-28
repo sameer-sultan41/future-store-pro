@@ -39,6 +39,7 @@ const NavBarCategory = ({ isNavbarVisible: isNavbarHide }: TProps) => {
   return (
     <div className="relative flex items-center select-none">
       <Button
+      variant={"ghost"}
         onClick={toggleMenu}
         className={cn(
           "w-auto px-4 py-2 border rounded-md transition-all duration-300",

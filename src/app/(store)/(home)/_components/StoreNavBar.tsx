@@ -107,8 +107,6 @@ const StoreNavBar = () => {
 					<div className="text-gray-500 flex pr-2 md:pr-0 space-x-2">
 						<CurrencyToggle />
 						<LanguageToggle />
-
-
 						<NavBarProfile />
 						<NavBarFavorite />
 						<NavBarShopping />
