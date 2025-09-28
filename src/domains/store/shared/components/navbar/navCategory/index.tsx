@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getAllCategoriesJSON } from "@/actions/category/category";
 import { ListIcon } from "@/shared/components/icons/svgIcons";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import { useToggleMenu } from "@/shared/hooks/useToggleMenu";
 import { TGroupJSON } from "@/shared/types/categories";
 import { cn } from "@/shared/utils/styling";
@@ -39,6 +39,7 @@ const NavBarCategory = ({ isNavbarVisible: isNavbarHide }: TProps) => {
   return (
     <div className="relative flex items-center select-none">
       <Button
+      variant={"ghost"}
         onClick={toggleMenu}
         className={cn(
           "w-auto px-4 py-2 border rounded-md transition-all duration-300",

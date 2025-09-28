@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 
 import { ProfileIcon } from "@/shared/components/icons/svgIcons";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import { useToggleMenu } from "@/shared/hooks/useToggleMenu";
 import { createSupabaseClient } from "@/shared/lib/supabaseClient";
 import { cn } from "@/shared/utils/styling";
@@ -45,10 +45,7 @@ const NavBarProfile = () => {
     <div className="relative">
       <Button
         onClick={toggleMenu}
-        className={cn(
-          "border-white h-9 hover:border-gray-300 transition-all text-gray-500 text-sm duration-300",
-          isActive && "border-gray-300 bg-gray-50"
-        )}
+      variant={"ghost"}
       >
         <ProfileIcon width={16} className="fill-white transition-all duration-300 stroke-gray-500 stroke-2" />
         <span className="select-none hidden lg:block">Account</span>
@@ -67,6 +64,7 @@ const NavBarProfile = () => {
               {user.email}
             </Button>
             <Button 
+            variant={"link"}
               onClick={handleSignOut}
               className="border-white font-semibold text-sm hover:bg-gray-100"
             >
@@ -76,12 +74,14 @@ const NavBarProfile = () => {
         ) : (
           <>
             <Button 
+                 variant={"link"}
               onClick={() => router.push('/login')}
-              className="border-white font-semibold text-sm hover:bg-gray-100"
             >
               Sign In
             </Button>
-            <Button className="border-white font-semibold text-sm hover:bg-gray-100">Sign Up</Button>
+            <Button variant={"link"} onClick={() => router.push('/signup')}>
+              Sign Up
+            </Button>
           </>
         )}
       </div>

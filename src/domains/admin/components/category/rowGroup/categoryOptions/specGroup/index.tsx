@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { addSingleSpec, deleteSingleSpec, deleteSpecGroup } from "@/actions/category/categoryOptions";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import Input from "@/shared/components/UI/input";
 import { TSingleSpec, TSpecGroup } from "@/shared/types/common";
 

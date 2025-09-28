@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { TTrafficListItem, deleteTraffic, getTrafficReport } from "@/actions/pageVisit/pageVisitServices";
-import Button from "@/shared/components/UI/button";
+import { Button } from "@/components/ui/button";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import { Pagination } from "@/shared/components/UI/table/pagination";
 import { TRAFFIC_LIST_PAGE_SIZE } from "@/shared/constants/admin/trafficView";
