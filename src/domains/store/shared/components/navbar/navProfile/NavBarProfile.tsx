@@ -64,6 +64,7 @@ const NavBarProfile = () => {
               {user.email}
             </Button>
             <Button 
+            variant={"link"}
               onClick={handleSignOut}
               className="border-white font-semibold text-sm hover:bg-gray-100"
             >
@@ -73,12 +74,14 @@ const NavBarProfile = () => {
         ) : (
           <>
             <Button 
+                 variant={"link"}
               onClick={() => router.push('/login')}
-              className="border-white font-semibold text-sm hover:bg-gray-100"
             >
               Sign In
             </Button>
-            <Button className="border-white font-semibold text-sm hover:bg-gray-100">Sign Up</Button>
+            <Button variant={"link"} onClick={() => router.push('/signup')}>
+              Sign Up
+            </Button>
           </>
         )}
       </div>

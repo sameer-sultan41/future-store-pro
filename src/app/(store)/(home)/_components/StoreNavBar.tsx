@@ -7,7 +7,7 @@ import { Box, Clock, Users, Headset } from "lucide-react";
 import AddVisit from "@/domains/store/shared/components/addVisit";
 import NavBarCategory from "@/domains/store/shared/components/navbar/navCategory";
 import NavBarFavorite from "@/domains/store/shared/components/navbar/navFavorite";
-import NavBarProfile from "@/domains/store/shared/components/navbar/navProfile";
+import NavBarProfile from "@/domains/store/shared/components/navbar/navProfile/NavBarProfile";
 import NavBarShopping from "@/domains/store/shared/components/navbar/navShopping";
 import { cn } from "@/shared/utils/styling";
 import { Input } from "@/components/ui/input";
