@@ -11,6 +11,11 @@ import NavBarProfile from "@/domains/store/shared/components/navbar/navProfile/N
 import NavBarShopping from "@/domains/store/shared/components/navbar/navShopping";
 import { cn } from "@/shared/utils/styling";
 import { Input } from "@/components/ui/input";
+import { LanguageToggle } from "./LanguageToggle";
+import { CurrencyToggle } from "./CurrencyToggle";
+
+
+
 
 const NAVBAR_ITEMS = [
 	{ name: "Computer", link: "/list/pc-laptops/computer" },
@@ -99,7 +104,11 @@ const StoreNavBar = () => {
 							className="absolute top-3.5 left-5 hidden sm:block"
 						/>
 					</div>
-					<div className="text-gray-500 flex pr-2 md:pr-0">
+					<div className="text-gray-500 flex pr-2 md:pr-0 space-x-2">
+						<CurrencyToggle />
+						<LanguageToggle />
+
+
 						<NavBarProfile />
 						<NavBarFavorite />
 						<NavBarShopping />
