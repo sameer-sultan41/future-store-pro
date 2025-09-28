@@ -10,6 +10,7 @@ import NavBarFavorite from "@/domains/store/shared/components/navbar/navFavorite
 import NavBarProfile from "@/domains/store/shared/components/navbar/navProfile";
 import NavBarShopping from "@/domains/store/shared/components/navbar/navShopping";
 import { cn } from "@/shared/utils/styling";
+import { Input } from "@/components/ui/input";
 
 const NAVBAR_ITEMS = [
 	{ name: "Computer", link: "/list/pc-laptops/computer" },
@@ -85,9 +86,9 @@ const StoreNavBar = () => {
 						</Link>
 					</nav>
 					<div className="h-11 relative flex-1 mx-6 sm:mx-10">
-						<input
+						<Input
 							type="text"
-							className="text-gray-800 hidden sm:block pl-4 size-full border-gray-300 focus:border-gray-500 border rounded-lg outline-gray-500 sm:pl-12"
+							className="hidden sm:block pl-4 size-full  rounded-lg sm:pl-12"
 							placeholder="Search"
 						/>
 						<Image

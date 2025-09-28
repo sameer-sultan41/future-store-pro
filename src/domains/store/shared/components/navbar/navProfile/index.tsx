@@ -45,10 +45,7 @@ const NavBarProfile = () => {
     <div className="relative">
       <Button
         onClick={toggleMenu}
-        className={cn(
-          "border-white h-9 hover:border-gray-300 transition-all text-gray-500 text-sm duration-300",
-          isActive && "border-gray-300 bg-gray-50"
-        )}
+      variant={"ghost"}
       >
         <ProfileIcon width={16} className="fill-white transition-all duration-300 stroke-gray-500 stroke-2" />
         <span className="select-none hidden lg:block">Account</span>
