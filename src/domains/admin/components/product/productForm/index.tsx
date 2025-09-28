@@ -144,8 +144,8 @@ const ProductForm = ({ formValues: props, onChange }: TProps) => {
           id: item.id,
           title: item.title,
           specs: item.specs,
-          created_at: new Date().toISOString(), // Default value
-          updated_at: new Date().toISOString(), // Default value
+          ...(item.created_at && { created_at: item.created_at }),
+          ...(item.updated_at && { updated_at: item.updated_at }),
         }))
       );
     }
