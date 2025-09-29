@@ -89,7 +89,7 @@ export type TSpecification = {
     value: string;
   }[];
 };
-
+// build success
 export type TPath = {
   id: string;
   parentID: string | null;
