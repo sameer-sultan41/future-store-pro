@@ -1,6 +1,5 @@
 'use client'
 import { redirect, useSearchParams } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { z } from 'zod'
 import { useState } from 'react'
 
@@ -19,8 +18,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Separator } from '@/components/ui/separator'
 import { toast, Toaster } from 'sonner'
+import { createClient } from '@/supabase/client'
 
-const supabase = createClientComponentClient()
+const supabase = createClient()
 
 // Define the IUserSignUp type
 export interface IUserSignUp {
@@ -73,11 +73,12 @@ export default function CredentialsSignInForm() {
   const onSubmit = async (data: IUserSignUp) => {
     setIsLoading(true)
     try {
-      const { error } = await supabase.auth.signUp({
+      const res = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
       })
-      console.log("error signup", error)
+      const { error } = res
+      console.log("error signup", res)
 
       if (error) {
         if (error.message.includes('security purposes')) {
@@ -90,7 +91,7 @@ export default function CredentialsSignInForm() {
 
       toast('Account created successfully!');
 
-      redirect(callbackUrl);
+      redirect(callbackUrl || '/sign-in');
     } catch (error) {
       toast('An unexpected error occurred.');
     } finally {

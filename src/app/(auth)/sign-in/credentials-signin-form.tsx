@@ -1,6 +1,7 @@
 'use client'
 import { redirect, useSearchParams } from 'next/navigation';
 import { z } from 'zod';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +23,8 @@ import { login } from '@/actions/auth/login';
 const signInDefaultValues =
   process.env.NODE_ENV === 'development'
     ? {
-        email: 'john@me.com',
-        password: '123456',
+         email: 'sameer@gmail.com',
+        password: 'sameer',
       }
     : {
         email: '',
@@ -41,6 +42,7 @@ export const UserSignInSchema = z.object({
 });
 
 export default function CredentialsSignInForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
 
@@ -52,22 +54,29 @@ export default function CredentialsSignInForm() {
   const { control, handleSubmit } = form;
 
   const onSubmit = async (data: IUserSignIn) => {
-    const res = await login(data);
-    console.log("error", res)
-    const { error } = res;
+    setIsLoading(true);
+    try {
+      const res = await login(data);
+      console.log('error signin', res);
+      const { error } = res;
 
-    if (error) {
-      toast.error('Invalid email or password', {
-        description: error.message,
-        action: {
-          label: 'Retry',
-          onClick: () => console.log('Retry'),
-        },
-      });
-      return;
+      if (error) {
+        toast.error('Invalid email or password', {
+          description: error.message,
+          action: {
+            label: 'Retry',
+            onClick: () => console.log('Retry'),
+          },
+        });
+        return;
+      }
+
+      redirect(callbackUrl);
+    } catch (err) {
+      toast.error('An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
     }
-
-    redirect(callbackUrl);
   };
 
   return (
@@ -109,7 +118,9 @@ export default function CredentialsSignInForm() {
           />
 
           <div>
-            <Button type="submit">Sign In</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </Button>
           </div>
           <div className="text-sm">
             <Link href="/page/conditions-of-use">Conditions of Use</Link> and{' '}
