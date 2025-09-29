@@ -1,11 +1,10 @@
 'use client'
-import { redirect, useSearchParams } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { redirect, useSearchParams } from 'next/navigation';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Link from 'next/link'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 import {
   Form,
@@ -14,11 +13,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
-
+} from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast, Toaster } from 'sonner';
+import { login } from '@/actions/auth/login';
 
 const signInDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -29,77 +28,62 @@ const signInDefaultValues =
     : {
         email: '',
         password: '',
-      }
+      };
 
-// Define the IUserSignIn type
 export interface IUserSignIn {
   email: string;
   password: string;
 }
 
-// Define the UserSignInSchema using zod
 export const UserSignInSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
-const supabase = createClientComponentClient();
-
 export default function CredentialsSignInForm() {
- 
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
 
   const form = useForm<IUserSignIn>({
     resolver: zodResolver(UserSignInSchema),
     defaultValues: signInDefaultValues,
-  })
+  });
 
-  const { control, handleSubmit } = form
+  const { control, handleSubmit } = form;
 
   const onSubmit = async (data: IUserSignIn) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      })
+    const res = await login(data);
+    console.log("error", res)
+    const { error } = res;
 
-      if (error) {
-        toast('Invalid email or password', {
-          description: error.message,
-          action: {
-            label: 'Retry',
-            onClick: () => console.log('Retry'),
-          },
-        })
-        return
-      }
-
-      redirect(callbackUrl)
-    } catch (error) {
-      toast('An unexpected error occurred', {
-        description: String(error),
+    if (error) {
+      toast.error('Invalid email or password', {
+        description: error.message,
         action: {
           label: 'Retry',
           onClick: () => console.log('Retry'),
         },
-      })
+      });
+      return;
     }
-  }
+
+    redirect(callbackUrl);
+  };
 
   return (
     <Form {...form}>
+      <Toaster position="top-right" richColors />
       <form onSubmit={handleSubmit(onSubmit)}>
-        <input type='hidden' name='callbackUrl' value={callbackUrl} />
-        <div className='space-y-6'>
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        <div className="space-y-6">
           <FormField
             control={control}
-            name='email'
+            name="email"
             render={({ field }) => (
-              <FormItem className='w-full'>
+              <FormItem className="w-full">
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter email address' {...field} />
+                  <Input placeholder="Enter email address" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -108,14 +92,14 @@ export default function CredentialsSignInForm() {
 
           <FormField
             control={control}
-            name='password'
+            name="password"
             render={({ field }) => (
-              <FormItem className='w-full'>
+              <FormItem className="w-full">
                 <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input
-                    type='password'
-                    placeholder='Enter password'
+                    type="password"
+                    placeholder="Enter password"
                     {...field}
                   />
                 </FormControl>
@@ -125,15 +109,14 @@ export default function CredentialsSignInForm() {
           />
 
           <div>
-            <Button type='submit'>Sign In</Button>
+            <Button type="submit">Sign In</Button>
           </div>
-          <div className='text-sm'>
-            {/* By signing in, you agree to {site.name}&apos;s{' '} */}
-            <Link href='/page/conditions-of-use'>Conditions of Use</Link> and{' '}
-            <Link href='/page/privacy-policy'>Privacy Notice.</Link>
+          <div className="text-sm">
+            <Link href="/page/conditions-of-use">Conditions of Use</Link> and{' '}
+            <Link href="/page/privacy-policy">Privacy Notice.</Link>
           </div>
         </div>
       </form>
     </Form>
-  )
+  );
 }
