@@ -1,7 +1,6 @@
 "use client";
 import { CloseIcon } from "@/shared/components/icons/svgIcons";
-
-import Button from "../button";
+import {Button} from "@/components/ui/button";
 
 type TProps = {
   title?: string;

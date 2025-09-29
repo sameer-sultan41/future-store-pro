@@ -2,7 +2,7 @@
 import { useFormStatus } from 'react-dom'
 
 import { Button } from '@/components/ui/button'
-import { SignInWithGoogle } from '@/lib/actions/user.actions'
+// import { SignInWithGoogle } from '@/lib/actions/user.actions'
 
 export function GoogleSignInForm() {
   const SignInButton = () => {
@@ -14,8 +14,8 @@ export function GoogleSignInForm() {
     )
   }
   return (
-    <form action={SignInWithGoogle}>
+    // <form action={SignInWithGoogle}>
       <SignInButton />
-    </form>
+    // </form>
   )
 }
