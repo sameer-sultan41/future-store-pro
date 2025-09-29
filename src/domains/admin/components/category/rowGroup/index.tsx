@@ -132,18 +132,18 @@ const RowCatGroup = ({ data, categories, onReset }: TProps) => {
     <div className="flex flex-wrap text-sm justify-between p-3 pl-5 items-center">
       <span className="inline-block w-[200px] text-gray-700 text-sm">{name}</span>
       <div className="flex gap-2">
-        <Button size="md" onClick={() => setShowOptions(true)}>
+        <Button  onClick={() => setShowOptions(true)}>
           Options / Specifications
         </Button>
-        <Button size="md" onClick={() => setShowAddCategory(true)}>
+        <Button  onClick={() => setShowAddCategory(true)}>
           Add Category
         </Button>
       </div>
       <div className="flex gap-2">
-        <Button size="md" onClick={() => setShowEdit(true)}>
+        <Button  onClick={() => setShowEdit(true)}>
           Edit
         </Button>
-        <Button size="md" onClick={() => setShowDelete(true)}>
+        <Button  onClick={() => setShowDelete(true)}>
           Delete
         </Button>
       </div>

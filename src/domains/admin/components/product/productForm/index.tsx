@@ -33,8 +33,8 @@ type SpecGroup = {
   id: string;
   title: string;
   specs: string[]; // Array of specifications
-  created_at: string; // Timestamp
-  updated_at: string; // Timestamp
+  created_at?: string; // Timestamp (optional)
+  updated_at?: string; // Timestamp (optional)
 };
 
 type TProps = {
@@ -144,8 +144,8 @@ const ProductForm = ({ formValues: props, onChange }: TProps) => {
           id: item.id,
           title: item.title,
           specs: item.specs,
-          ...(item.created_at && { created_at: item.created_at }),
-          ...(item.updated_at && { updated_at: item.updated_at }),
+          // ...(item.created_at),
+          // ...(item.updated_at),
         }))
       );
     }

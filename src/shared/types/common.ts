@@ -1,4 +1,4 @@
-import { NameValue, OptionSetType, PageType } from "@prisma/client";
+
 
 export type TProductCard = {
   name: string;
@@ -49,8 +49,8 @@ export type TCategory = {
 export type TOptionSet = {
   id: string;
   name: string;
-  options: NameValue[];
-  type: OptionSetType;
+  options: any[];
+  type: any;
 };
 
 export type TSingleOption = {
@@ -71,7 +71,7 @@ export type TSingleSpec = {
 };
 
 export type TAddPageVisit = {
-  pageType: PageType;
+  pageType: any;
   pagePath?: string;
   productID?: string;
   deviceResolution?: string;

@@ -1,4 +1,4 @@
-import { ProductSpec } from "@prisma/client";
+
 
 export type TUserReview = {
   userName: string;
@@ -63,7 +63,7 @@ export type TAddProductFormValues = {
   salePrice?: string;
   images: string[];
   categoryID: string;
-  specifications: ProductSpec[];
+  specifications: any[];
 };
 
 export type TProductListItem = {
