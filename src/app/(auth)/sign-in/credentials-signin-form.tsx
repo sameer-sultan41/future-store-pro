@@ -22,7 +22,7 @@ import { login } from '@/actions/auth/login';
 const signInDefaultValues =
   process.env.NODE_ENV === 'development'
     ? {
-        email: 'admin@example.com',
+        email: 'john@me.com',
         password: '123456',
       }
     : {

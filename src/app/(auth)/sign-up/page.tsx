@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
-import { auth } from '@/auth'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import SignUpForm from './signup-form'
@@ -19,10 +19,10 @@ export default async function SignUpPage(props: {
 
   const { callbackUrl } = searchParams
 
-  const session = await auth()
-  if (session) {
-    return redirect(callbackUrl || '/')
-  }
+  // const session = await auth()
+  // if (session) {
+  //   return redirect(callbackUrl || '/')
+  // }
 
   return (
     <div className='w-full'>
