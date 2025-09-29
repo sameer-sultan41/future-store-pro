@@ -1,18 +1,10 @@
-import { Metadata } from 'next'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import CredentialsSignInForm from './credentials-signin-form'
-import { GoogleSignInForm } from './google-signin-form'
 import { Button } from '@/components/ui/button'
 import { getSetting } from '@/actions/settings/settings'
 import { Separator } from '@/components/ui/separator'
-
-
-export const metadata: Metadata = {
-  title: 'Sign In',
-}
 
 export default async function SignInPage(props: {
   searchParams: Promise<{
@@ -20,14 +12,17 @@ export default async function SignInPage(props: {
   }>
 }) {
   const searchParams = await props.searchParams
-  const { site } = await getSetting()
+  let site
+
+  try {
+    const settings = await getSetting()
+    site = settings.site
+  } catch (error) {
+    console.error('Failed to fetch site settings:', error)
+    site = { name: 'our site' } // Fallback value
+  }
 
   const { callbackUrl = '/' } = searchParams
-
-  // const session = await auth()
-  // if (session) {
-  //   return redirect(callbackUrl)
-  // }
 
   return (
     <div className='w-full'>
@@ -40,7 +35,7 @@ export default async function SignInPage(props: {
             <CredentialsSignInForm />
             <Separator />
             <div className='mt-4'>
-              {/* <GoogleSignInForm /> */}
+              {/* Placeholder for additional forms */}
             </div>
           </div>
         </CardContent>
