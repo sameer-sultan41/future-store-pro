@@ -101,6 +101,37 @@ CREATE TABLE user_profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Table: settings
+
+CREATE TABLE IF NOT EXISTS settings (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    common JSONB NOT NULL DEFAULT '{
+        "pageSize": 9,
+        "isMaintenanceMode": false,
+        "freeShippingMinPrice": 0,
+        "defaultTheme": "light",
+        "defaultColor": "blue"
+    }',
+    site JSONB NOT NULL,
+    carousels JSONB NOT NULL,
+    available_languages JSONB NOT NULL,
+    default_language TEXT NOT NULL,
+    available_currencies JSONB NOT NULL,
+    default_currency TEXT NOT NULL,
+    available_payment_methods JSONB NOT NULL,
+    default_payment_method TEXT NOT NULL,
+    available_delivery_dates JSONB NOT NULL,
+    default_delivery_date TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Ensure unique constraints for nested JSON fields if needed
+-- Example: Ensure unique URL in carousels
+-- ALTER TABLE settings ADD CONSTRAINT unique_carousel_url UNIQUE ((carousels->>'url'));
+
+-- Add additional constraints or indexes as necessary
+
 -- Indexes for better performance
 CREATE INDEX idx_categories_parent_id ON categories(parent_id);
 CREATE INDEX idx_categories_url ON categories(url);
@@ -120,6 +151,7 @@ ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE page_visits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 
 -- Public read access for store data
 CREATE POLICY "Public read access for categories" ON categories FOR SELECT USING (true);
@@ -129,6 +161,7 @@ CREATE POLICY "Public read access for spec_groups" ON spec_groups FOR SELECT USI
 CREATE POLICY "Public read access for category_spec_groups" ON category_spec_groups FOR SELECT USING (true);
 CREATE POLICY "Public read access for brands" ON brands FOR SELECT USING (true);
 CREATE POLICY "Public read access for products" ON products FOR SELECT USING (true);
+CREATE POLICY "Public read access for settings" ON settings FOR SELECT USING (true);
 
 -- Admin full access (authenticated users)
 CREATE POLICY "Admin full access for categories" ON categories FOR ALL USING (auth.role() = 'authenticated');
@@ -139,6 +172,7 @@ CREATE POLICY "Admin full access for category_spec_groups" ON category_spec_grou
 CREATE POLICY "Admin full access for brands" ON brands FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access for products" ON products FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Admin full access for page_visits" ON page_visits FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Admin full access for settings" ON settings FOR ALL USING (auth.role() = 'authenticated');
 
 -- User profile policies
 CREATE POLICY "Users can view own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
