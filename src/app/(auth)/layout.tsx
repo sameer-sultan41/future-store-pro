@@ -15,9 +15,9 @@ export default async function AuthLayout({
       <header className='mt-8'>
         <Link href='/'>
           <Image
-            src='/icons/logo.svg'
+            src={site.logo}
             alt='logo'
-            width={64}
+            width={184}
             height={64}
             priority
             style={{
