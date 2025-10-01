@@ -76,24 +76,34 @@ export default function CredentialsSignInForm() {
       const res = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          data: {
+            name: data.name,
+          }
+        }
       })
       const { error } = res
-      console.log("error signup", res)
+      console.log("signup response", res)
 
       if (error) {
         if (error.message.includes('security purposes')) {
-          toast('Please wait a moment before trying again.');
+          toast.error('Please wait a moment before trying again.');
         } else {
-          toast(error.message);
+          toast.error('Signup failed', {
+            description: error.message,
+          });
         }
         return;
       }
 
-      toast('Account created successfully!');
+      toast.success('Account created successfully!', {
+        description: 'Please check your email and click the verification link to complete your registration.',
+      });
 
-      redirect(callbackUrl || '/sign-in');
+      // Redirect to confirmation page
+      redirect('/confirm');
     } catch (error) {
-      toast('An unexpected error occurred.');
+      toast.error('An unexpected error occurred.');
     } finally {
       setIsLoading(false)
     }

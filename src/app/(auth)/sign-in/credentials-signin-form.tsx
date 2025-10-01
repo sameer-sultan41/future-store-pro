@@ -61,13 +61,24 @@ export default function CredentialsSignInForm() {
       const { error } = res;
 
       if (error) {
-        toast.error('Invalid email or password', {
-          description: error.message,
-          action: {
-            label: 'Retry',
-            onClick: () => console.log('Retry'),
-          },
-        });
+        // Handle email not confirmed error specifically
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Email not verified', {
+            description: 'Please check your email and click the verification link before signing in.',
+            action: {
+              label: 'Resend Email',
+              onClick: () => handleResendConfirmation(data.email),
+            },
+          });
+        } else {
+          toast.error('Sign in failed', {
+            description: error.message,
+            action: {
+              label: 'Retry',
+              onClick: () => console.log('Retry'),
+            },
+          });
+        }
         return;
       }
 
@@ -76,6 +87,29 @@ export default function CredentialsSignInForm() {
       toast.error('An unexpected error occurred.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async (email: string) => {
+    try {
+      const { createClient } = await import('@/supabase/client');
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+      
+      if (error) {
+        toast.error('Failed to resend confirmation email', {
+          description: error.message,
+        });
+      } else {
+        toast.success('Confirmation email sent!', {
+          description: 'Please check your email for the verification link.',
+        });
+      }
+    } catch (error) {
+      toast.error('An error occurred while resending the email.');
     }
   };
 
