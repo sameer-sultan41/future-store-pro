@@ -5,7 +5,7 @@ import StoreNavBar from "@/app/(store)/(home)/_components/StoreNavBar";
 import Warning from "@/domains/store/shared/components/warning";
 import { shoppingCartStore } from "@/store/shoppingCart";
 
-import StoreFooter from "./_components/Footer";
+import StoreFooter from "./(home)/_components/Footer";
 
 const StoreLayout = ({ children }: { children: React.ReactNode }) => {
   return (

@@ -66,25 +66,25 @@ const StoreNavBar = () => {
 					</Link>
 					<nav className="header-nav flex gap-6 text-gray-700 font-medium text-sm">
 						<Link
-							href="#productsPanel"
+							href="/products"
 							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
 						>
 							<Box className="w-5 h-5" /> Products
 						</Link>
 						<Link
-							href="#upcoming"
+							href="/upcoming"
 							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
 						>
 							<Clock className="w-5 h-5" /> Upcoming
 						</Link>
 						<Link
-							href="#forum"
+							href="/community"
 							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
 						>
 							<Users className="w-5 h-5" /> Community
 						</Link>
 						<Link
-							href="#support"
+							href="/support"
 							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
 						>
 							<Headset className="w-5 h-5" /> Support
