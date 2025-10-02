@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const path = require("path");
+const createNextIntlPlugin = require('next-intl/plugin');
 const nextConfig = {
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")],
@@ -17,5 +18,6 @@ const nextConfig = {
     IMG_URL: process.env.CLOUDINARY_URL,
   },
 };
+const withNextIntl = createNextIntlPlugin();
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);
