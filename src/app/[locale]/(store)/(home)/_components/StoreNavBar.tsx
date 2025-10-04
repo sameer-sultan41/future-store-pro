@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from "react";
 import { Box, Clock, Users, Headset } from "lucide-react";
 
@@ -29,6 +30,7 @@ const NAVBAR_ITEMS = [
 ];
 
 const StoreNavBar = () => {
+	const t = useTranslations('Navigation');
 	const [hideNavbar, setHideNavbar] = useState(false);
 
 	useEffect(() => {
@@ -65,30 +67,30 @@ const StoreNavBar = () => {
 						<Image alt="future Logo" src={"/images/logo.png"} width={125} height={40} quality={100} />
 					</Link>
 					<nav className="header-nav flex gap-6 text-gray-700 font-medium text-sm">
-						<Link
-							href="/products"
-							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
-						>
-							<Box className="w-5 h-5" /> Products
-						</Link>
-						<Link
-							href="/upcoming"
-							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
-						>
-							<Clock className="w-5 h-5" /> Upcoming
-						</Link>
-						<Link
-							href="/community"
-							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
-						>
-							<Users className="w-5 h-5" /> Community
-						</Link>
-						<Link
-							href="/support"
-							className="flex items-center gap-2 hover:text-blue-500 transition-colors"
-						>
-							<Headset className="w-5 h-5" /> Support
-						</Link>
+									<Link
+										href="/products"
+										className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+									>
+										<Box className="w-5 h-5" /> {t('products')}
+									</Link>
+									<Link
+										href="/upcoming"
+										className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+									>
+										<Clock className="w-5 h-5" /> {t('upcoming')}
+									</Link>
+									<Link
+										href="/community"
+										className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+									>
+										<Users className="w-5 h-5" /> {t('community')}
+									</Link>
+									<Link
+										href="/support"
+										className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+									>
+										<Headset className="w-5 h-5" /> {t('support')}
+									</Link>
 					</nav>
 					<div className="h-11 relative flex-1 mx-6 sm:mx-10">
 						<Input
