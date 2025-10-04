@@ -14,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner'; // optional (remove if not using)
 import { Check } from "lucide-react";
+import { useRouter, usePathname } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
 
 type Lang = {
   code: string;       // e.g. "en", "de", "ar", "ur"
@@ -37,55 +39,20 @@ const DEFAULT_LANGS: Lang[] = [
   { code: 'ur', label: 'اردو', flag: '🇵🇰', rtl: true },
 ];
 
-const isBrowser = typeof window !== 'undefined';
+
 
 export function LanguageToggle({
   className,
   languages = DEFAULT_LANGS,
-  storageKey = 'app.lang',
-  initial,
-  onChange,
   showToast = true,
-}: LanguageToggleProps) {
-  const getDefault = React.useCallback(() => {
-    if (!isBrowser) return initial ?? languages[0]?.code ?? 'en';
-    return (
-      localStorage.getItem(storageKey) ||
-      initial ||
-      document.documentElement.lang ||
-      languages[0]?.code ||
-      'en'
-    );
-  }, [initial, languages, storageKey]);
-
-  const [current, setCurrent] = React.useState<string>(getDefault);
-
-  // Keep <html lang> & dir in sync
-  const applyHtmlAttrs = React.useCallback(
-    (code: string) => {
-      const lang = languages.find(l => l.code === code);
-      const html = document.documentElement;
-      html.setAttribute('lang', code);
-      // html.setAttribute('dir', lang?.rtl ? 'rtl' : 'ltr');
-
-      // Optional: flip body text alignment for RTL to feel natural
-      document.body.classList.toggle('rtl', !!lang?.rtl);
-    },
-    [languages]
-  );
-
-  React.useEffect(() => {
-    if (!isBrowser) return;
-    applyHtmlAttrs(current);
-  }, [current, applyHtmlAttrs]);
+}: Omit<LanguageToggleProps, 'storageKey' | 'initial' | 'onChange'>) {
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const handleSelect = (code: string) => {
-    setCurrent(code);
-    if (isBrowser) {
-      localStorage.setItem(storageKey, code);
-      applyHtmlAttrs(code);
-    }
-    onChange?.(code);
+    if (code === locale) return;
+    router.push(pathname, { locale: code });
     if (showToast) {
       try {
         toast?.success?.(`Language set to ${labelFor(code, languages)}`);
@@ -95,7 +62,7 @@ export function LanguageToggle({
     }
   };
 
-  const active = languages.find(l => l.code === current);
+  const active = languages.find(l => l.code === locale);
 
   return (
     <DropdownMenu>
@@ -104,9 +71,9 @@ export function LanguageToggle({
           variant="outline"
           className={cn('shadow-sm uppercase', className)}
           aria-label="Change language"
-          title={`Language: ${active?.label ?? current}`}
+          title={`Language: ${active?.label ?? locale}`}
         >
-          <Globe className="h-4 w-4" /> {current}
+          <Globe className="h-4 w-4" /> {locale}
           <span className="sr-only">Toggle language</span>
         </Button>
       </DropdownMenuTrigger>
@@ -118,7 +85,7 @@ export function LanguageToggle({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {languages.map((lang) => {
-          const selected = lang.code === current;
+          const selected = lang.code === locale;
           return (
             <DropdownMenuItem
               key={lang.code}
