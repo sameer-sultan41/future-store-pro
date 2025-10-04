@@ -115,7 +115,7 @@ const StoreNavBar = () => {
 					</div>
 				</div>
 			</section>
-			<section className="w-full border-b-gray-400 mt-5 border-t-gray-300 border-b border-t">
+			<section className="w-full bg-blue-800 border-b-gray-400 mt-5 border-t-gray-300 border-b border-t">
 				<div className="storeContainer h-[50px] flex justify-between">
 					<div className="flex items-center">
 						<NavBarCategory isNavbarVisible={!hideNavbar} />
