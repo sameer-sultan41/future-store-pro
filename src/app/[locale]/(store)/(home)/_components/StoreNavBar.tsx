@@ -3,10 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from "react";
-
-import { Box, Clock, Users, Headset, Facebook, Youtube, Instagram } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTiktok } from "@fortawesome/free-brands-svg-icons";
+import { faTiktok, faFacebookF, faYoutube, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
 import AddVisit from "@/domains/store/shared/components/addVisit";
 import NavBarCategory from "@/domains/store/shared/components/navbar/navCategory";
@@ -17,6 +15,7 @@ import { cn } from "@/shared/utils/styling";
 import { Input } from "@/components/ui/input";
 import { LanguageToggle } from "./LanguageToggle";
 import { CurrencyToggle } from "./CurrencyToggle";
+import { Box, Clock, Headset, Users } from "lucide-react";
 
 
 
@@ -137,30 +136,30 @@ const StoreNavBar = () => {
 						</ul>
 					</div>
 			       <ul className="flex items-center gap-2">
-		       <li>
-			       <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-				       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
-				       <Facebook className="w-5 h-5 text-gray-700 group-hover:text-blue-600 transition-colors duration-200" />
-			       </Link>
-		       </li>
-		       <li>
-			       <Link href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
-				       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
-				       <Youtube className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors duration-200" />
-			       </Link>
-		       </li>
-		       <li>
-			       <Link href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
-				       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
-				       <FontAwesomeIcon icon={faTiktok} className="w-5 h-5 text-gray-700 group-hover:text-black transition-colors duration-200" />
-			       </Link>
-		       </li>
-		       <li>
-			       <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-				       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
-				       <Instagram className="w-5 h-5 text-gray-700 group-hover:text-pink-500 transition-colors duration-200" />
-			       </Link>
-		       </li>
+	       <li>
+		       <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faFacebookF} className="w-5 h-5 text-gray-700 group-hover:text-blue-600 transition-colors duration-200" />
+		       </Link>
+	       </li>
+	       <li>
+		       <Link href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faYoutube} className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors duration-200" />
+		       </Link>
+	       </li>
+	       <li>
+		       <Link href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faTiktok} className="w-5 h-5 text-gray-700 group-hover:text-black transition-colors duration-200" />
+		       </Link>
+	       </li>
+	       <li>
+		       <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faInstagram} className="w-5 h-5 text-gray-700 group-hover:text-pink-500 transition-colors duration-200" />
+		       </Link>
+	       </li>
 			       </ul>
 				</div>
 			</section>
