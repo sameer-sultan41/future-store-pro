@@ -223,10 +223,10 @@ input {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--color-blue-600);
+  --primary: var(--color-blue-500);
   --primary-foreground: #fff;
   --secondary: var(--color-blue-800);
-  --secondary-foreground: var(--color-blue-100);
+  --secondary-foreground: var(--color-blue-400);
   --muted: var(--color-blue-100);
   --muted-foreground: var(--color-blue-700);
   --accent: var(--color-blue-300);
