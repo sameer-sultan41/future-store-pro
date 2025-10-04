@@ -10,7 +10,6 @@ import StoreFooter from "./(home)/_components/Footer";
 const StoreLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <main className="bg-gray-50">
-      dsf
       <Provider store={shoppingCartStore}>
         <StoreNavBar />
         {children}

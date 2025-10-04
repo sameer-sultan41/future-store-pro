@@ -1,5 +1,11 @@
 {
-  "HomePage": {
-    "title": "Hello world!"
+  "Header": {
+    "products": "products"
+  },
+  "Navigation": {
+    "products": "Products",
+    "upcoming": "Upcoming",
+    "community": "Community",
+    "support": "Support"
   }
 }

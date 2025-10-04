@@ -1,6 +1,12 @@
 
 {
-  "HomePage": {
-    "title": "ہیلو"
+  "Header": {
+    "products": "مصنوعات"
+  },
+  "Navigation": {
+    "products": "مصنوعات",
+    "upcoming": "آنے والا",
+    "community": "کمیونٹی",
+    "support": "سپورٹ"
   }
 }
