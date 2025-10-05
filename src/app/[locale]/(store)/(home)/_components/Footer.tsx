@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from "@/shared/components/icons/svgIcons";
 import { Button } from "@/components/ui/button";
+import { CompanyLogoList } from "./CompanyLogoList";
 
 const policies = [
   "Privacy Policy",
@@ -101,7 +102,7 @@ const Footer = () => {
           </div>
           <div className="lg:mb-0 mb-12">
             <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Brands</h3>
-            
+            <CompanyLogoList /> 
           </div>
         </section>
       </div>

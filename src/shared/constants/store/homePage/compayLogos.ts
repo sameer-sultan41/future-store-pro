@@ -2,12 +2,12 @@ export const COMPANIES_LOGOS = [
   {
     width: 104,
     bgPositionX: 0,
-    url: "/list/photography/scanners/epson",
+    url: "/images/products/iphone1.jpg",
   },
   {
     width: 50,
     bgPositionX: -105,
-    url: "/",
+    url: "/images/products/iphone1.jpg",
   },
   {
     width: 50,
@@ -17,12 +17,12 @@ export const COMPANIES_LOGOS = [
   {
     width: 44,
     bgPositionX: -207,
-    url: "/list/smartphones/apple-iphone",
+    url: "/images/products/iphone1.jpg",
   },
   {
     width: 47,
     bgPositionX: -252,
-    url: "/list/smartphones/xiaomi",
+    url: "/images/products/iphone1.jpg",
   },
   {
     width: 54,
@@ -32,11 +32,11 @@ export const COMPANIES_LOGOS = [
   {
     width: 55,
     bgPositionX: -355,
-    url: "/",
+    url: "/images/products/iphone1.jpg",
   },
   {
     width: 98,
     bgPositionX: -411,
-    url: "/list/pc-laptops/laptops/asus",
+    url: "/images/products/iphone1.jpg",
   },
 ];
