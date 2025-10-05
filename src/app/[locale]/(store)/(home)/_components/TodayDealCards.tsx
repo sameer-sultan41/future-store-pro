@@ -26,15 +26,15 @@ export function TodayDealCards() {
             view all
           </Link>
         </div>
-        <div className="relative">
+        
           <Carousel className="w-full ">
-      <CarouselContent className="-ml-1 gap-2 p-5">
+      <CarouselContent className="-ml-1">
 
              {TodayDeals.map((deal, index) => (
                 <CarouselItem
                  
                  key={index}
-                  className="pl-1 md:basis-1/2 lg:basis-1/4 "
+                  className="pl-1 md:basis-1/2 lg:basis-1/4 p-4"
                 >
                   <TodayDealCard
                     productName={deal.name}
@@ -52,7 +52,7 @@ export function TodayDealCards() {
       <CarouselNext />
     </Carousel>
         </div>
-      </div>
+
     </section>
   );
 }

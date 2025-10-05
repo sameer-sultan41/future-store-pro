@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ClockIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
-import { Heart } from "lucide-react";
+// FontAwesome icons
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCartPlus, faEye, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import { Heart, Scale } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type TProps = {
   productName: string;
@@ -31,17 +35,28 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
       animate={{ opacity: 1, y: 0, scale: 1 }}
       whileHover={{ scale: 1.03, boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)" }}
       transition={{ type: "spring", stiffness: 200, damping: 18 }}
-      className="relative p-2  rounded-xl shadow-sm overflow-hidden group bg-white border border-gray-200"
-  
+      className="relative p-2  rounded-xl shadow-sm  group bg-white border border-gray-200"
+
     >
       <motion.div
-        className="absolute top-3 right-3 z-10 cursor-pointer"
+        className="absolute top-3 right-3 z-10 cursor-pointer flex gap-2"
         whileTap={{ scale: 0.8, rotate: -15 }}
         whileHover={{ scale: 1.2 }}
         transition={{ type: 'spring', stiffness: 300 }}
       >
         <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
+
       </motion.div>
+      <motion.div
+        className="absolute top-3 right-12 z-10 cursor-pointer flex gap-2"
+        whileTap={{ scale: 0.8, rotate: -15 }}
+        whileHover={{ scale: 1.2 }}
+        transition={{ type: 'spring', stiffness: 300 }}
+      >
+         <Scale width={22} className="fill-white drop-shadow-lg stroke-primary" />    </motion.div>
+
+ 
+   
       <Link
         href={url}
         className="imgWrapper w-full h-[220px] block relative overflow-hidden border-2 border-gray-200 rounded-xl group"
