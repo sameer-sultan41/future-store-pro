@@ -111,44 +111,52 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
             </motion.span>
           ))}
       </div>
-      <div className="flex justify-between mx-2 mt-2 items-end">
-        <motion.section
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-        >
-          <span className="block text-gray-400 text-xs line-through select-none">
-            was {oldPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
-          </span>
-          <motion.span
-            className="block text-2xl font-bold text-primary drop-shadow-sm"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+      <div className="flex flex-col gap-2 mx-2 mt-2">
+        <div className="flex justify-between items-end">
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
           >
-            {newPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
-          </motion.span>
-        </motion.section>
-        <motion.section
-          className="text-center text-red-500 flex items-center flex-col gap-1.5"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-        >
-          <ClockIcon width={18} className="fill-red-500 my-2 mt-2.5 mx-auto block" />
-          <motion.span
-            className="w-24 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+            <span className="block text-gray-400 text-xs line-through select-none">
+              was {oldPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
+            </span>
+            <motion.span
+              className="block text-2xl font-bold text-primary drop-shadow-sm"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+            >
+              {newPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
+            </motion.span>
+          </motion.section>
+          <motion.section
+            className="text-center text-red-500 flex items-center flex-col gap-1.5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
           >
-            {`${remainedTime.getHours().toLocaleString("en-us", { minimumIntegerDigits: 2 })}
-            :
-            ${remainedTime.getMinutes().toLocaleString("en-us", { minimumIntegerDigits: 2 })}
-            :
-            ${remainedTime.getSeconds().toLocaleString("en-us", { minimumIntegerDigits: 2 })}`}
-          </motion.span>
-        </motion.section>
+            <ClockIcon width={18} className="fill-red-500 my-2 mt-2.5 mx-auto block" />
+            <motion.span
+              className="w-24 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+            >
+              {`${remainedTime.getHours().toLocaleString("en-us", { minimumIntegerDigits: 2 })}
+              :
+              ${remainedTime.getMinutes().toLocaleString("en-us", { minimumIntegerDigits: 2 })}
+              :
+              ${remainedTime.getSeconds().toLocaleString("en-us", { minimumIntegerDigits: 2 })}`}
+            </motion.span>
+          </motion.section>
+        </div>
+        <Button
+    
+        >
+          <FontAwesomeIcon icon={faCartPlus} className="text-white" />
+          Add to Cart
+        </Button>
       </div>
     </motion.div>
   );

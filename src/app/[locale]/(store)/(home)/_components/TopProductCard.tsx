@@ -1,8 +1,12 @@
+
 import Image from "next/image";
 import Link from "next/link";
-
 import { TProductCard } from "@/shared/types/common";
 import { cn } from "@/shared/utils/styling";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCartPlus, faEye, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const TopProductCard = ({
   name,
@@ -15,13 +19,30 @@ const TopProductCard = ({
   staticWidth = false,
 }: TProductCard) => {
   return (
-    <Link
-      href={url}
+    <div
       className={cn(
         "bg-white rounded-2xl p-3 transition-all duration-500 relative border border-gray-200 shadow-sm hover:shadow-lg group overflow-hidden flex flex-col",
         staticWidth && "min-w-64"
       )}
     >
+      {/* Top right action buttons */}
+      <div className="absolute top-3 right-3 z-10 flex flex-row gap-2 items-center">
+        <span className="cursor-pointer">
+          <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
+        </span>
+        <button
+          title="Compare"
+          className="bg-white rounded-full p-1 shadow hover:bg-gray-100 transition border border-gray-200"
+        >
+          <FontAwesomeIcon icon={faBalanceScale} className="text-gray-500" />
+        </button>
+        <button
+          title="View"
+          className="bg-white rounded-full p-1 shadow hover:bg-gray-100 transition border border-gray-200"
+        >
+          <FontAwesomeIcon icon={faEye} className="text-gray-500" />
+        </button>
+      </div>
       {!isAvailable && (
         <div className="flex left-2 right-2 bottom-2 top-2 bg-white/60 backdrop-blur-[2px] absolute z-[1] items-center justify-center rounded-2xl">
           <span className="mt-14 text-gray-100 font-light px-6 py-1 backdrop-blur-[6px] rounded-md shadow-gray-200 bg-black/60">
@@ -55,33 +76,36 @@ const TopProductCard = ({
           ))}
         </div>
       </div>
-      <div className="flex items-end h-10 mt-auto px-1">
-        <div className="flex-grow relative flex flex-col justify-end">
-          {dealPrice ? (
-            <>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-bold text-xs rounded px-2 py-0.5 text-primary bg-primary/10">
-                  -{(100 - (dealPrice / price) * 100).toLocaleString("en-us", { maximumFractionDigits: 0 })}%
+      <div className="flex flex-col gap-2 mx-1 mt-auto">
+        <div className="flex items-end">
+          <div className="flex-grow relative flex flex-col justify-end">
+            {dealPrice ? (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-bold text-xs rounded px-2 py-0.5 text-primary bg-primary/10">
+                    -{(100 - (dealPrice / price) * 100).toLocaleString("en-us", { maximumFractionDigits: 0 })}%
+                  </span>
+                  <span className="line-through text-gray-400 text-xs">
+                    was {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
+                  </span>
+                </div>
+                <span className="text-lg font-bold text-primary">
+                  {dealPrice.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
                 </span>
-                <span className="line-through text-gray-400 text-xs">
-                  was {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
-                </span>
-              </div>
+              </>
+            ) : (
               <span className="text-lg font-bold text-primary">
-                {dealPrice.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
+                {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
               </span>
-            </>
-          ) : (
-            <span className="text-lg font-bold text-primary">
-              {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
-            </span>
-          )}
+            )}
+          </div>
         </div>
-        <div className="flex-grow text-right flex items-end justify-end">
-          <button className="cursor-pointer size-9 border-none bg-no-repeat bg-center rounded-full opacity-60 transition-opacity duration-300 hover:opacity-100 bg-black/0 bg-[url('/icons/heartIcon.svg')] bg-[length:20px_18px]" />
-        </div>
+        <Button className="w-full mt-2 flex items-center justify-center gap-2">
+          <FontAwesomeIcon icon={faCartPlus} className="text-white" />
+          Add to Cart
+        </Button>
       </div>
-    </Link>
+    </div>
   );
 };
 
