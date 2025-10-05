@@ -3,7 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from "react";
-import { Box, Clock, Users, Headset } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTiktok, faFacebookF, faYoutube, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
 import AddVisit from "@/domains/store/shared/components/addVisit";
 import NavBarCategory from "@/domains/store/shared/components/navbar/navCategory";
@@ -14,6 +15,7 @@ import { cn } from "@/shared/utils/styling";
 import { Input } from "@/components/ui/input";
 import { LanguageToggle } from "./LanguageToggle";
 import { CurrencyToggle } from "./CurrencyToggle";
+import { Box, Clock, Headset, Users } from "lucide-react";
 
 
 
@@ -115,7 +117,7 @@ const StoreNavBar = () => {
 					</div>
 				</div>
 			</section>
-			<section className="w-full border-b-gray-400 mt-5 border-t-gray-300 border-b border-t">
+			<section className="w-full bg-blue-800 border-b-gray-400 mt-5 border-t-gray-300 border-b border-t">
 				<div className="storeContainer h-[50px] flex justify-between">
 					<div className="flex items-center">
 						<NavBarCategory isNavbarVisible={!hideNavbar} />
@@ -133,24 +135,32 @@ const StoreNavBar = () => {
 							))}
 						</ul>
 					</div>
-					<ul className="flex items-center">
-						<li className="hidden lg:block">
-							<Link
-								href={""}
-								className="text-sm hover:bg-gray-100 py-2 px-4 rounded-lg transition-all duration-150"
-							>
-								PC Configuration
-							</Link>
-						</li>
-						<li className="gap-2">
-							<Link
-								href={""}
-								className="text-sm bg-[url('/icons/discountIcon.svg')] bg-[0px_10px] bg-no-repeat text-red-900 flex gap-1 md:visible hover:bg-gray-100 py-2 pl-5 pr-4 rounded-lg transition-all duration-150"
-							>
-								Top Deals
-							</Link>
-						</li>
-					</ul>
+			       <ul className="flex items-center gap-2">
+	       <li>
+		       <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faFacebookF} className="w-5 h-5 text-gray-700 group-hover:text-blue-600 transition-colors duration-200" />
+		       </Link>
+	       </li>
+	       <li>
+		       <Link href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faYoutube} className="w-5 h-5 text-gray-700 group-hover:text-red-500 transition-colors duration-200" />
+		       </Link>
+	       </li>
+	       <li>
+		       <Link href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faTiktok} className="w-5 h-5 text-gray-700 group-hover:text-black transition-colors duration-200" />
+		       </Link>
+	       </li>
+	       <li>
+		       <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+			       className="flex items-center justify-center w-9 h-9 rounded-full transition-transform duration-200 hover:scale-110 hover:shadow-lg focus:scale-110 focus:shadow-lg group">
+			       <FontAwesomeIcon icon={faInstagram} className="w-5 h-5 text-gray-700 group-hover:text-pink-500 transition-colors duration-200" />
+		       </Link>
+	       </li>
+			       </ul>
 				</div>
 			</section>
 			<AddVisit />

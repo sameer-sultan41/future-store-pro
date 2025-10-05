@@ -1,18 +1,32 @@
 import Link from "next/link";
-
-import ProductCard from "@/domains/product/components/productCard";
 import { TopProducts } from "@/domains/product/constants";
+import TopProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export const TopSellingProductsList = () => {
   return (
-    <div className="w-full mt-14">
-      <div className="flex w-full justify-between items-center mb-7">
-        <h2 className="text-2xl font-medium text-gray-700">Top Selling Products</h2>
-        <Link href={"/"}>view all</Link>
-      </div>
-      <div className="flex justify-between gap-3.5 overflow-x-scroll pb-7 2xl:pb-2 2xl:overflow-x-visible">
-        {TopProducts.map((product, index) => (
-          <ProductCard
+        <section className="w-full mt-14 px-2 md:px-6 ">
+      <div className="w-full bg-gray-100 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-10 border border-gray-100">
+        <div className="flex w-full justify-between items-center mb-7">
+          <h2 className="text-2xl font-bold ">Top Selling Products</h2>
+          <Link
+            href={""}
+            className="font-medium bg-[position:right_center] hover:pr-5 pr-6  bg-[url('/icons/arrowIcon02.svg')] bg-no-repeat bg-right-center transition-all duration-300 ease-out"
+          >
+            view all
+          </Link>
+        </div>
+        <div className="relative">
+          <Carousel className="w-full ">
+      <CarouselContent className="-ml-1 gap-2 p-5">
+
+           {TopProducts.map((product, index) =>(
+                <CarouselItem
+                 
+                 key={index}
+                  className="pl-1 md:basis-1/2 lg:basis-1/4 "
+                >
+                <TopProductCard
             name={product.name}
             imgUrl={product.imgUrl}
             price={product.price}
@@ -22,8 +36,14 @@ export const TopSellingProductsList = () => {
             key={index}
             staticWidth
           />
-        ))}
+                </CarouselItem>
+              ))}
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };

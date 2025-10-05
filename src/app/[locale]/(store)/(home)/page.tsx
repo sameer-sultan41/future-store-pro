@@ -24,13 +24,13 @@ export default function Home() {
           <HomeCategoryList />
           <HomeSlider />
         </div>
-        <WideCardRow cards={threeSaleCards} />
         <TodayDealCards />
-        <WideCardRow cards={twoSaleCards} />
+        <WideCardRow cards={threeSaleCards} />
+        {/* <WideCardRow cards={twoSaleCards} /> */}
         <CollectionCards />
         <TopSellingProductsList />
-        <LatestBlogPosts />
-        <CompanyLogoList />
+        {/* <LatestBlogPosts /> */}
+        {/* <CompanyLogoList /> */}
       </div>
     </div>
   );

@@ -6,13 +6,13 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getList } from "@/actions/list/listServices";
-import ProductCard from "@/domains/product/components/productCard";
+import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
 import { ProductListSkeleton } from "@/domains/store/productList/components";
 import Filters from "@/domains/store/productList/components/filters";
 import NoItem from "@/domains/store/productList/components/noItem";
 import { DEFAULT_FILTERS, SORT_DATA, sortDropdownData } from "@/domains/store/productList/constants";
 import { TFilterBrands, TFilters, TListItem } from "@/domains/store/productList/types";
-import { TPageStatus } from "@/domains/store/productList/types/";
+import { TPageStatus } from "@/domains/store/productList/types";
 import { getFiltersFromProductList } from "@/domains/store/productList/utils";
 import { Button } from "@/components/ui/button";
 import DropDownList from "@/shared/components/UI/dropDown";

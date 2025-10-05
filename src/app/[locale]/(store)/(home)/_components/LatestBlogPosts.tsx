@@ -1,4 +1,4 @@
-import { BlogCardData } from "@/domains/store/homePage/constants/";
+import { BlogCardData } from "@/domains/store/homePage/constants";
 
 import HomeBlogCard from "../../../../../domains/store/homePage/components/latestBlogPosts/BlogCard";
 

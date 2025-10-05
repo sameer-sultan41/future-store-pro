@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type TProps = {
@@ -9,10 +10,17 @@ type TProps = {
 const CompanyLogo = ({ bgPositionX, url, width }: TProps) => {
   return (
     <Link
-      className="bg-[url('/icons/companiesIcons.png')] h-14 bg-no-repeat bg-[position-y:center] opacity-80 transition-opacity duration-300 hover:opacity-100"
-      style={{ width: width, backgroundPositionX: bgPositionX }}
+      className="bg-[url('/icons/companiesIcons.png')] h-14 w-48 bg-no-repeat bg-[position-y:center] opacity-80 transition-opacity duration-300 hover:opacity-100"
       href={url}
-    />
+    >
+      <Image
+        src={url}
+        alt="Company Logo"
+        width={width}
+        height={56}
+        className="object-contain"
+      />
+    </Link>
   );
 };
 
