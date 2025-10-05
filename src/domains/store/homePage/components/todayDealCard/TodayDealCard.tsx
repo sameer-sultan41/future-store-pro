@@ -31,7 +31,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
       animate={{ opacity: 1, y: 0, scale: 1 }}
       whileHover={{ scale: 1.03, boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)" }}
       transition={{ type: "spring", stiffness: 200, damping: 18 }}
-      className="relative p-2  rounded-xl shadow-xl overflow-hidden group bg-white border border-gray-200"
+      className="relative p-2  rounded-xl shadow-sm overflow-hidden group bg-white border border-gray-200"
   
     >
       <motion.div
@@ -115,14 +115,14 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
           </motion.span>
         </motion.section>
         <motion.section
-          className="text-center text-primary flex items-center flex-col gap-1.5"
+          className="text-center text-red-500 flex items-center flex-col gap-1.5"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <ClockIcon width={18} className="fill-primary my-2 mt-2.5 mx-auto block" />
+          <ClockIcon width={18} className="fill-red-500 my-2 mt-2.5 mx-auto block" />
           <motion.span
-            className="w-24 h-7 rounded-md border border-secondary bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
+            className="w-24 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
