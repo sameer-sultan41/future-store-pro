@@ -34,7 +34,6 @@ const CollectionCard = ({ collection }: TProps) => {
       <motion.div
         className="absolute top-2 right-3.5 w-[140px] h-[180px] z-[1]"
 
-        // transition={{ type: "spring", stiffness: 200 }}
       >
         <Image src={collection.imgUrl} alt={collection.name} fill sizes="(max-width:140px)" className="object-cover transition-transform duration-500 ease-out " />
       </motion.div>
