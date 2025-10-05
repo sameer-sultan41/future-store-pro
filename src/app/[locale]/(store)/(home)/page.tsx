@@ -29,7 +29,7 @@ export default function Home() {
         {/* <WideCardRow cards={twoSaleCards} /> */}
         <CollectionCards />
         <TopSellingProductsList />
-        <LatestBlogPosts />
+        {/* <LatestBlogPosts /> */}
         {/* <CompanyLogoList /> */}
       </div>
     </div>
