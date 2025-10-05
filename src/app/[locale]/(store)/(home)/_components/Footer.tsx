@@ -100,17 +100,8 @@ const Footer = () => {
             </ul>
           </div>
           <div className="lg:mb-0 mb-12">
-            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Sign Up to Newsletter</h3>
-            <div className="flex w-auto justify-start">
-              <input
-                type="text"
-                placeholder="email address"
-                className="w-[200px] text-sm h-8 rounded-md px-4 border border-gray-300 focus:border-gray-800"
-              />
-              <Button className="h-8  px-4 ml-2 rounded-md border text-sm border-gray-300 bg-gray-100 text-gray-700  hover:bg-gray-200 active:bg-gray-300 active:text-gray-900">
-                Subscribe
-              </Button>
-            </div>
+            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Brands</h3>
+            
           </div>
         </section>
       </div>

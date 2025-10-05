@@ -1,7 +1,6 @@
 import Link from "next/link";
-
-import ProductCard from "@/domains/product/components/productCard";
 import { TopProducts } from "@/domains/product/constants";
+import TopProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
 
 export const TopSellingProductsList = () => {
   return (
@@ -12,7 +11,7 @@ export const TopSellingProductsList = () => {
       </div>
       <div className="flex justify-between gap-3.5 overflow-x-scroll pb-7 2xl:pb-2 2xl:overflow-x-visible">
         {TopProducts.map((product, index) => (
-          <ProductCard
+          <TopProductCard
             name={product.name}
             imgUrl={product.imgUrl}
             price={product.price}

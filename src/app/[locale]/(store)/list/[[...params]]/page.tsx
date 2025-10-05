@@ -6,7 +6,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getList } from "@/actions/list/listServices";
-import ProductCard from "@/domains/product/components/productCard";
+import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
 import { ProductListSkeleton } from "@/domains/store/productList/components";
 import Filters from "@/domains/store/productList/components/filters";
 import NoItem from "@/domains/store/productList/components/noItem";
