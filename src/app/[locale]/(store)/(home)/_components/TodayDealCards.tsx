@@ -51,27 +51,6 @@ export function TodayDealCards() {
       <CarouselPrevious />
       <CarouselNext />
     </Carousel>
-          {/* <Carousel className="w-full" options={{ align: 'start' }} ref={emblaApiRef}>
-            <CarouselContent>
-              {TodayDeals.map((deal, index) => (
-                <CarouselItem
-                  key={index}
-                  className="basis-1/4"
-                >
-                  <TodayDealCard
-                    productName={deal.name}
-                    oldPrice={deal.price}
-                    newPrice={deal.dealPrice}
-                    image={deal.imgUrl}
-                    spec={deal.specs}
-                    dealEndTime={deal.dealDate}
-                    url={deal.url}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel> */}
-         
         </div>
       </div>
     </section>

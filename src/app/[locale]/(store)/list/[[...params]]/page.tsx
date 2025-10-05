@@ -12,7 +12,7 @@ import Filters from "@/domains/store/productList/components/filters";
 import NoItem from "@/domains/store/productList/components/noItem";
 import { DEFAULT_FILTERS, SORT_DATA, sortDropdownData } from "@/domains/store/productList/constants";
 import { TFilterBrands, TFilters, TListItem } from "@/domains/store/productList/types";
-import { TPageStatus } from "@/domains/store/productList/types/";
+import { TPageStatus } from "@/domains/store/productList/types";
 import { getFiltersFromProductList } from "@/domains/store/productList/utils";
 import { Button } from "@/components/ui/button";
 import DropDownList from "@/shared/components/UI/dropDown";

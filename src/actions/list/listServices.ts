@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 import { TFilters } from "@/domains/store/productList/types";
-import { TListSort } from "@/domains/store/productList/types/";
+import { TListSort } from "@/domains/store/productList/types";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TProductPath } from "@/shared/types/product";
 
