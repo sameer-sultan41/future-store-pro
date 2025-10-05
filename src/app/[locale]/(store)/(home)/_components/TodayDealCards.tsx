@@ -52,7 +52,6 @@ export function TodayDealCards() {
       <CarouselNext />
     </Carousel>
         </div>
-
     </section>
   );
 }
