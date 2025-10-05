@@ -4,34 +4,34 @@ import Link from "next/link";
 import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from "@/shared/components/icons/svgIcons";
 import { Button } from "@/components/ui/button";
 
-const CATEGORIES = [
-  "Computer & Laptop",
-  "Tablets & iPad",
-  "Printer & Cameras",
-  "Smart Phones",
-  "OLED Smart TVs",
-  "Keyboard & Mouse",
-  "Video Games",
-  "Sports & Outdoors",
-  "Smart Watches",
-];
-const CUSTOMER_SERVICES = [
+const policies = [
   "Privacy Policy",
-  "Refund Policy",
-  "Shipping & Return",
-  "Terms & Conditions",
-  "Advanced Search",
-  "Store Locations",
+"Shipping Policy",
+"Billing Policy",
+"Refund / Return Policy",
 ];
+const support = [
+  "FAQs",
+"Integration Docs",
+"Contact Us",
+"Login / Account",
+];
+const payment = [
+  "JazzCash",
+"EasyPaisa",
+"NayaPay",
+
+];
+
 const LEGALS = ["Conditions of Use & Sale", "Privacy Notice", "Imprint", "Cookies Notice", "Interest-Based Ads Notice"];
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 const Footer = () => {
   return (
-    <footer className="flex flex-col border-t bg-white z-50 border-t-gray-300 w-full">
+    <footer className="flex flex-col border-t bg-white z-50 border-t-gray-300 w-full mt-5">
       <div className="flex-col storeContainer">
-        <div className="flex w-full items-center h-32 border-b border-b-gray-300">
+        {/* <div className="flex w-full items-center h-32 border-b border-b-gray-300">
           <Link href={"/"}>
             <Image alt="future Logo" src={"/images/logo.png"} width={125} height={40} />
           </Link>
@@ -49,21 +49,21 @@ const Footer = () => {
               className="absolute top-3.5 left-5 hidden sm:block"
             />
           </div>
-        </div>
+        </div> */}
         <section className="flex flex-col lg:flex-row items-start justify-between">
-          <div>
-            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Contact Us</h3>
-            <span className="text-gray-500 block text-sm leading-5">Got Question? Call us 24/7</span>
-            <h2 className="text-blue-600 font-medium my-2">+49 30 575909881</h2>
+          <div className="md:max-w-[300px]">
+            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">About FUTURESTORE</h3>
+            <span className="text-gray-500 block text-sm leading-5">Unified neon demo for an advanced e-commerce frontend — replace placeholders with real APIs and server-side endpoints.</span>
+            <h2 className="text-blue-600 font-medium my-2">+92 315 0242899</h2>
             <span className="text-gray-500 block text-sm leading-5">
-              685 Market Street, San Francisco, CA 94105, US
+              Address: Shop #20 Bhayani Avenue, Nazimabad, Karachi 
             </span>
-            <span className="text-gray-500 block text-sm leading-5">nonamecompany@justportfolio.com</span>
+            <span className="text-gray-500 block text-sm leading-5">futurestore@gmail.com</span>
           </div>
           <div>
-            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Categories</h3>
+            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Policies</h3>
             <ul className="p-0 mb-4">
-              {CATEGORIES.map((item) => (
+              {policies.map((item) => (
                 <li
                   key={item}
                   className="text-sm leading-7 transition-all duration-150 hover:text-gray-800 text-gray-700"
@@ -74,9 +74,22 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Customer Service</h3>
+            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Support & Tools</h3>
             <ul>
-              {CUSTOMER_SERVICES.map((item) => (
+              {support.map((item) => (
+                <li
+                  key={item}
+                  className="text-sm leading-7 transition-all duration-150 hover:text-gray-800 text-gray-700"
+                >
+                  <Link href={""}>{item}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg text-gray-900 font-medium mt-9 mb-4">Payments Gateways</h3>
+            <ul>
+              {payment.map((item) => (
                 <li
                   key={item}
                   className="text-sm leading-7 transition-all duration-150 hover:text-gray-800 text-gray-700"
@@ -103,43 +116,9 @@ const Footer = () => {
       </div>
       <section className="w-full xl:h-20 bg-gray-100 text-sm">
         <div className="h-full flex-col gap-4 xl:flex-row xl:gap-0 justify-between items-center storeContainer">
-          <span className="text-gray-500 mt-6 xl:mt-0">© {CURRENT_YEAR} future Store. All Rights Reserved.</span>
-          <ul className="gap-4 flex flex-col my-6 sm:my-0 sm:flex-row text-gray-800 font-medium">
-            {LEGALS.map((item) => (
-              <li
-                key={item}
-                className="text-sm leading-7 transition-all text-center duration-150 hover:text-gray-800 text-gray-700"
-              >
-                <Link href={""}>{item}</Link>
-              </li>
-            ))}
-          </ul>
-          <div className="flex gap-4 mb-6 xl:mb-0">
-            <Link
-              href={"https://www.linkedIn.com"}
-              className="fill-gray-400 hover:fill-gray-800 transition-all duration-200"
-            >
-              <LinkedinIcon width={20} strokeWidth={0} className="fill-inherit" />
-            </Link>
-            <Link
-              href={"https://www.twitter.com"}
-              className="fill-gray-400 hover:fill-gray-800 transition-all duration-200"
-            >
-              <XIcon width={20} className="fill-inherit" />
-            </Link>
-            <Link
-              href={"https://www.instagram.com"}
-              className="fill-gray-400 hover:fill-gray-800 transition-all duration-200"
-            >
-              <InstagramIcon width={20} strokeWidth={0} className="fill-inherit" />
-            </Link>
-            <Link
-              href={"https://www.facebook.com"}
-              className="fill-gray-400 hover:fill-gray-800 transition-all duration-200"
-            >
-              <FacebookIcon width={20} strokeWidth={0} className="fill-inherit" />
-            </Link>
-          </div>
+          <span className="text-gray-500 mt-6 xl:mt-0 mx-auto">© {CURRENT_YEAR} future Store. All Rights Reserved.</span>
+        
+       
         </div>
       </section>
     </footer>
