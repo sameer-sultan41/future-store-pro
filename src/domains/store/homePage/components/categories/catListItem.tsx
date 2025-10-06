@@ -10,7 +10,10 @@ type TProps = {
 };
 
 const CategoryListItem = ({ categoryData, className }: TProps) => {
-  const { categories, group } = { ...categoryData };
+  const { categories, group } = categoryData;
+  // Fallbacks for icon size and icon url
+  const iconUrl = group.iconUrl || "/icons/otherCatIcon.svg";
+  const iconSize = Array.isArray(group.iconSize) && group.iconSize.length === 2 ? group.iconSize : [28, 28];
   return (
     <li
       className={cn(
@@ -21,10 +24,10 @@ const CategoryListItem = ({ categoryData, className }: TProps) => {
       <Link href={"/list/" + group.url} className="text-gray-700 transition-colors duration-300 hover:text-gray-900">
         <div className="w-7 inline-block">
           <Image
-            src={group.iconUrl || "/icons/otherCatIcon.svg"}
+            src={iconUrl}
             alt={group.name}
-            width={group.iconSize[0]}
-            height={group.iconSize[1]}
+            width={iconSize[0]}
+            height={iconSize[1]}
           />
         </div>
         {group.name}
@@ -46,9 +49,9 @@ const CategoryListItem = ({ categoryData, className }: TProps) => {
               </Link>
               {item?.subCategories?.length ? (
                 <div className="flex flex-col">
-                  {item.subCategories.map((link, index) => (
+                  {item.subCategories.map((link, subIdx) => (
                     <Link
-                      key={index}
+                      key={subIdx}
                       href={"/list/" + group.url + "/" + item.category.url + "/" + link.url}
                       className="text-gray-500 px-3 py-2 border border-white rounded-md transition-all duration-300 text-sm hover:text-gray-700 hover:border-gray-200 hover:bg-gray-100"
                     >
