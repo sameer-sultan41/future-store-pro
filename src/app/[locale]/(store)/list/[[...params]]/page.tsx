@@ -49,7 +49,7 @@ const ListPage = () => {
       setIsListLoading(true);
 
       // const response = await getProductsByCategory("electronics/smartphones", "en");
-      const response = await getProductsByCategory(pathName, "en" , { sortName: 'name', sortType: 'asc' },"", "all", 0, 1000);
+      const response = await getProductsByCategory(pathName, "en" , { sortName: 'name', sortType: 'asc' },"", "all", 0, 1000,["b497558c-26f2-4f08-805a-8f96b3e9f717"]);
       console.log("response ==>", response);
       // Accepts both {res: [...]} and {products: [...], subCategories: [...]}
       let products: any[] = Array.isArray(response.res) ? response.res : [];

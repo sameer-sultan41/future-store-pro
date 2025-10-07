@@ -23,6 +23,7 @@ const pathToArray = (path: string) => {
 // search: string (search by product name)
 // stockFilter: 'all' | 'inStock' | 'outStock'
 // minPrice and maxPrice are optional for price range filtering
+// brands: string[] (array of brand IDs to filter by)
 export const getProductsByCategory = async (
   categoryIUrl: string,
   languageCode: string,
@@ -30,7 +31,8 @@ export const getProductsByCategory = async (
   search?: string,
   stockFilter: 'all' | 'in' | 'out' = 'all',
   minPrice?: number,
-  maxPrice?: number
+  maxPrice?: number,
+  brands?: string[]
 ) => {
   const categoryIdOrUrl = pathToArray(categoryIUrl);
   console.log(" categoryIdOrUrl", categoryIdOrUrl);
@@ -84,6 +86,11 @@ export const getProductsByCategory = async (
       .select('*')
       .in('category_id', categoryIds)
       .eq('is_available', true);
+
+    // Brands filter
+    if (brands && brands.length > 0) {
+      query = query.in('brand_id', brands);
+    }
 
     // Stock filter
     if (stockFilter === 'in') {
