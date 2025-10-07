@@ -15,8 +15,8 @@ export const HomeCategoryList = () => {
   const [categories, setCategories] = useState<TGroupJSON[]>([]);
   useEffect(() => {
     const getCategoriesDB = async () => {
-      const result = await getAllCategoriesJSON(locale);
-      console.log("result", result)
+      const result = await getAllCategoriesJSON(locale as string);
+
       if (result.res) {
         setCategories(result.res);
       }
