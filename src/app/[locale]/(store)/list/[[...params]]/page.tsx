@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getList } from "@/actions/list/listServices";
+import { getList, getProductsByCategory } from "@/actions/list/listServices";
 import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
 import { ProductListSkeleton } from "@/domains/store/productList/components";
 import Filters from "@/domains/store/productList/components/filters";
@@ -21,10 +21,13 @@ import { IMAGE_BASE_URL } from "@/shared/constants/store";
 import { TProductPath } from "@/shared/types/product";
 import { cn } from "@/shared/utils/styling";
 
+
+
 const ListPage = () => {
   const router = useRouter();
   const { params } = useParams<{ params: string[] }>();
   const pathName = usePathname();
+
 
   const [productList, setProductList] = useState<TListItem[]>([]);
   const [subCategories, setSubCategories] = useState<TProductPath[]>([]);
@@ -44,19 +47,42 @@ const ListPage = () => {
     const getProductsList = async () => {
       setIsListLoading(true);
 
-      const response = await getList(pathName, SORT_DATA[sortIndex], appliedFilters);
-      if (response.error || !response.products || !response.subCategories) return router.push("/");
-
+      // const response = await getProductsByCategory("electronics/smartphones", "en");
+      const response = await getProductsByCategory(pathName, "en");
+      // Accepts both {res: [...]} and {products: [...], subCategories: [...]}
+      let products: any[] = Array.isArray(response.res) ? response.res : [];
+      // Map products to TListItem structure
+      const mappedProducts = products.map((product) => {
+        const t = product.translation;
+        return {
+          id: product.id,
+          name: t?.name || product.name || '',
+          isAvailable: product.is_available,
+          specialFeatures: t?.special_features || product.special_features || [],
+          images: product.images || [],
+          price: product.base_price,
+          salePrice: product.salePrice ?? null,
+          brand: product.brand || { id: '', name: '' },
+        };
+      });
+      // Subcategories fallback (not used in UI but kept for future)
+      let subCats: any[] = [];
+      if (Array.isArray(response.subCategories)) {
+        subCats = response.subCategories;
+      }
+      if (response.error || !Array.isArray(mappedProducts)) {
+        router.push("/");
+        return;
+      }
       if (isFilterApplied) {
         setFilters(appliedFilters);
-        setProductList(response.products);
+        setProductList(mappedProducts);
       } else {
-        const filtersFromDB = getFiltersFromProductList(response.products);
+        const filtersFromDB = getFiltersFromProductList(mappedProducts);
         setFilters(filtersFromDB);
-        setSubCategories(response.subCategories);
-        setProductList(response.products);
+        setSubCategories(subCats);
+        setProductList(mappedProducts);
       }
-
       setIsListLoading(false);
     };
 
@@ -172,7 +198,7 @@ const ListPage = () => {
             name={product.name}
             price={product.price}
             isAvailable={product.isAvailable}
-            dealPrice={product.salePrice || undefined}
+            dealPrice={product.salePrice ?? undefined}
             specs={product.specialFeatures}
             url={"/product/" + product.id}
           />

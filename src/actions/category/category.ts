@@ -92,26 +92,34 @@ export const getAllCategories = async () => {
     return { error: "Cant read Category Groups" };
   }
 };
-export const getAllCategoriesJSON = async () => {
+export const getAllCategoriesJSON = async (languageCode:string) => {
   try {
     const supabase = createSupabaseServer();
     const { data: result, error } = await supabase
       .from('categories')
-      .select('*');
+      .select(`
+        id,
+        parent_id,
+        url,
+        icon_url,
+        icon_size,
+        category_translations!inner(name)
+      `)
+      .eq('category_translations.language_code', languageCode);
 
     if (error) return { error: error.message };
     if (!result) return { error: "Can't read categories" };
-    
+
     // Transform to match expected format
     const transformedResult = result.map(item => ({
       id: item.id,
       parentID: item.parent_id,
-      name: item.name,
+      name: item.category_translations[0]?.name || '',
       url: item.url,
       iconSize: item.icon_size,
       iconUrl: item.icon_url,
     }));
-    
+
     return { res: convertToJson(transformedResult) };
   } catch {
     return { error: "Cant read Category Groups" };

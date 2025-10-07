@@ -5,14 +5,18 @@ import { useEffect, useState } from "react";
 import { getAllCategoriesJSON } from "@/actions/category/category";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import { TGroupJSON } from "@/shared/types/categories";
-
-import CategoryListItem from "../../../../../domains/store/homePage/components/categories/catListItem";
+import { useParams } from 'next/navigation'
+import CategoryListItem from "@/domains/store/homePage/components/categories/catListItem";
 
 export const HomeCategoryList = () => {
+  const params = useParams();
+  const {locale} =params
+   
   const [categories, setCategories] = useState<TGroupJSON[]>([]);
   useEffect(() => {
     const getCategoriesDB = async () => {
-      const result = await getAllCategoriesJSON();
+      const result = await getAllCategoriesJSON(locale as string);
+
       if (result.res) {
         setCategories(result.res);
       }
