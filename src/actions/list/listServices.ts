@@ -21,11 +21,13 @@ const pathToArray = (path: string) => {
 
 // sort: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' }
 // search: string (search by product name)
+// stockFilter: 'all' | 'inStock' | 'outStock'
 export const getProductsByCategory = async (
   categoryIUrl: string,
   languageCode: string,
   sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
-  search?: string
+  search?: string,
+  stockFilter: 'all' | 'in' | 'out' = 'all'
 ) => {
   const categoryIdOrUrl = pathToArray(categoryIUrl);
   console.log(" categoryIdOrUrl", categoryIdOrUrl);
@@ -72,12 +74,20 @@ export const getProductsByCategory = async (
       }
     }
 
+
     // Build product query with filters
     let query = supabase
       .from('products')
       .select('*')
       .in('category_id', categoryIds)
       .eq('is_available', true);
+
+    // Stock filter
+    if (stockFilter === 'in') {
+      query = query.gt('stock_quantity', 0);
+    } else if (stockFilter === 'out') {
+      query = query.eq('stock_quantity', 0);
+    }
 
     // Sorting
     if (sort) {
