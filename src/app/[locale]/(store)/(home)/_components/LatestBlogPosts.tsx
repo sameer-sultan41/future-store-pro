@@ -1,6 +1,6 @@
 import { BlogCardData } from "@/domains/shop/homePage/constants";
 
-import HomeBlogCard from "../../../../../domains/store/homePage/components/latestBlogPosts/BlogCard";
+import HomeBlogCard from "@/domains/shop//homePage/components/latestBlogPosts/BlogCard";
 
 export const LatestBlogPosts = () => {
   return (
