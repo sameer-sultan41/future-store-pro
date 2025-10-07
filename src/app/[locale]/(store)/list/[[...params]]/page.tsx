@@ -28,7 +28,6 @@ const ListPage = () => {
   const { params } = useParams<{ params: string[] }>();
   const pathName = usePathname();
 
-  console.log("pathName",pathName)
 
   const [productList, setProductList] = useState<TListItem[]>([]);
   const [subCategories, setSubCategories] = useState<TProductPath[]>([]);
