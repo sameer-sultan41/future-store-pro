@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import { Order } from "@/shared/types/database";
+import { Order } from "@/shared/utils/type";
 
 export const createOrder = async (orderData: {
   user_id: string;
