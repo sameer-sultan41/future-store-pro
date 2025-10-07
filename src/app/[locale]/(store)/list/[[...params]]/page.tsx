@@ -49,7 +49,6 @@ const ListPage = () => {
 
       // const response = await getProductsByCategory("electronics/smartphones", "en");
       const response = await getProductsByCategory(pathName, "en");
-      console.log("response ==>", response);
       // Accepts both {res: [...]} and {products: [...], subCategories: [...]}
       let products: any[] = Array.isArray(response.res) ? response.res : [];
       // Map products to TListItem structure
