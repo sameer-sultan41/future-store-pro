@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import { ProductVariant } from "@/shared/types/database";
+import { ProductVariant } from "@/shared/utils/type";
 
 export const getProductVariants = async (productId: string) => {
   try {
