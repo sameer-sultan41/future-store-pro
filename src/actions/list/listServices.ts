@@ -5,46 +5,137 @@ import { TFilters } from "@/domains/store/productList/types";
 import { TListSort } from "@/domains/store/productList/types";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TProductPath } from "@/shared/types/product";
+import { ca } from "zod/v4/locales";
 
 const ValidateSort = z.object({
   sortName: z.enum(["id", "price", "name"]),
   sortType: z.enum(["asc", "desc"]),
 });
 
-export const getList = async (path: string, sortData: TListSort, filters: TFilters) => {
-  if (!ValidateSort.safeParse(sortData).success) return { error: "Invalid Path" };
+const pathToArray = (path: string) => {
+  const pathWithoutList = path.split("/list/")[1];
+  // const pathArray = pathWithoutList.split("/");
+  return pathWithoutList;
+};
+
+
+export const getProductsByCategory = async (categoryIUrl: string, languageCode: string) => {
+  const categoryIdOrUrl = pathToArray(categoryIUrl);
+  console.log(" categoryIdOrUrl", categoryIdOrUrl);
+  try {
+    const supabase = createSupabaseServer();
+
+    // Helper to check if string is UUID
+    const isUUID = (str: string) => {
+      return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+    };
+
+    // Find category by id or url
+    let categoryQuery;
+    if (isUUID(categoryIdOrUrl)) {
+      categoryQuery = supabase
+        .from('categories')
+        .select('*')
+        .eq('id', categoryIdOrUrl)
+        .maybeSingle();
+    } else {
+      categoryQuery = supabase
+        .from('categories')
+        .select('*')
+        .eq('url', categoryIdOrUrl)
+        .maybeSingle();
+    }
+    const { data: category, error: catError } = await categoryQuery;
+    if (catError || !category) {
+      return { error: catError ? catError.message : 'Category not found' };
+    }
+
+    // If parent_id is null, it's a parent category, so get all its subcategories
+    let categoryIds = [category.id];
+    if (category.parent_id === null) {
+      // Get all subcategories
+      const { data: subcats, error: subcatError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('parent_id', category.id)
+        .eq('is_active', true);
+      if (subcatError) return { error: subcatError.message };
+      if (subcats && subcats.length > 0) {
+        categoryIds = categoryIds.concat(subcats.map((c: any) => c.id));
+      }
+    }
+
+    // Get products in these categories
+    const { data: products, error: prodError } = await supabase
+      .from('products')
+      .select('*')
+      .in('category_id', categoryIds)
+      .eq('is_available', true);
+    if (prodError) return { error: prodError.message };
+
+    // Optionally, join with product_translations for the given language
+    const productIds = products.map((p: any) => p.id);
+    let translations: Record<string, any> = {};
+    if (productIds.length > 0) {
+      const { data: trans, error: transError } = await supabase
+        .from('product_translations')
+        .select('*')
+        .in('product_id', productIds)
+        .eq('language_code', languageCode);
+      if (!transError && trans) {
+        for (const t of trans) {
+          translations[t.product_id] = t;
+        }
+      }
+    }
+
+    // Attach translation to each product
+    const result = products.map((p: any) => ({
+      ...p,
+      translation: translations[p.id] || null,
+    }));
+
+    return { res: result };
+  } catch (error) {
+    return { error: JSON.stringify(error) };
+  }
+};
+
+export const getList = async (path: string, sortData: TListSort, filters: TFilters, languageCode = 'en') => {
+  if (!ValidateSort.safeParse(sortData).success) return { error: "Invalid Sort" };
   if (!path || path === "") return { error: "Invalid Path" };
   const pathArray = pathToArray(path);
   if (!pathArray || pathArray.length > 3 || pathArray.length === 0) return { error: "Invalid Path" };
 
   const categoryID = await findCategoryFromPathArray(pathArray);
-  if (categoryID === "") return { error: "Invalid Path Name" };
+  if (categoryID === "") return { error: "Invalid category ID & Name" };
 
-  const subCategories: TProductPath[] | null = await getSubCategories(categoryID);
+  const subCategories: TProductPath[] | null = await getSubCategories(categoryID, languageCode);
   if (!subCategories) return { error: "Invalid Sub Categories" };
 
   const allRelatedCategories = await findCategoryChildren(categoryID, pathArray.length);
   if (!allRelatedCategories || allRelatedCategories.length === 0) return { error: "Invalid Path Name" };
 
-  const result = await getProductsByCategories(allRelatedCategories, sortData, filters);
+  const result = await getProductsByCategories(allRelatedCategories, sortData, filters, languageCode);
   if (!result) return { error: "Can't Find Product!" };
 
   return { products: result, subCategories: subCategories };
 };
 
-const getSubCategories = async (catID: string) => {
+const getSubCategories = async (catID: string, languageCode = 'en') => {
   try {
     const supabase = createSupabaseServer();
     const { data: result, error } = await supabase
       .from('categories')
-      .select('name, url')
-      .eq('parent_id', catID);
+      .select(`id, url, category_translations!inner(name)`)
+      .eq('parent_id', catID)
+      .eq('category_translations.language_code', languageCode);
 
     if (error || !result) return null;
     const subCategories: TProductPath[] = [];
     result.forEach((cat) => {
       subCategories.push({
-        label: cat.name,
+        label: cat.category_translations[0]?.name || '',
         url: cat.url,
       });
     });
@@ -108,7 +199,7 @@ const findCategoryChildren = async (catID: string, numberOfParents: number) => {
   }
 };
 
-const getProductsByCategories = async (categories: string[], sortData: TListSort, filters: TFilters) => {
+const getProductsByCategories = async (categories: string[], sortData: TListSort, filters: TFilters, languageCode = 'en') => {
   const brands: string[] | null = filters.brands.length > 0 ? [] : null;
   if (brands) {
     filters.brands.forEach((brand) => {
@@ -128,18 +219,20 @@ const getProductsByCategories = async (categories: string[], sortData: TListSort
       .from('products')
       .select(`
         id,
-        name,
         images,
-        price,
+        base_price,
         sale_price,
         special_features,
         is_available,
+        brand_id,
         brands (
           id,
           name
-        )
+        ),
+        product_translations!inner(name)
       `)
-      .in('category_id', categories);
+      .in('category_id', categories)
+      .eq('product_translations.language_code', languageCode);
 
     if (isAvailable !== null) {
       query = query.eq('is_available', isAvailable);
@@ -150,10 +243,12 @@ const getProductsByCategories = async (categories: string[], sortData: TListSort
     }
 
     if (!isInitialPrice) {
-      query = query.gt('price', filters.priceMinMax[0]).lte('price', filters.priceMinMax[1]);
+      query = query.gt('base_price', filters.priceMinMax[0]).lte('base_price', filters.priceMinMax[1]);
     }
 
-    query = query.order(sortData.sortName, { ascending: sortData.sortType === 'asc' });
+    // Use base_price for sorting if sortName is 'price'
+    const sortField = sortData.sortName === 'price' ? 'base_price' : sortData.sortName;
+    query = query.order(sortField, { ascending: sortData.sortType === 'asc' });
 
     const { data: result, error } = await query;
 
@@ -162,17 +257,15 @@ const getProductsByCategories = async (categories: string[], sortData: TListSort
     // Transform to match expected format
     const transformedResult = result.map(item => ({
       id: item.id,
-      name: item.name,
+      name: item.product_translations[0]?.name || '',
       images: item.images,
-      price: item.price,
+      price: item.base_price,
       salePrice: item.sale_price,
       specialFeatures: item.special_features,
       isAvailable: item.is_available,
       brand: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        id: (item.brands as any).id,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: (item.brands as any).name,
+        id: (item.brands as any)?.id,
+        name: (item.brands as any)?.name,
       },
     }));
 
@@ -182,8 +275,4 @@ const getProductsByCategories = async (categories: string[], sortData: TListSort
   }
 };
 
-const pathToArray = (path: string) => {
-  const pathWithoutList = path.split("/list/")[1];
-  const pathArray = pathWithoutList.split("/");
-  return pathArray;
-};
+
