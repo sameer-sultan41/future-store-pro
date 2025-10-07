@@ -16,7 +16,7 @@ type TProps = {
   onChange?: (newIndex: number) => void;
 };
 
-const DropDownList = ({ data, width = "auto", selectedIndex = 0, onChange }: TProps) => {
+const SortByDropdown = ({ data, width = "auto", selectedIndex = 0, onChange }: TProps) => {
   const optionRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useToggleMenu(false, optionRef);
 
@@ -80,4 +80,4 @@ const DropDownList = ({ data, width = "auto", selectedIndex = 0, onChange }: TPr
   );
 };
 
-export default DropDownList;
+export default SortByDropdown;
