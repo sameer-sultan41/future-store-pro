@@ -22,12 +22,15 @@ const pathToArray = (path: string) => {
 // sort: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' }
 // search: string (search by product name)
 // stockFilter: 'all' | 'inStock' | 'outStock'
+// minPrice and maxPrice are optional for price range filtering
 export const getProductsByCategory = async (
   categoryIUrl: string,
   languageCode: string,
   sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
   search?: string,
-  stockFilter: 'all' | 'in' | 'out' = 'all'
+  stockFilter: 'all' | 'in' | 'out' = 'all',
+  minPrice?: number,
+  maxPrice?: number
 ) => {
   const categoryIdOrUrl = pathToArray(categoryIUrl);
   console.log(" categoryIdOrUrl", categoryIdOrUrl);
@@ -87,6 +90,14 @@ export const getProductsByCategory = async (
       query = query.gt('stock_quantity', 0);
     } else if (stockFilter === 'out') {
       query = query.eq('stock_quantity', 0);
+    }
+
+    // Price range filter
+    if (typeof minPrice === 'number') {
+      query = query.gte('base_price', minPrice);
+    }
+    if (typeof maxPrice === 'number') {
+      query = query.lte('base_price', maxPrice);
     }
 
     // Sorting
