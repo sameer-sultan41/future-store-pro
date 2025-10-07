@@ -1,8 +1,8 @@
 "use server";
 import { z } from "zod";
 
-import { TFilters } from "@/domains/store/productList/types";
-import { TListSort } from "@/domains/store/productList/types";
+import { TFilters } from "@/domains/shop/productList/types";
+import { TListSort } from "@/domains/shop/productList/types";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TProductPath } from "@/shared/types/product";
 import { ca } from "zod/v4/locales";

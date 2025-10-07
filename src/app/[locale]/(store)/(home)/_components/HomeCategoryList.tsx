@@ -6,7 +6,7 @@ import { getAllCategoriesJSON } from "@/actions/category/category";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import { TGroupJSON } from "@/shared/types/categories";
 import { useParams } from 'next/navigation'
-import CategoryListItem from "@/domains/store/homePage/components/categories/catListItem";
+import CategoryListItem from "@/domains/shop/homePage/components/categories/catListItem";
 
 export const HomeCategoryList = () => {
   const params = useParams();

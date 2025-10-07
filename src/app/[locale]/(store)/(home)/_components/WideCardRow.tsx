@@ -1,5 +1,5 @@
-import { WideCard } from "@/domains/store/homePage/components/wideCardRow/WideCard";
-import { TWideCard } from "@/domains/store/homePage/types";
+import { WideCard } from "@/domains/shop/homePage/components/wideCardRow/WideCard";
+import { TWideCard } from "@/domains/shop/homePage/types";
 
 type TProps = {
   cards: TWideCard[];

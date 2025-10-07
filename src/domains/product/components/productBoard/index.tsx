@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import AddToCartButton from "@/domains/store/shoppingCard/components/addToCartButton";
-import Quantity from "@/domains/store/shoppingCard/components/quantity";
+import AddToCartButton from "@/domains/shop/shoppingCard/components/addToCartButton";
+import Quantity from "@/domains/shop/shoppingCard/components/quantity";
 import { StarIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 import { TProductBoard } from "@/shared/types/product";
 import { TCartItem } from "@/shared/types/shoppingCart";

@@ -1,7 +1,7 @@
 "use client";
 
-import { TFilters } from "@/domains/store/productList/types";
-import { TPageStatus } from "@/domains/store/productList/types";
+import { TFilters } from "@/domains/shop/productList/types";
+import { TPageStatus } from "@/domains/shop/productList/types";
 import { CloseIcon } from "@/shared/components/icons/svgIcons";
 import { Button } from "@/components/ui/button";
 import CheckBox from "@/shared/components/UI/checkBox";

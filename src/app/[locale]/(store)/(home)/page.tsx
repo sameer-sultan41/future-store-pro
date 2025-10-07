@@ -9,8 +9,8 @@ import {
   TodayDealCards,
   TopSellingProductsList,
   WideCardRow,
-} from "@/domains/store/homePage/components";
-import { threeSaleCards, twoSaleCards } from "@/domains/store/homePage/constants";
+} from "@/domains/shop/homePage/components";
+import { threeSaleCards, twoSaleCards } from "@/domains/shop/homePage/constants";
 
 export const metadata: Metadata = {
   title: "Future Store - Homepage",
