@@ -19,7 +19,14 @@ const pathToArray = (path: string) => {
 };
 
 
-export const getProductsByCategory = async (categoryIUrl: string, languageCode: string) => {
+// sort: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' }
+// search: string (search by product name)
+export const getProductsByCategory = async (
+  categoryIUrl: string,
+  languageCode: string,
+  sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
+  search?: string
+) => {
   const categoryIdOrUrl = pathToArray(categoryIUrl);
   console.log(" categoryIdOrUrl", categoryIdOrUrl);
   try {
@@ -65,17 +72,47 @@ export const getProductsByCategory = async (categoryIUrl: string, languageCode: 
       }
     }
 
-    // Get products in these categories
-    const { data: products, error: prodError } = await supabase
+    // Build product query with filters
+    let query = supabase
       .from('products')
       .select('*')
       .in('category_id', categoryIds)
       .eq('is_available', true);
+
+    // Sorting
+    if (sort) {
+      // Map sortName to actual DB field
+      let sortField: string = sort.sortName;
+      if (sort.sortName === 'price') sortField = 'base_price';
+      else if (sort.sortName === 'date') sortField = 'created_at';
+      else if (sort.sortName === 'name') sortField = 'url'; // fallback, but not used directly
+      query = query.order(sortField, { ascending: sort.sortType === 'asc' });
+    }
+
+    // Search by name (in product_translations)
+    let productIds: string[] = [];
+    let translations: Record<string, any> = {};
+    if (search && search.trim().length > 0) {
+      // First, get product_translations matching name
+      const { data: trans, error: transError } = await supabase
+        .from('product_translations')
+        .select('product_id')
+        .ilike('name', `%${search}%`)
+        .eq('language_code', languageCode);
+      if (transError) return { error: transError.message };
+      if (!trans || trans.length === 0) return { res: [] };
+      productIds = trans.map((t: any) => t.product_id);
+      query = query.in('id', productIds);
+    }
+
+    // Get products
+    const { data: products, error: prodError } = await query;
     if (prodError) return { error: prodError.message };
 
-    // Optionally, join with product_translations for the given language
-    const productIds = products.map((p: any) => p.id);
-    let translations: Record<string, any> = {};
+    // Join with product_translations for the given language
+    if (!productIds.length) {
+      productIds = products.map((p: any) => p.id);
+    }
     if (productIds.length > 0) {
       const { data: trans, error: transError } = await supabase
         .from('product_translations')
