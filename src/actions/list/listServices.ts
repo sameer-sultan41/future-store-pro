@@ -1,4 +1,62 @@
 "use server";
+// Returns only brands that have products in the given category (and subcategories)
+export const getBrandsByCategory = async (categoryUrl: string) => {
+  const supabase = createSupabaseServer();
+
+   const categoryUrlOrId = pathToArray(categoryUrl);
+  // Helper to check if string is UUID
+  const isUUID = (str: string) =>
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
+  // Find category by id or url
+  let categoryQuery;
+  if (isUUID(categoryUrlOrId)) {
+    categoryQuery = supabase.from('categories').select('*').eq('id', categoryUrlOrId).maybeSingle();
+  } else {
+    categoryQuery = supabase.from('categories').select('*').eq('url', categoryUrlOrId).maybeSingle();
+  }
+  const { data: category, error: catError } = await categoryQuery;
+  if (catError || !category) {
+    return { error: catError ? catError.message : 'Category not found' };
+  }
+
+  // Get all relevant category IDs (including subcategories if parent)
+  let categoryIds = [category.id];
+  if (category.parent_id === null) {
+    const { data: subcats, error: subcatError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('parent_id', category.id)
+      .eq('is_active', true);
+    if (subcatError) return { error: subcatError.message };
+    if (subcats && subcats.length > 0) {
+      categoryIds = categoryIds.concat(subcats.map((c: any) => c.id));
+    }
+  }
+
+  // Get all brands for products in these categories
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('brand_id')
+    .in('category_id', categoryIds)
+    .eq('is_available', true);
+  if (productsError) return { error: productsError.message };
+
+  // Deduplicate brand IDs
+  const brandIds = Array.from(new Set(products.map((p: any) => p.brand_id)));
+  if (brandIds.length === 0) return { res: [] };
+
+  // Get brand details for these IDs
+  const { data: brands, error: brandsError } = await supabase
+    .from('brands')
+    .select('id, name')
+    .in('id', brandIds)
+    .eq('is_active', true);
+  if (brandsError) return { error: brandsError.message };
+
+  return { res: brands };
+};
+
 import { z } from "zod";
 
 import { TFilters } from "@/domains/shop/productList/types";

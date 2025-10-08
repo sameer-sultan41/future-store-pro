@@ -1,22 +1,25 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { TFilters, TPageStatus, TFilterBrands } from "@/domains/shop/productList/types";
-import { DEFAULT_FILTERS } from "@/domains/shop/productList/constants";
-import { CloseIcon } from "@/shared/components/icons/svgIcons";
 import { Button } from "@/components/ui/button";
-import CheckBox from "@/shared/components/UI/checkBox";
-import PriceSlider from "@/shared/components/UI/priceSlider";
-import { SK_Box } from "@/shared/components/UI/skeleton";
 import { cn } from "@/shared/utils/styling";
-import { Label } from "@radix-ui/react-label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { getBrandsByCategory } from "@/actions/list/listServices";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Filters = () => {
+  const brands = [
+    {
+      id: "b497558c-26f2-4f08-805a-8f96b3e9f717",
+      name: "Apple",
+    },
+    {
+      id: "2575786c-1911-4e00-af49-5b9c3040fc6b",
+      name: "Samsung",
+    },
+  ];
+
+  console.log("brands ==>", brands);
   // Render
   return (
     <div className={cn("min-w-[260px]  border-r border-gray-300 pr-5 ")}>
@@ -55,16 +58,10 @@ const Filters = () => {
             </div>
             <hr className="h-5 mt-[31px] border-r border-gray-300" />
             <div>
-              <label className="block w-full mb-2">To</label>
+              <Label className="block w-full mb-2">To</Label>
               <Input type="number" value={100} />
             </div>
           </div>
-          {/* <PriceSlider
-            sliderValues={filters.priceMinMax}
-            minMaxLimit={filters.priceMinMaxLimitation}
-            pageStatus={pageStatus}
-            onChange={(value) => onFilterChange({ ...filters, priceMinMax: [...value] })}
-          /> */}
         </div>
       </div>
       <div className="w-full mb-4 border-b border-gray-300">
@@ -73,14 +70,14 @@ const Filters = () => {
         </div>
         <div className="w-full flex gap-2 px-2.5 mb-6 flex-col">
           <div className="w-full h-auto flex gap-2 flex-col">
-            {/* {filters.brands.map((brand, index) => (
-                <CheckBox
-                  key={brand.id}
-                  isChecked={brand.isSelected}
-                  text={brand.name}
-                  onClick={() => onBrandChange(index)}
-                />
-              ))} */}
+            {brands.map((brand, index) => (
+              <div>
+                <Label htmlFor={brand.id}>
+                  <Checkbox id={brand.id} />
+                  <span className="ml-2">{brand.name}</span>
+                </Label>
+              </div>
+            ))}
           </div>
         </div>
       </div>
