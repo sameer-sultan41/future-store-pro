@@ -49,13 +49,13 @@ const ListPage = () => {
       // const response = await getProductsByCategory("electronics/smartphones", "en");
       const response = await getProductsByCategory(
         pathName,
-        "en",
-        { sortName: "name", sortType: "asc" },
-        "",
-        "all",
-        0,
-        1000,
-        ["b497558c-26f2-4f08-805a-8f96b3e9f717"]
+        "en"
+        // { sortName: "name", sortType: "asc" },
+        // "",
+        // "all",
+        // 0,
+        // 1000,
+        // ["b497558c-26f2-4f08-805a-8f96b3e9f717"]
       );
       console.log("response ==>", response);
       // Accepts both {res: [...]} and {products: [...], subCategories: [...]}
@@ -224,16 +224,7 @@ const ListPage = () => {
 
   return (
     <div className="w-full flex pt-3 lg:mt-9 md:pt-2">
-      <Filters
-        onToggleWindow={toggleFiltersWindow}
-        showFilters={showFilters}
-        filters={filters}
-        onFilterChange={setFilters}
-        onBrandChange={handleBrandChange}
-        isFilterChanged={isFilterChanged}
-        onApplyFilter={handleApplyFilter}
-        pageStatus={currentPageStatus}
-      />
+      <Filters />
       <div className="flex-grow flex flex-col ml-0 2xl:ml-4 lg:ml-3">
         <div className="w-full items-center text-sm mb-5 ml-3 hidden lg:flex">
           <Image src={"/icons/sortIcon.svg"} alt="Sort" width={16} height={12} className="mr-3" />
