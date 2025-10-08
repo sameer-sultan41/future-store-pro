@@ -29,7 +29,7 @@ export const getProductsByCategory = async (
   languageCode: string,
   sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
   search?: string,
-  stockFilter: 'all' | 'in' | 'out' = 'all',
+  stockFilter: 'all' | 'inStock' | 'outStock' = 'all',
   minPrice?: number,
   maxPrice?: number,
   brands?: string[]
@@ -93,9 +93,9 @@ export const getProductsByCategory = async (
     }
 
     // Stock filter
-    if (stockFilter === 'in') {
+    if (stockFilter === 'inStock') {
       query = query.gt('stock_quantity', 0);
-    } else if (stockFilter === 'out') {
+    } else if (stockFilter === 'outStock') {
       query = query.eq('stock_quantity', 0);
     }
 
