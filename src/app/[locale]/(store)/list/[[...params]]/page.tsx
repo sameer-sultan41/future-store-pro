@@ -11,7 +11,7 @@ const page = async ({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
   const { params: pathParams = [], locale } = params;
-  const { availability, minPrice, maxPrice, brand } = await searchParams;
+  const { availability, minPrice, maxPrice, brand, sortName, sortType, search } = await searchParams;
 
   console.log("searchParams", searchParams);
   const pathName = Array.isArray(pathParams) ? pathParams.join("/") : "";
@@ -19,8 +19,11 @@ const page = async ({
   const response = await getProductsByCategory({
     categoryIdOrUrl: pathName,
     languageCode: locale,
-    sort: { sortName: "name", sortType: "asc" },
-    search: "",
+    sort: {
+      sortName: (["price", "date", "name"].includes(String(sortName)) ? sortName : "date") as "price" | "date" | "name",
+      sortType: (sortType === "asc" || sortType === "desc" ? sortType : "desc") as "asc" | "desc",
+    },
+    search: search ? String(search) : "",
     stockFilter: availability as "all" | "inStock" | "outStock",
     minPrice: minPrice !== undefined && minPrice !== "" ? Number(minPrice) : undefined,
     maxPrice: maxPrice !== undefined && maxPrice !== "" ? Number(maxPrice) : undefined,
