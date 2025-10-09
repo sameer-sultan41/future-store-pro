@@ -4,7 +4,7 @@ import DropDownList from "@/shared/components/UI/dropDown";
 import { sortDropdownData } from "@/domains/shop/productList/constants";
 import Filters from "@/domains/shop/productList/components/filters";
 import Image from "next/image";
-import LineList from "@/shared/components/UI/lineList";
+import SortByFilters from "./_components/SortByFilters";
 
 export const metadata: Metadata = {
   title: "future - Products List",
@@ -37,7 +37,7 @@ const ListLayout = ({
             <div className="w-full items-center text-sm mb-5 ml-3 hidden lg:flex">
               <Image src={"/icons/sortIcon.svg"} alt="Sort" width={16} height={12} className="mr-3" />
               <span className="font-medium w-14 mr-3 text-gray-900">Sort By:</span>
-              <LineList />
+              <SortByFilters />
             </div>
             {children}
           </div>

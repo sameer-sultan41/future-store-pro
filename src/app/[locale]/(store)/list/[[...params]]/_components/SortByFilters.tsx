@@ -15,7 +15,7 @@ const sortDropdownData = [
   { text: "Name", sortName: "name", sortType: "asc" },
 ];
 
-const LineList = () => {
+const SortByFilters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -48,7 +48,7 @@ const LineList = () => {
           </Button>
         );
       })}
-      <Form
+      <form
         onSubmit={(e) => {
           e.preventDefault();
           const params = new URLSearchParams(searchParams.toString());
@@ -98,9 +98,9 @@ const LineList = () => {
         >
           <Search size={18} />
         </button>
-      </Form>
+      </form>
     </div>
   );
 };
 
-export default LineList;
+export default SortByFilters;
