@@ -1,6 +1,7 @@
 import React from "react";
 import { getProductsByCategory } from "@/actions/list/listServices";
 import TopProductCard from "../../(home)/_components/TopProductCard";
+import NoResultImage from "./_components/NoResultImage";
 
 const page = async ({
   params,
@@ -27,6 +28,10 @@ const page = async ({
   });
 
   const products = response?.res || [];
+
+  if (products.length < 1) {
+    return <NoResultImage />;
+  }
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-2 mb-14">
       {products.map((product) => (

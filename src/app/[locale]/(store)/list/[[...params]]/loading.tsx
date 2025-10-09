@@ -3,8 +3,10 @@ import React from "react";
 
 const loading = () => {
   return (
-    <div>
-      <ProductListSkeleton />
+    <div className="flex gap-5 items-center">
+      {Array.from({ length: 10 }).map((_, idx) => (
+        <ProductListSkeleton key={idx} />
+      ))}
     </div>
   );
 };
