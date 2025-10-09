@@ -2,8 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import Input from "../input";
 import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Form } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const sortDropdownData = [
   { text: "Newest", sortName: "date", sortType: "desc" },
@@ -16,6 +18,14 @@ const sortDropdownData = [
 const LineList = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // State to manage the search input value
+  const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    // Sync the state with the search parameter
+    setSearchValue(searchParams.get("search") || "");
+  }, [searchParams]);
 
   // Get current sort from search params
   const currentSortName = searchParams.get("sortName") || "id";
@@ -38,15 +48,12 @@ const LineList = () => {
           </Button>
         );
       })}
-      <form
+      <Form
         onSubmit={(e) => {
           e.preventDefault();
-          const form = e.target as HTMLFormElement;
-          const input = form.elements.namedItem("search") as HTMLInputElement;
-          const value = input.value.trim();
           const params = new URLSearchParams(searchParams.toString());
-          if (value) {
-            params.set("search", value);
+          if (searchValue.trim()) {
+            params.set("search", searchValue.trim());
           } else {
             params.delete("search");
           }
@@ -60,16 +67,19 @@ const LineList = () => {
             name="search"
             placeholder="Search products..."
             className="h-8 px-2 text-sm pr-8"
-            defaultValue={searchParams.get("search") || ""}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             autoComplete="off"
           />
-          {searchParams.get("search") && searchParams.get("search") !== "" && (
-            <button
+          {searchValue && (
+            <Button
               type="button"
+              variant={"link"}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
               tabIndex={-1}
               aria-label="Clear search"
               onClick={() => {
+                setSearchValue("");
                 const params = new URLSearchParams(searchParams.toString());
                 params.delete("search");
                 router.replace(`?${params.toString()}`);
@@ -78,7 +88,7 @@ const LineList = () => {
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6 6L14 14M6 14L14 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-            </button>
+            </Button>
           )}
         </div>
         <button
@@ -88,7 +98,7 @@ const LineList = () => {
         >
           <Search size={18} />
         </button>
-      </form>
+      </Form>
     </div>
   );
 };
