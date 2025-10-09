@@ -36,6 +36,14 @@ const Filters = () => {
     router.replace(`?${params.toString()}`);
   };
 
+  const handleReset = () => {
+    setAvailability("all");
+    setminPrice("");
+    setmaxPrice("");
+    setSelectedBrands([]);
+    router.replace("?");
+  };
+
   return (
     <aside
       className={cn(
@@ -131,9 +139,14 @@ const Filters = () => {
         </div>
       </section>
 
-      <Button variant="default" size="lg" className="mt-2 w-full shadow-md" onClick={handleApply}>
-        Apply Filters
-      </Button>
+      <div className="flex gap-2 mt-2 w-full">
+        <Button variant="default" size="lg" className="w-1/2 shadow-md" onClick={handleApply}>
+          Apply Filters
+        </Button>
+        <Button variant="outline" size="lg" className="w-1/2 shadow-md" onClick={handleReset}>
+          Reset Filters
+        </Button>
+      </div>
     </aside>
   );
 };

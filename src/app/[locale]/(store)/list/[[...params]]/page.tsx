@@ -15,16 +15,16 @@ const page = async ({
   console.log("searchParams", searchParams);
   const pathName = Array.isArray(pathParams) ? pathParams.join("/") : "";
 
-  const response = await getProductsByCategory(
-    pathName,
-    locale,
-    { sortName: "name", sortType: "asc" },
-    "",
-    "all",
-    Number(minPrice) || undefined,
-    Number(maxPrice) || undefined,
-    brand
-  );
+  const response = await getProductsByCategory({
+    categoryIdOrUrl: pathName,
+    languageCode: locale,
+    sort: { sortName: "name", sortType: "asc" },
+    search: "",
+    stockFilter: availability as "all" | "inStock" | "outStock",
+    minPrice: minPrice !== undefined && minPrice !== "" ? Number(minPrice) : undefined,
+    maxPrice: maxPrice !== undefined && maxPrice !== "" ? Number(maxPrice) : undefined,
+    brands: Array.isArray(brand) ? brand : brand ? [brand] : undefined,
+  });
 
   const products = response?.res || [];
   return (

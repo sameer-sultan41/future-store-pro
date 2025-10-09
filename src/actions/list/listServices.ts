@@ -82,19 +82,30 @@ const pathToArray = (path: string) => {
 // stockFilter: 'all' | 'inStock' | 'outStock'
 // minPrice and maxPrice are optional for price range filtering
 // brands: string[] (array of brand IDs to filter by)
-export const getProductsByCategory = async (
+export const getProductsByCategory = async (payload: {
   categoryIdOrUrl: string,
   languageCode: string,
   sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
   search?: string,
-  stockFilter: 'all' | 'inStock' | 'outStock' = 'all',
+  stockFilter?: 'all' | 'inStock' | 'outStock',
   minPrice?: number,
   maxPrice?: number,
   brands?: string[]
-) => {
+}) => {
 
 
   try {
+    const {
+      categoryIdOrUrl,
+      languageCode,
+      sort,
+      search,
+      stockFilter = 'all',
+      minPrice,
+      maxPrice,
+      brands
+    } = payload;
+
     const supabase = createSupabaseServer();
 
     // Helper to check if string is UUID
@@ -136,7 +147,6 @@ export const getProductsByCategory = async (
         categoryIds = categoryIds.concat(subcats.map((c: any) => c.id));
       }
     }
-
 
     // Build product query with filters
     let query = supabase
