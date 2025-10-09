@@ -26,7 +26,7 @@ const NavBarCategory = ({ isNavbarVisible: isNavbarHide }: TProps) => {
 
   useEffect(() => {
     const getCategoriesDB = async () => {
-      const result = await getAllCategoriesJSON();
+      const result = await getAllCategoriesJSON("en");
       if (result.res) {
         setCategories(result.res);
       }
@@ -39,7 +39,7 @@ const NavBarCategory = ({ isNavbarVisible: isNavbarHide }: TProps) => {
   return (
     <div className="relative flex items-center select-none">
       <Button
-      variant={"ghost"}
+        variant={"ghost"}
         onClick={toggleMenu}
         className={cn(
           "w-auto px-4 py-2 border rounded-md transition-all duration-300",

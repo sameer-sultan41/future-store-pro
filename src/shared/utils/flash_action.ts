@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import { FlashDeal } from "@/shared/types/database";
+
 
 export const getActiveFlashDeals = async () => {
   try {

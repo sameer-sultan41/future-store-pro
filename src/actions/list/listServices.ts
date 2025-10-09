@@ -10,7 +10,7 @@ export const getBrandsByCategory = async (categoryUrl: string) => {
 
   // Find category by id or url
   let categoryQuery;
-  if (isUUID(categoryUrlOrId)) {
+  if (isUUID(categoryUrlOrId[0])) {
     categoryQuery = supabase.from('categories').select('*').eq('id', categoryUrlOrId).maybeSingle();
   } else {
     categoryQuery = supabase.from('categories').select('*').eq('url', categoryUrlOrId).maybeSingle();
@@ -72,8 +72,8 @@ const ValidateSort = z.object({
 
 const pathToArray = (path: string) => {
   const pathWithoutList = path.split("/list/")[1];
-  // const pathArray = pathWithoutList.split("/");
-  return pathWithoutList;
+  const pathArray = pathWithoutList.split("/");
+  return pathArray;
 };
 
 

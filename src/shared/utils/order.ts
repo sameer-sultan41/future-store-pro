@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import { Order } from "@/shared/types/database";
+import { Order } from "./type";
 
 export const createOrder = async (orderData: {
   user_id: string;
@@ -19,22 +19,30 @@ export const createOrder = async (orderData: {
     
     for (const item of orderData.items) {
       // Get product price
-      const { data: product } = await supabase
+      const { data: product, error: productError } = await supabase
         .from('products')
-        .select('base_price, product_translations!inner(name)')
+        .select('base_price, sku, product_translations!inner(name)')
         .eq('id', item.product_id)
         .single();
-      
+
+      if (productError || !product) {
+        return { error: productError?.message || "Product not found" };
+      }
+
       let unitPrice = product.base_price;
-      
+
       // Check for variant price adjustment
       if (item.product_variant_id) {
-        const { data: variant } = await supabase
+        const { data: variant, error: variantError } = await supabase
           .from('product_variants')
           .select('price_adjustment')
           .eq('id', item.product_variant_id)
           .single();
-        
+
+        if (variantError || !variant) {
+          return { error: variantError?.message || "Product variant not found" };
+        }
+
         unitPrice += variant.price_adjustment;
       }
       
