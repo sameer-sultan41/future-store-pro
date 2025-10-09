@@ -2,6 +2,9 @@ import { Metadata } from "next";
 import BreadCrumb from "./_components/BreadCrumb";
 import DropDownList from "@/shared/components/UI/dropDown";
 import { sortDropdownData } from "@/domains/shop/productList/constants";
+import Filters from "@/domains/shop/productList/components/filters";
+import Image from "next/image";
+import LineList from "@/shared/components/UI/lineList";
 
 export const metadata: Metadata = {
   title: "future - Products List",
@@ -28,7 +31,17 @@ const ListLayout = ({
           </button>
           <DropDownList data={sortDropdownData} width="180px" />
         </div>
-        {children}
+        <div className="w-full flex pt-3 lg:mt-9 md:pt-2">
+          <Filters />
+          <div className="flex-grow flex flex-col ml-0 2xl:ml-4 lg:ml-3">
+            <div className="w-full items-center text-sm mb-5 ml-3 hidden lg:flex">
+              <Image src={"/icons/sortIcon.svg"} alt="Sort" width={16} height={12} className="mr-3" />
+              <span className="font-medium w-14 mr-3 text-gray-900">Sort By:</span>
+              <LineList />
+            </div>
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -57,7 +57,7 @@ const ListPage = () => {
         // 1000,
         // ["b497558c-26f2-4f08-805a-8f96b3e9f717"]
       );
-   
+
       // Accepts both {res: [...]} and {products: [...], subCategories: [...]}
       let products: any[] = Array.isArray(response.res) ? response.res : [];
       // Map products to TListItem structure
@@ -222,19 +222,7 @@ const ListPage = () => {
     ),
   }[currentPageStatus];
 
-  return (
-    <div className="w-full flex pt-3 lg:mt-9 md:pt-2">
-      <Filters />
-      <div className="flex-grow flex flex-col ml-0 2xl:ml-4 lg:ml-3">
-        <div className="w-full items-center text-sm mb-5 ml-3 hidden lg:flex">
-          <Image src={"/icons/sortIcon.svg"} alt="Sort" width={16} height={12} className="mr-3" />
-          <span className="font-medium w-14 mr-3 text-gray-900">Sort By:</span>
-          <LineList data={sortDropdownData} selectedId={sortIndex} onChange={handleSortChange} />
-        </div>
-        {pageStatusJSX}
-      </div>
-    </div>
-  );
+  return <>{pageStatusJSX}</>;
 };
 
 export default ListPage;
