@@ -16,8 +16,8 @@ const Filters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [availability, setAvailability] = useState(searchParams.get("availability") || "all");
-  const [priceFrom, setPriceFrom] = useState(Number(searchParams.get("priceFrom")) || null);
-  const [priceTo, setPriceTo] = useState(Number(searchParams.get("priceTo")) || null);
+  const [priceFrom, setPriceFrom] = useState<string>(searchParams.get("priceFrom") ?? "");
+  const [priceTo, setPriceTo] = useState<string>(searchParams.get("priceTo") ?? "");
   const [selectedBrands, setSelectedBrands] = useState<string[]>(searchParams.getAll("brand"));
 
   const handleBrandChange = (id: string) => {
@@ -29,8 +29,8 @@ const Filters = () => {
   const handleApply = () => {
     const params = new URLSearchParams();
     if (availability !== "all") params.set("availability", availability);
-    params.set("priceFrom", priceFrom.toString());
-    params.set("priceTo", priceTo.toString());
+    if (priceFrom !== "") params.set("priceFrom", priceFrom);
+    if (priceTo !== "") params.set("priceTo", priceTo);
     selectedBrands.forEach((b) => params.append("brand", b));
     router.replace(`?${params.toString()}`);
   };
@@ -77,11 +77,14 @@ const Filters = () => {
                 id="priceFrom"
                 type="number"
                 min={0}
-                max={priceTo}
+                max={priceTo !== "" ? Number(priceTo) : undefined}
                 value={priceFrom}
                 onChange={(e) => {
-                  const val = Math.min(Number(e.target.value), priceTo);
-                  setPriceFrom(val);
+                  const val = e.target.value;
+                  // Only allow numbers or empty string
+                  if (/^\d*$/.test(val)) {
+                    setPriceFrom(val);
+                  }
                 }}
                 placeholder="Min"
               />
@@ -94,11 +97,14 @@ const Filters = () => {
               <Input
                 id="priceTo"
                 type="number"
-                min={priceFrom}
+                min={priceFrom !== "" ? Number(priceFrom) : 0}
                 value={priceTo}
                 onChange={(e) => {
-                  const val = Math.max(Number(e.target.value), priceFrom);
-                  setPriceTo(val);
+                  const val = e.target.value;
+                  // Only allow numbers or empty string
+                  if (/^\d*$/.test(val)) {
+                    setPriceTo(val);
+                  }
                 }}
                 placeholder="Max"
               />
