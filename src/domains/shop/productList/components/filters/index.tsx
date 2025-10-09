@@ -3,7 +3,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/utils/styling";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -17,22 +16,15 @@ const Filters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [availability, setAvailability] = useState(searchParams.get("availability") || "all");
-  const [priceFrom, setPriceFrom] = useState(Number(searchParams.get("priceFrom")) || 0);
-  const [priceTo, setPriceTo] = useState(Number(searchParams.get("priceTo")) || 100000);
+  const [priceFrom, setPriceFrom] = useState(Number(searchParams.get("priceFrom")) || null);
+  const [priceTo, setPriceTo] = useState(Number(searchParams.get("priceTo")) || null);
   const [selectedBrands, setSelectedBrands] = useState<string[]>(searchParams.getAll("brand"));
-
-  // For slider sync
-  const [sliderValue, setSliderValue] = useState<[number, number]>([priceFrom, priceTo]);
 
   const handleBrandChange = (id: string) => {
     setSelectedBrands((prev) => (prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]));
   };
 
-  const handleSliderChange = (value: number[]) => {
-    setSliderValue([value[0], value[1]] as [number, number]);
-    setPriceFrom(value[0]);
-    setPriceTo(value[1]);
-  };
+  // Removed slider logic; price is now controlled only by input fields
 
   const handleApply = () => {
     const params = new URLSearchParams();
@@ -76,7 +68,6 @@ const Filters = () => {
       <section>
         <h3 className="text-base font-medium text-gray-800 mb-3">Price</h3>
         <div className="flex flex-col gap-3 px-1">
-          <Slider min={0} max={100} step={1} value={sliderValue} onValueChange={handleSliderChange} className="mb-2" />
           <div className="flex gap-2 items-center">
             <div className="flex-1">
               <Label className="block mb-1" htmlFor="priceFrom">
@@ -91,7 +82,6 @@ const Filters = () => {
                 onChange={(e) => {
                   const val = Math.min(Number(e.target.value), priceTo);
                   setPriceFrom(val);
-                  setSliderValue([val, priceTo]);
                 }}
                 placeholder="Min"
               />
@@ -105,12 +95,10 @@ const Filters = () => {
                 id="priceTo"
                 type="number"
                 min={priceFrom}
-                max={priceTo}
                 value={priceTo}
                 onChange={(e) => {
                   const val = Math.max(Number(e.target.value), priceFrom);
                   setPriceTo(val);
-                  setSliderValue([priceFrom, val]);
                 }}
                 placeholder="Max"
               />
