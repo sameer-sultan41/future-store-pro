@@ -17,8 +17,8 @@ const Filters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [availability, setAvailability] = useState(searchParams.get("availability") || "all");
-  const [priceFrom, setPriceFrom] = useState<string>(searchParams.get("priceFrom") ?? "");
-  const [priceTo, setPriceTo] = useState<string>(searchParams.get("priceTo") ?? "");
+  const [minPrice, setminPrice] = useState<string>(searchParams.get("minPrice") ?? "");
+  const [maxPrice, setmaxPrice] = useState<string>(searchParams.get("maxPrice") ?? "");
   const [selectedBrands, setSelectedBrands] = useState<string[]>(searchParams.getAll("brand"));
 
   const handleBrandChange = (id: string) => {
@@ -30,8 +30,8 @@ const Filters = () => {
   const handleApply = () => {
     const params = new URLSearchParams();
     if (availability !== "all") params.set("availability", availability);
-    if (priceFrom !== "") params.set("priceFrom", priceFrom);
-    if (priceTo !== "") params.set("priceTo", priceTo);
+    if (minPrice !== "") params.set("minPrice", minPrice);
+    if (maxPrice !== "") params.set("maxPrice", maxPrice);
     selectedBrands.forEach((b) => params.append("brand", b));
     router.replace(`?${params.toString()}`);
   };
@@ -71,20 +71,20 @@ const Filters = () => {
         <div className="flex flex-col gap-3 px-1">
           <div className="flex gap-2 items-center">
             <div className="flex-1">
-              <Label className="block mb-1" htmlFor="priceFrom">
+              <Label className="block mb-1" htmlFor="minPrice">
                 From
               </Label>
               <Input
-                id="priceFrom"
+                id="minPrice"
                 type="number"
                 min={0}
-                max={priceTo !== "" ? Number(priceTo) : undefined}
-                value={priceFrom}
+                max={maxPrice !== "" ? Number(maxPrice) : undefined}
+                value={minPrice}
                 onChange={(e) => {
                   const val = e.target.value;
                   // Only allow numbers or empty string
                   if (/^\d*$/.test(val)) {
-                    setPriceFrom(val);
+                    setminPrice(val);
                   }
                 }}
                 placeholder="Min"
@@ -92,19 +92,19 @@ const Filters = () => {
             </div>
             <span className="mx-1 text-gray-400">-</span>
             <div className="flex-1">
-              <Label className="block mb-1" htmlFor="priceTo">
+              <Label className="block mb-1" htmlFor="maxPrice">
                 To
               </Label>
               <Input
-                id="priceTo"
+                id="maxPrice"
                 type="number"
-                min={priceFrom !== "" ? Number(priceFrom) : 0}
-                value={priceTo}
+                min={minPrice !== "" ? Number(minPrice) : 0}
+                value={maxPrice}
                 onChange={(e) => {
                   const val = e.target.value;
                   // Only allow numbers or empty string
                   if (/^\d*$/.test(val)) {
-                    setPriceTo(val);
+                    setmaxPrice(val);
                   }
                 }}
                 placeholder="Max"

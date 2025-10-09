@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { sortDropdownData } from "@/domains/shop/productList/constants";
 import { TDropDown } from "@/shared/types/uiElements";
-import { cn } from "@/shared/utils/styling";
 
 type TProps = {
   data: TDropDown[];

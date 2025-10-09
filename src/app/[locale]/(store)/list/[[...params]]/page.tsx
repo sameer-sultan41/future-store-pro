@@ -2,23 +2,30 @@ import React from "react";
 import { getProductsByCategory } from "@/actions/list/listServices";
 import TopProductCard from "../../(home)/_components/TopProductCard";
 
-const page = async ({ params }: { params: { locale: string; params?: string[] } }) => {
+const page = async ({
+  params,
+  searchParams,
+}: {
+  params: { locale: string; params?: string[] };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
   const { params: pathParams = [], locale } = params;
+  const { availability, minPrice, maxPrice, brand } = await searchParams;
 
-  console.log("params", params);
+  console.log("searchParams", searchParams);
   const pathName = Array.isArray(pathParams) ? pathParams.join("/") : "";
-  console.log("pathName", pathName);
+
   const response = await getProductsByCategory(
     pathName,
-    locale
-    // { sortName: "name", sortType: "asc" },
-    // "",
-    // "all",
-    // 0,
-    // 1000,
-    // ["b497558c-26f2-4f08-805a-8f96b3e9f717"]
+    locale,
+    { sortName: "name", sortType: "asc" },
+    "",
+    "all",
+    Number(minPrice) || undefined,
+    Number(maxPrice) || undefined,
+    brand
   );
-  console.log("response 1", response);
+
   const products = response?.res || [];
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-2 mb-14">
