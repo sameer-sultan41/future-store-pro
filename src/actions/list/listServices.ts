@@ -83,7 +83,7 @@ const pathToArray = (path: string) => {
 // minPrice and maxPrice are optional for price range filtering
 // brands: string[] (array of brand IDs to filter by)
 export const getProductsByCategory = async (
-  categoryIUrl: string,
+  categoryIdOrUrl: string,
   languageCode: string,
   sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
   search?: string,
@@ -92,8 +92,8 @@ export const getProductsByCategory = async (
   maxPrice?: number,
   brands?: string[]
 ) => {
-  const categoryIdOrUrl = pathToArray(categoryIUrl);
-  console.log(" categoryIdOrUrl", categoryIdOrUrl);
+
+
   try {
     const supabase = createSupabaseServer();
 
