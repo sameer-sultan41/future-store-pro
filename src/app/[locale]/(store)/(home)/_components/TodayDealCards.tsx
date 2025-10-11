@@ -28,7 +28,7 @@ export function TodayDealCards({ DealData }: { DealData: FlashDeal }) {
                   productName={deal.product?.product_translations[0].name || "Product"}
                   oldPrice={deal.product?.base_price || 0}
                   newPrice={deal.deal_price || 0}
-                  image={deal.product?.images || "/images/images/defaultUser.png"}
+                  image={deal.product?.images || ["/images/images/defaultUser.png"]}
                   desc={deal.product?.product_translations[0].description || ""}
                   dealEndTime={DealData.end_date}
                   url={`${deal.product?.url}`}
