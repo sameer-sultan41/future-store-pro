@@ -1,6 +1,6 @@
 import { COMPANIES_LOGOS } from "@/shared/constants/store/homePage/compayLogos";
 
-import CompanyLogo from "../../../../../domains/store/homePage/components/companyLogo/CompanyLogo";
+import CompanyLogo from "@/domains/shop//homePage/components/companyLogo/CompanyLogo";
 import {
   Carousel,
   CarouselContent,

@@ -52,7 +52,7 @@ const ProductForm = ({ formValues: props, onChange }: TProps) => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const result = await getAllCategoriesJSON();
+      const result = await getAllCategoriesJSON("en");
       if (result.res) {
         setCategoryList(convertJSONtoDropdownList(result.res));
       }

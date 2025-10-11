@@ -1,8 +1,66 @@
 "use server";
+// Returns only brands that have products in the given category (and subcategories)
+export const getBrandsByCategory = async (categoryUrl: string) => {
+  const supabase = createSupabaseServer();
+
+   const categoryUrlOrId = pathToArray(categoryUrl);
+  // Helper to check if string is UUID
+  const isUUID = (str: string) =>
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
+  // Find category by id or url
+  let categoryQuery;
+  if (isUUID(categoryUrlOrId[0])) {
+    categoryQuery = supabase.from('categories').select('*').eq('id', categoryUrlOrId).maybeSingle();
+  } else {
+    categoryQuery = supabase.from('categories').select('*').eq('url', categoryUrlOrId).maybeSingle();
+  }
+  const { data: category, error: catError } = await categoryQuery;
+  if (catError || !category) {
+    return { error: catError ? catError.message : 'Category not found' };
+  }
+
+  // Get all relevant category IDs (including subcategories if parent)
+  let categoryIds = [category.id];
+  if (category.parent_id === null) {
+    const { data: subcats, error: subcatError } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('parent_id', category.id)
+      .eq('is_active', true);
+    if (subcatError) return { error: subcatError.message };
+    if (subcats && subcats.length > 0) {
+      categoryIds = categoryIds.concat(subcats.map((c: any) => c.id));
+    }
+  }
+
+  // Get all brands for products in these categories
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('brand_id')
+    .in('category_id', categoryIds)
+    .eq('is_available', true);
+  if (productsError) return { error: productsError.message };
+
+  // Deduplicate brand IDs
+  const brandIds = Array.from(new Set(products.map((p: any) => p.brand_id)));
+  if (brandIds.length === 0) return { res: [] };
+
+  // Get brand details for these IDs
+  const { data: brands, error: brandsError } = await supabase
+    .from('brands')
+    .select('id, name')
+    .in('id', brandIds)
+    .eq('is_active', true);
+  if (brandsError) return { error: brandsError.message };
+
+  return { res: brands };
+};
+
 import { z } from "zod";
 
-import { TFilters } from "@/domains/store/productList/types";
-import { TListSort } from "@/domains/store/productList/types";
+import { TFilters } from "@/domains/shop/productList/types";
+import { TListSort } from "@/domains/shop/productList/types";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { TProductPath } from "@/shared/types/product";
 import { ca } from "zod/v4/locales";
@@ -14,15 +72,40 @@ const ValidateSort = z.object({
 
 const pathToArray = (path: string) => {
   const pathWithoutList = path.split("/list/")[1];
-  // const pathArray = pathWithoutList.split("/");
-  return pathWithoutList;
+  const pathArray = pathWithoutList.split("/");
+  return pathArray;
 };
 
 
-export const getProductsByCategory = async (categoryIUrl: string, languageCode: string) => {
-  const categoryIdOrUrl = pathToArray(categoryIUrl);
-  console.log(" categoryIdOrUrl", categoryIdOrUrl);
+// sort: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' }
+// search: string (search by product name)
+// stockFilter: 'all' | 'inStock' | 'outStock'
+// minPrice and maxPrice are optional for price range filtering
+// brands: string[] (array of brand IDs to filter by)
+export const getProductsByCategory = async (payload: {
+  categoryIdOrUrl: string,
+  languageCode: string,
+  sort?: { sortName: 'price'|'date'|'name', sortType: 'asc'|'desc' },
+  search?: string,
+  stockFilter?: 'all' | 'inStock' | 'outStock',
+  minPrice?: number,
+  maxPrice?: number,
+  brands?: string[]
+}) => {
+
+
   try {
+    const {
+      categoryIdOrUrl,
+      languageCode,
+      sort,
+      search,
+      stockFilter = 'all',
+      minPrice,
+      maxPrice,
+      brands
+    } = payload;
+
     const supabase = createSupabaseServer();
 
     // Helper to check if string is UUID
@@ -65,17 +148,67 @@ export const getProductsByCategory = async (categoryIUrl: string, languageCode: 
       }
     }
 
-    // Get products in these categories
-    const { data: products, error: prodError } = await supabase
+    // Build product query with filters
+    let query = supabase
       .from('products')
       .select('*')
       .in('category_id', categoryIds)
       .eq('is_available', true);
+
+    // Brands filter
+    if (brands && brands.length > 0) {
+      query = query.in('brand_id', brands);
+    }
+
+    // Stock filter
+    if (stockFilter === 'inStock') {
+      query = query.gt('stock_quantity', 0);
+    } else if (stockFilter === 'outStock') {
+      query = query.eq('stock_quantity', 0);
+    }
+
+    // Price range filter
+    if (typeof minPrice === 'number') {
+      query = query.gte('base_price', minPrice);
+    }
+    if (typeof maxPrice === 'number') {
+      query = query.lte('base_price', maxPrice);
+    }
+
+    // Sorting
+    if (sort) {
+      // Map sortName to actual DB field
+      let sortField: string = sort.sortName;
+      if (sort.sortName === 'price') sortField = 'base_price';
+      else if (sort.sortName === 'date') sortField = 'created_at';
+      else if (sort.sortName === 'name') sortField = 'url'; // fallback, but not used directly
+      query = query.order(sortField, { ascending: sort.sortType === 'asc' });
+    }
+
+    // Search by name (in product_translations)
+    let productIds: string[] = [];
+    let translations: Record<string, any> = {};
+    if (search && search.trim().length > 0) {
+      // First, get product_translations matching name
+      const { data: trans, error: transError } = await supabase
+        .from('product_translations')
+        .select('product_id')
+        .ilike('name', `%${search}%`)
+        .eq('language_code', languageCode);
+      if (transError) return { error: transError.message };
+      if (!trans || trans.length === 0) return { res: [] };
+      productIds = trans.map((t: any) => t.product_id);
+      query = query.in('id', productIds);
+    }
+
+    // Get products
+    const { data: products, error: prodError } = await query;
     if (prodError) return { error: prodError.message };
 
-    // Optionally, join with product_translations for the given language
-    const productIds = products.map((p: any) => p.id);
-    let translations: Record<string, any> = {};
+    // Join with product_translations for the given language
+    if (!productIds.length) {
+      productIds = products.map((p: any) => p.id);
+    }
     if (productIds.length > 0) {
       const { data: trans, error: transError } = await supabase
         .from('product_translations')

@@ -1,4 +1,4 @@
-import { TListSort } from "@/domains/store/productList/types";
+import { TListSort } from "@/domains/shop/productList/types";
 import { TDropDown } from "@/shared/types/uiElements";
 
 import { TFilters } from "../types";

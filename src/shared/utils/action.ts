@@ -1,6 +1,7 @@
 "use server";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import { Language } from "@/shared/types/database";
+import { Language } from "./type";
+
 
 // Get products by category (parent or child) with brand info and translation
 export const getProductsByCategory = async (categoryIdOrUrl: string, languageCode: string) => {

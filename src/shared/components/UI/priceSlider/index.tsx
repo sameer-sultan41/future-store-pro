@@ -1,5 +1,5 @@
 "use client";
-import { TPageStatus } from "@/domains/store/productList/types";
+import { TPageStatus } from "@/domains/shop/productList/types";
 
 import { SK_Box } from "../skeleton";
 

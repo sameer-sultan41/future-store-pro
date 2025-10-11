@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { TodayDeals } from "@/domains/product/constants";
 
-import TodayDealCard from "../../../../../domains/store/homePage/components/todayDealCard/TodayDealCard";
+import TodayDealCard from "@/domains/shop/homePage/components/todayDealCard/TodayDealCard";
 import { Carousel, CarouselContent, CarouselItem ,  CarouselNext,
   CarouselPrevious,} from "@/components/ui/carousel";
 import { useRef } from "react";

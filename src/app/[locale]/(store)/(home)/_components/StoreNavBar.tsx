@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTiktok, faFacebookF, faYoutube, faInstagram } from "@fortawesome/free-brands-svg-icons";
 
-import AddVisit from "@/domains/store/shared/components/addVisit";
-import NavBarCategory from "@/domains/store/shared/components/navbar/navCategory";
-import NavBarFavorite from "@/domains/store/shared/components/navbar/navFavorite";
-import NavBarProfile from "@/domains/store/shared/components/navbar/navProfile/NavBarProfile";
-import NavBarShopping from "@/domains/store/shared/components/navbar/navShopping";
+import AddVisit from "@/domains/shop/shared/components/addVisit";
+import NavBarCategory from "@/domains/shop/shared/components/navbar/navCategory";
+import NavBarFavorite from "@/domains/shop/shared/components/navbar/navFavorite";
+import NavBarProfile from "@/domains/shop/shared/components/navbar/navProfile/NavBarProfile";
+import NavBarShopping from "@/domains/shop/shared/components/navbar/navShopping";
 import { cn } from "@/shared/utils/styling";
 import { Input } from "@/components/ui/input";
 import { LanguageToggle } from "./LanguageToggle";
