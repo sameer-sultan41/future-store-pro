@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DollarSign, Check } from "lucide-react";
+import { DollarSign, Check, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -16,13 +16,14 @@ import { useState, useEffect } from "react";
 export function CurrencyToggle({ currency }: { currency: Currency }) {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentCurrency, setCurrentCurrency] = useState( "PKR");
-  const router = useRouter();
+  const [currentCurrency, setCurrentCurrency] = useState(currency?.code);
 
   useEffect(() => {
     async function fetchCurrencies() {
       try {
         const response = await getCurrency();
+        const currency = await getCurrencyFromCookie();
+        setCurrentCurrency(currency?.code || "PKR");
 
         console.log("data from getCurrency", response);
         if (response && response.currencyData) {
@@ -56,14 +57,17 @@ export function CurrencyToggle({ currency }: { currency: Currency }) {
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Button variant="outline">
-          <DollarSign className="h-4 w-4" /> {currentCurrency}
+          {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <DollarSign className="h-4 w-4" />}{" "}
+          {currentCurrency}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Choose Currency</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {loading ? (
-          <DropdownMenuItem disabled>Loading...</DropdownMenuItem>
+          <DropdownMenuItem disabled>
+            <LoaderCircle className="h-4 w-4 animate-spin" /> Loading...
+          </DropdownMenuItem>
         ) : (
           currencies.map((currency) => (
             <DropdownMenuItem
