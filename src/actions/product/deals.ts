@@ -1,6 +1,18 @@
 "use server";
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
+import { cookies } from "next/headers";
+
+
+function getCurrencyCodeFromCookie(): string {
+  const cookieStore = cookies();
+  const currency = cookieStore.get("currency");
+  return currency?.value || "PKR";
+}
+
+
+
+
 
 export const getTodayDeals = async (locale: string = "en") => {
   const supabase = createSupabaseServer();
