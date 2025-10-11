@@ -30,8 +30,8 @@ export const getTodayDeals = async (locale: string = "en") => {
           )
         )
       `)
-    //   .eq("is_active", true)
-    //   .gt("end_date", new Date().toISOString())
+      .eq("is_active", true)
+      .gt("end_date", new Date().toISOString())
       .eq("flash_deal_products.product.product_translations.language_code", locale);
     // Only the requested translation is returned
     return { data: data as FlashDeal[] | null, error: error ? error.message ?? String(error) : null };
