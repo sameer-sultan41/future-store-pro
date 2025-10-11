@@ -12,13 +12,17 @@ import {
 } from "@/domains/shop/homePage/components";
 import { threeSaleCards } from "@/domains/shop/homePage/constants";
 import { getSettingsData } from "@/actions/settings/settings";
+import { FlashDeal, getTodayDeals } from "@/actions/product/deals";
 
 export const metadata: Metadata = {
   title: "Future Store - Homepage",
 };
 
-export default async function Home() {
+export default async function Home({ params }: { params: { locale: string; params?: string[] } }) {
+  const { params: pathParams = [], locale } = params;
   const settings = await getSettingsData();
+
+  const { data: flashDeals, error } = await getTodayDeals(locale);
 
   return (
     <div className="w-full bg-mint-500">
@@ -27,7 +31,10 @@ export default async function Home() {
           <HomeCategoryList />
           <HomeSlider CarouselData={settings.carousels} />
         </div>
-        <TodayDealCards locale="en" />
+        {flashDeals?.map((item) => (
+          <TodayDealCards DealData={item} />
+        ))}
+
         <WideCardRow cards={threeSaleCards} />
         {/* <WideCardRow cards={twoSaleCards} /> */}
         <CollectionCards />

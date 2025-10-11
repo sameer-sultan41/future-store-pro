@@ -15,15 +15,14 @@ type TProps = {
   productName: string;
   newPrice: number;
   oldPrice: number;
-  image: [string, string];
-  dealEndTime: Date;
-  spec?: string[];
+  image: string[];
+  dealEndTime: string;
+  desc?: string;
   url: string;
 };
 
-const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, spec = [], url }: TProps) => {
-
-    console.log("remainedTime", dealEndTime);
+const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url }: TProps) => {
+  // console.log("remainedTime", dealEndTime);
   const saveAmount = oldPrice - newPrice;
   const [remainedTime, setRemainedTime] = useState(() => {
     // Ensure dealEndTime is a Date object
@@ -49,8 +48,6 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
     const s = String(date.getSeconds()).padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
-
-
 
   return (
     <motion.div
@@ -117,20 +114,15 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
           {productName}
         </motion.h3>
       </Link>
-      <div className="h-14 w-full ml-2">
-        {!!spec.length &&
-          spec.map((item, index) => (
-            <motion.span
-              key={index}
-              className="block h-3.5 mb-1 text-sm text-gray-500 italic"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + index * 0.05 }}
-            >
-              {item}
-            </motion.span>
-          ))}
-      </div>
+
+      <motion.span
+        className="block h-14 w-full mb-1 text-sm text-gray-500 italic line-clamp-2"
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        {desc}
+      </motion.span>
+
       <div className="flex flex-col gap-2 mx-2 mt-2">
         <div className="flex justify-between items-end">
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>

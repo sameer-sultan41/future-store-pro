@@ -23,7 +23,7 @@ export const HomeCategoryList = () => {
     };
     getCategoriesDB();
   }, []);
-  console.log("categories", categories);
+
   return (
     <div className="min-w-[256px] absolute h-[500px] hidden lg:block bg-white mr-4 rounded-xl px-6 text-gray-800 shadow-md z-[3]">
       <ul className="mt-3">
