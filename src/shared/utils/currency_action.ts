@@ -1,7 +1,8 @@
 "use server";
 
+import { Currency } from "@/actions/server";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import { Currency } from "./type";
+
 
 
 export const getAllCurrencies = async () => {

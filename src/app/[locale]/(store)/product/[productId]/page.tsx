@@ -213,6 +213,7 @@ const ProductPage = () => {
                 url={product.url}
                 dealPrice={product.dealPrice}
                 staticWidth
+                currency={null}
               />
             ))}
           </div>

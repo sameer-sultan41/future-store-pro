@@ -11,7 +11,7 @@ export type TProductCard = {
   imgUrl: [string, string];
   url: string;
   staticWidth?: boolean;
-  currency: Currency | null;
+  currency?: Currency | null;
 };
 
 export type TSlide = {
