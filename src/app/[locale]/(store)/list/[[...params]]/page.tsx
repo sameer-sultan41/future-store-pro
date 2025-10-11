@@ -2,6 +2,8 @@ import React from "react";
 import { getProductsByCategory } from "@/actions/list/listServices";
 import TopProductCard from "../../(home)/_components/TopProductCard";
 import NoResultImage from "./_components/NoResultImage";
+import { getCurrencyFromCookie } from "@/actions/server";
+import { getConvertedPrice } from "@/shared/utils/helper";
 
 const page = async ({
   params,
@@ -13,7 +15,6 @@ const page = async ({
   const { params: pathParams = [], locale } = params;
   const { availability, minPrice, maxPrice, brand, sortName, sortType, search } = await searchParams;
 
-  console.log("searchParams", searchParams);
   const pathName = Array.isArray(pathParams) ? pathParams.join("/") : "";
 
   const response = await getProductsByCategory({
@@ -32,6 +33,8 @@ const page = async ({
 
   const products = response?.res || [];
 
+  const currency = await getCurrencyFromCookie();
+
   if (products.length < 1) {
     return <NoResultImage />;
   }
@@ -42,11 +45,12 @@ const page = async ({
           key={product.id}
           imgUrl={product.images}
           name={product.translation?.name || product.sku}
-          price={product.base_price}
+          price={getConvertedPrice(currency, product.base_price)}
           isAvailable={product.is_available}
-          dealPrice={undefined}
+          dealPrice={getConvertedPrice(currency, product.flash_deal_price || 0) || undefined}
           specs={product.translation?.special_features || []}
           url={"/product/" + product.id}
+          currency={currency}
         />
       ))}
     </div>

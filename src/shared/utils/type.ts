@@ -6,13 +6,7 @@ export type Language = {
   is_active: boolean;
 };
 
-export type Currency = {
-  code: string;
-  name: string;
-  symbol: string;
-  exchange_rate_to_usd: number;
-  is_active: boolean;
-};
+
 
 export type ProductVariant = {
   id: string;

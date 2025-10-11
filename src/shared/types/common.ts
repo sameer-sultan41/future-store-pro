@@ -1,3 +1,5 @@
+import { Currency } from "@/actions/server";
+import { C } from "node_modules/framer-motion/dist/types.d-DsEeKk6G";
 
 
 export type TProductCard = {
@@ -9,6 +11,7 @@ export type TProductCard = {
   imgUrl: [string, string];
   url: string;
   staticWidth?: boolean;
+  currency: Currency | null;
 };
 
 export type TSlide = {

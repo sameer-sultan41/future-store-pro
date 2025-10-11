@@ -10,8 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCurrencyFromCookie } from "@/actions/server";
-import { get } from "http";
+import { Currency, getCurrencyFromCookie } from "@/actions/server";
+import { getConvertedPrice } from "@/shared/utils/helper";
 
 type TProps = {
   productName: string;
@@ -24,33 +24,24 @@ type TProps = {
 };
 
 const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url }: TProps) => {
-  const [currency, setCurrency] = useState<{
-    code: string;
-    symbol: string;
-    exchange_rate_to_usd: number;
-  } | null>(null);
+  const [currency, setCurrency] = useState<Currency | null>(null);
 
   // Fetch currency from cookie
   useEffect(() => {
     const getCurrency = async () => {
       const currency = await getCurrencyFromCookie();
-      setCurrency(currency);
+      if (currency) {
+        setCurrency(currency); // or set to false if appropriate
+      } else {
+        setCurrency(null);
+      }
     };
     getCurrency();
   }, []);
 
-  // Convert price using exchange rate if currency is set and not USD
-  const getConvertedPrice = (price: number) => {
-    if (!currency) return price;
-    if (currency.code !== "USD" && currency.exchange_rate_to_usd) {
-      return price / currency.exchange_rate_to_usd;
-    }
-    return price;
-  };
-
   const currencySymbol = currency?.symbol || "€";
 
-  const saveAmount = getConvertedPrice(oldPrice) - getConvertedPrice(newPrice);
+  const saveAmount = getConvertedPrice(currency, oldPrice) - getConvertedPrice(currency, newPrice);
 
   const [remainedTime, setRemainedTime] = useState(() => {
     // Ensure dealEndTime is a Date object
@@ -155,7 +146,12 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         <div className="flex justify-between items-end">
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <span className="block text-gray-400 text-xs line-through select-none">
-              was {getConvertedPrice(oldPrice).toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} {currencySymbol}
+              was{" "}
+              {getConvertedPrice(currency, oldPrice).toLocaleString("en-us", {
+                useGrouping: true,
+                minimumFractionDigits: 2,
+              })}{" "}
+              {currencySymbol}
             </span>
             <motion.span
               className="block text-2xl font-bold text-primary drop-shadow-sm"
@@ -163,7 +159,11 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             >
-              {getConvertedPrice(newPrice).toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} {currencySymbol}
+              {getConvertedPrice(currency, newPrice).toLocaleString("en-us", {
+                useGrouping: true,
+                minimumFractionDigits: 2,
+              })}{" "}
+              {currencySymbol}
             </motion.span>
           </motion.section>
           <motion.section

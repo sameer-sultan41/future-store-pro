@@ -1,10 +1,9 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import { TProductCard } from "@/shared/types/common";
 import { cn } from "@/shared/utils/styling";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCartPlus, faEye, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +16,10 @@ const TopProductCard = ({
   url,
   isAvailable = true,
   staticWidth = false,
+  currency,
 }: TProductCard) => {
+  const currencySymbol = currency?.symbol || "Rs";
+
   return (
     <div
       className={cn(
@@ -86,16 +88,19 @@ const TopProductCard = ({
                     -{(100 - (dealPrice / price) * 100).toLocaleString("en-us", { maximumFractionDigits: 0 })}%
                   </span>
                   <span className="line-through text-gray-400 text-xs">
-                    was {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
+                    was {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}
+                    {currencySymbol}
                   </span>
                 </div>
                 <span className="text-lg font-bold text-primary">
-                  {dealPrice.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
+                  {dealPrice.toLocaleString("en-us", { minimumFractionDigits: 2 })}
+                  {currencySymbol}
                 </span>
               </>
             ) : (
               <span className="text-lg font-bold text-primary">
-                {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}€
+                {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}
+                {currencySymbol}
               </span>
             )}
           </div>
