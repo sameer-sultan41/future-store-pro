@@ -12,8 +12,7 @@ export type Currency = {
   isActive: Boolean;
 };
 
-
- const supabase = createSupabaseServer();
+const supabase = createSupabaseServer();
 
 export async function setCurrency(currency: Currency) {
   cookies().set("currency", JSON.stringify(currency), {
@@ -23,17 +22,6 @@ export async function setCurrency(currency: Currency) {
   });
 }
 
-// // Function to get currency from cookie
-// export function newsSave() {
-//   console.log("first")
-//   // const currencyCookie = cookies().get("currency")?.value;
-//   // if (!currencyCookie) return null;
-//   // try {
-//   //   return JSON.parse(currencyCookie) as Currency;
-//   // } catch {
-//   //   return null;
-//   // }
-// }
 
 // Helper to get currency code from cookies
 export async function getCurrency() {

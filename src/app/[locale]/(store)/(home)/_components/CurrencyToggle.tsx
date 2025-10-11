@@ -9,14 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DollarSign, Check, LoaderCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 // Currency Toggle Component
-export function CurrencyToggle({ currency }: { currency: Currency }) {
+export function CurrencyToggle() {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentCurrency, setCurrentCurrency] = useState(currency?.code);
+  const [currentCurrency, setCurrentCurrency] = useState("PKR");
 
   useEffect(() => {
     async function fetchCurrencies() {
@@ -38,12 +37,6 @@ export function CurrencyToggle({ currency }: { currency: Currency }) {
       }
     }
     fetchCurrencies();
-  }, []);
-
-  // Fetch currency from cookie
-  useEffect(() => {
-    const getCurrency = async () => {};
-    getCurrency();
   }, []);
 
   const handleCurrencyChange = async (currency: Currency) => {
