@@ -32,7 +32,7 @@ export default async function Home({ params }: { params: { locale: string; param
           <HomeSlider CarouselData={settings.carousels} />
         </div>
         {flashDeals?.map((item) => (
-          <TodayDealCards DealData={item} />
+          <TodayDealCards key={item.id} DealData={item} />
         ))}
 
         <WideCardRow cards={threeSaleCards} />
