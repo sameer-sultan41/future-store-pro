@@ -23,12 +23,7 @@ const CategoryListItem = ({ categoryData, className }: TProps) => {
     >
       <Link href={"/list/" + group.url} className="text-gray-700 transition-colors duration-300 hover:text-gray-900">
         <div className="w-7 inline-block">
-          <Image
-            src={iconUrl}
-            alt={group.name}
-            width={iconSize[0]}
-            height={iconSize[1]}
-          />
+          <Image src={iconUrl} alt={group.name} width={iconSize[0]} height={iconSize[1]} />
         </div>
         {group.name}
       </Link>
@@ -42,7 +37,7 @@ const CategoryListItem = ({ categoryData, className }: TProps) => {
           {categories.map((item, index) => (
             <div className="w-full flex flex-col" key={index}>
               <Link
-                href={"/list/" + group.url + "/" + item.category.url}
+                href={"/list/" + item.category.url}
                 className="text-gray-900 px-3 py-2 border border-white rounded-md transition-all duration-300 hover:border-gray-200 hover:bg-gray-100"
               >
                 {item.category.name}
@@ -52,7 +47,7 @@ const CategoryListItem = ({ categoryData, className }: TProps) => {
                   {item.subCategories.map((link, subIdx) => (
                     <Link
                       key={subIdx}
-                      href={"/list/" + group.url + "/" + item.category.url + "/" + link.url}
+                      href={"/list/" + item.category.url + "/" + link.url}
                       className="text-gray-500 px-3 py-2 border border-white rounded-md transition-all duration-300 text-sm hover:text-gray-700 hover:border-gray-200 hover:bg-gray-100"
                     >
                       {link.name}

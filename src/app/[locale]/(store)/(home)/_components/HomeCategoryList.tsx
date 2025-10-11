@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { getAllCategoriesJSON } from "@/actions/category/category";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import { TGroupJSON } from "@/shared/types/categories";
-import { useParams } from 'next/navigation'
+import { useParams } from "next/navigation";
 import CategoryListItem from "@/domains/shop/homePage/components/categories/catListItem";
 
 export const HomeCategoryList = () => {
   const params = useParams();
-  const {locale} =params
-   
+  const { locale } = params;
+
   const [categories, setCategories] = useState<TGroupJSON[]>([]);
   useEffect(() => {
     const getCategoriesDB = async () => {
@@ -23,7 +23,7 @@ export const HomeCategoryList = () => {
     };
     getCategoriesDB();
   }, []);
-
+  console.log("categories", categories);
   return (
     <div className="min-w-[256px] absolute h-[500px] hidden lg:block bg-white mr-4 rounded-xl px-6 text-gray-800 shadow-md z-[3]">
       <ul className="mt-3">
