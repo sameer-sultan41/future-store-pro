@@ -16,6 +16,7 @@ export async function getSettingsData() {
     .select('*')
     .single();
 
+
   if (error) throw error;
 
   // Adjust the path below based on your settings JSON structure

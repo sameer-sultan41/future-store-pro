@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ClockIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 // FontAwesome icons
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCartPlus, faEye, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -15,19 +15,39 @@ type TProps = {
   productName: string;
   newPrice: number;
   oldPrice: number;
-  image: [string, string];
-  dealEndTime: Date;
-  spec?: string[];
+  image: string[];
+  dealEndTime: string;
+  desc?: string;
   url: string;
 };
 
-const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, spec = [], url }: TProps) => {
+const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url }: TProps) => {
+  // console.log("remainedTime", dealEndTime);
   const saveAmount = oldPrice - newPrice;
-  const [remainedTime, setRemainedTime] = useState(dealEndTime);
+  const [remainedTime, setRemainedTime] = useState(() => {
+    // Ensure dealEndTime is a Date object
+    return typeof dealEndTime === "string" ? new Date(dealEndTime) : dealEndTime;
+  });
 
-  setTimeout(() => {
-    setRemainedTime(new Date(remainedTime.getTime() - 1000));
-  }, 1000);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRemainedTime((prev) => {
+        if (!prev || isNaN(prev.getTime())) return prev; // Prevent error
+        const next = new Date(prev.getTime() - 1000);
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Helper to format time safely
+  const formatTime = (date: Date) => {
+    if (!date || isNaN(date.getTime())) return "00:00:00";
+    const h = String(date.getHours()).padStart(2, "0");
+    const m = String(date.getMinutes()).padStart(2, "0");
+    const s = String(date.getSeconds()).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
 
   return (
     <motion.div
@@ -36,27 +56,24 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
       whileHover={{ scale: 1.03, boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)" }}
       transition={{ type: "spring", stiffness: 200, damping: 18 }}
       className="relative p-2  rounded-xl shadow-sm  group bg-white border border-gray-200"
-
     >
       <motion.div
         className="absolute top-3 right-3 z-10 cursor-pointer flex gap-2"
         whileTap={{ scale: 0.8, rotate: -15 }}
         whileHover={{ scale: 1.2 }}
-        transition={{ type: 'spring', stiffness: 300 }}
+        transition={{ type: "spring", stiffness: 300 }}
       >
         <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
-
       </motion.div>
       <motion.div
         className="absolute top-3 right-12 z-10 cursor-pointer flex gap-2"
         whileTap={{ scale: 0.8, rotate: -15 }}
         whileHover={{ scale: 1.2 }}
-        transition={{ type: 'spring', stiffness: 300 }}
+        transition={{ type: "spring", stiffness: 300 }}
       >
-         <Scale width={22} className="fill-white drop-shadow-lg stroke-primary" />    </motion.div>
+        <Scale width={22} className="fill-white drop-shadow-lg stroke-primary" />{" "}
+      </motion.div>
 
- 
-   
       <Link
         href={url}
         className="imgWrapper w-full h-[220px] block relative overflow-hidden border-2 border-gray-200 rounded-xl group"
@@ -81,7 +98,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
         className="absolute top-5 left-5 rounded-md px-2 py-1 bg-primary text-primary-foreground text-sm shadow-lg"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
       >
         <span className="font-bold tracking-wide">
           Save {saveAmount.toLocaleString("en-us", { minimumFractionDigits: 2 })} €
@@ -97,27 +114,18 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
           {productName}
         </motion.h3>
       </Link>
-      <div className="h-14 w-full ml-2">
-        {!!spec.length &&
-          spec.map((item, index) => (
-            <motion.span
-              key={index}
-              className="block h-3.5 mb-1 text-sm text-gray-500 italic"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + index * 0.05 }}
-            >
-              {item}
-            </motion.span>
-          ))}
-      </div>
+
+      <motion.span
+        className="block h-14 w-full mb-1 text-sm text-gray-500 italic line-clamp-2"
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+      >
+        {desc}
+      </motion.span>
+
       <div className="flex flex-col gap-2 mx-2 mt-2">
         <div className="flex justify-between items-end">
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
+          <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <span className="block text-gray-400 text-xs line-through select-none">
               was {oldPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
             </span>
@@ -125,7 +133,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
               className="block text-2xl font-bold text-primary drop-shadow-sm"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             >
               {newPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
             </motion.span>
@@ -141,19 +149,13 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, sp
               className="w-24 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+              transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
             >
-              {`${remainedTime.getHours().toLocaleString("en-us", { minimumIntegerDigits: 2 })}
-              :
-              ${remainedTime.getMinutes().toLocaleString("en-us", { minimumIntegerDigits: 2 })}
-              :
-              ${remainedTime.getSeconds().toLocaleString("en-us", { minimumIntegerDigits: 2 })}`}
+              {formatTime(remainedTime)}
             </motion.span>
           </motion.section>
         </div>
-        <Button
-    
-        >
+        <Button>
           <FontAwesomeIcon icon={faCartPlus} className="text-white" />
           Add to Cart
         </Button>
