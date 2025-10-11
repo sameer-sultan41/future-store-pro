@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
 import { ClockIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 // FontAwesome icons
@@ -10,6 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCurrencyFromCookie } from "@/actions/server";
+import { get } from "http";
 
 type TProps = {
   productName: string;
@@ -36,13 +38,6 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         const next = new Date(prev.getTime() - 1000);
         return next;
       });
-
-
-      function getCurrencyCodeFromCookie(): string {
-  const cookieStore = cookies();
-  const currency = cookieStore.get("currency");
-  return currency?.value || "PKR";
-}
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -55,6 +50,14 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
     const s = String(date.getSeconds()).padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
+
+  useEffect(() => {
+    const getCurrency = async () => {
+      const currency = await getCurrencyFromCookie();
+      console.log(" currency from cookie", currency);
+    };
+    getCurrency();
+  }, []);
 
   return (
     <motion.div
