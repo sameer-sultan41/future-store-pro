@@ -36,6 +36,13 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         const next = new Date(prev.getTime() - 1000);
         return next;
       });
+
+
+      function getCurrencyCodeFromCookie(): string {
+  const cookieStore = cookies();
+  const currency = cookieStore.get("currency");
+  return currency?.value || "PKR";
+}
     }, 1000);
     return () => clearInterval(timer);
   }, []);
