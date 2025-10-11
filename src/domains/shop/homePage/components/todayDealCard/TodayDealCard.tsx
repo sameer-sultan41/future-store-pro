@@ -24,8 +24,34 @@ type TProps = {
 };
 
 const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url }: TProps) => {
-  // console.log("remainedTime", dealEndTime);
-  const saveAmount = oldPrice - newPrice;
+  const [currency, setCurrency] = useState<{
+    code: string;
+    symbol: string;
+    exchange_rate_to_usd: number;
+  } | null>(null);
+
+  // Fetch currency from cookie
+  useEffect(() => {
+    const getCurrency = async () => {
+      const currency = await getCurrencyFromCookie();
+      setCurrency(currency);
+    };
+    getCurrency();
+  }, []);
+
+  // Convert price using exchange rate if currency is set and not USD
+  const getConvertedPrice = (price: number) => {
+    if (!currency) return price;
+    if (currency.code !== "USD" && currency.exchange_rate_to_usd) {
+      return price / currency.exchange_rate_to_usd;
+    }
+    return price;
+  };
+
+  const currencySymbol = currency?.symbol || "€";
+
+  const saveAmount = getConvertedPrice(oldPrice) - getConvertedPrice(newPrice);
+
   const [remainedTime, setRemainedTime] = useState(() => {
     // Ensure dealEndTime is a Date object
     return typeof dealEndTime === "string" ? new Date(dealEndTime) : dealEndTime;
@@ -50,14 +76,6 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
     const s = String(date.getSeconds()).padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
-
-  useEffect(() => {
-    const getCurrency = async () => {
-      const currency = await getCurrencyFromCookie();
-      console.log(" currency from cookie", currency);
-    };
-    getCurrency();
-  }, []);
 
   return (
     <motion.div
@@ -111,7 +129,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
       >
         <span className="font-bold tracking-wide">
-          Save {saveAmount.toLocaleString("en-us", { minimumFractionDigits: 2 })} €
+          Save {saveAmount.toLocaleString("en-us", { minimumFractionDigits: 2 })} {currencySymbol}
         </span>
       </motion.div>
       <Link href={url}>
@@ -137,7 +155,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         <div className="flex justify-between items-end">
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <span className="block text-gray-400 text-xs line-through select-none">
-              was {oldPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
+              was {getConvertedPrice(oldPrice).toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} {currencySymbol}
             </span>
             <motion.span
               className="block text-2xl font-bold text-primary drop-shadow-sm"
@@ -145,7 +163,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             >
-              {newPrice.toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} €
+              {getConvertedPrice(newPrice).toLocaleString("en-us", { useGrouping: true, minimumFractionDigits: 2 })} {currencySymbol}
             </motion.span>
           </motion.section>
           <motion.section
