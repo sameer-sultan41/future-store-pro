@@ -27,7 +27,7 @@ export default async function Home() {
           <HomeCategoryList />
           <HomeSlider CarouselData={settings.carousels} />
         </div>
-        <TodayDealCards />
+        <TodayDealCards locale="en" />
         <WideCardRow cards={threeSaleCards} />
         {/* <WideCardRow cards={twoSaleCards} /> */}
         <CollectionCards />
