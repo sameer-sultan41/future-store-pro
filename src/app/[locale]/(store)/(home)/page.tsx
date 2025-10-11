@@ -10,19 +10,22 @@ import {
   TopSellingProductsList,
   WideCardRow,
 } from "@/domains/shop/homePage/components";
-import { threeSaleCards, twoSaleCards } from "@/domains/shop/homePage/constants";
+import { threeSaleCards } from "@/domains/shop/homePage/constants";
+import { getSettingsData } from "@/actions/settings/settings";
 
 export const metadata: Metadata = {
   title: "Future Store - Homepage",
 };
 
-export default function Home() {
+export default async function Home() {
+  const settings = await getSettingsData();
+
   return (
     <div className="w-full bg-mint-500">
       <div className="storeContainer flex-col">
         <div className="flex w-full mt-40">
           <HomeCategoryList />
-          <HomeSlider />
+          <HomeSlider CarouselData={settings.carousels} />
         </div>
         <TodayDealCards />
         <WideCardRow cards={threeSaleCards} />
