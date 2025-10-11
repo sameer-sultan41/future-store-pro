@@ -1,5 +1,35 @@
+import { createSupabaseServer } from '@/shared/lib/supabaseClient';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { SettingsResponse } from './types';
+
+
+
+
+
+
+    const supabase = createSupabaseServer();
+
+export async function getSettingsData() {
+  const { data, error } = await supabase
+    .from('settings')
+    .select('*')
+    .single();
+
+  if (error) throw error;
+
+  // Adjust the path below based on your settings JSON structure
+  // For example, if banners are at site.banners or site.carousel
+  return data as SettingsResponse;
+}
+
+
+
+
+
+
+
+// <========> Old code <========>
 
 // Placeholder for ISettingInput type definition
 export interface ISettingInput {
@@ -55,10 +85,7 @@ export interface ISettingInput {
   defaultDeliveryDate: string;
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+
 
 const globalForSettings = global as unknown as {
   cachedSettings: ISettingInput | null;

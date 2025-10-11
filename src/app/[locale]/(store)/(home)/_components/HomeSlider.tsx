@@ -3,12 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-import { SlidesData } from "@/domains/shop/homePage/constants";
 import { ArrowIcon } from "@/shared/components/icons/svgIcons";
 import { cn } from "@/shared/utils/styling";
+import { CarouselItem } from "@/actions/settings/types";
 
-export const HomeSlider = () => {
+export const HomeSlider = ({ CarouselData }: { CarouselData: CarouselItem[] }) => {
   const [activeSlideNum, setActiveSlideNum] = useState(0);
   const touchPos = {
     start: 0,
@@ -30,7 +29,7 @@ export const HomeSlider = () => {
     setActiveSlideNum((prev) => {
       if (newSlideNumber === prev) return prev;
 
-      const slideLastIndex = SlidesData.length - 1;
+      const slideLastIndex = CarouselData.length - 1;
       if (newSlideNumber > prev) {
         return activeSlideNum === slideLastIndex ? 0 : prev + 1;
       }
@@ -89,7 +88,7 @@ export const HomeSlider = () => {
         </button>
       </div>
       <div className="h-full rounded-xl overflow-hidden translate-z-0 top-0 left-0 select-none">
-        {SlidesData.map((slide, index) => (
+        {CarouselData.map((slide, index) => (
           <div
             onTouchStart={touchStart}
             onTouchMove={touchMove}
@@ -97,47 +96,45 @@ export const HomeSlider = () => {
             onMouseDown={mouseStart}
             onMouseMove={mouseMouse}
             onMouseUp={handleTouchEnd}
-            key={index}
+            key={slide.id}
             className={cn(
               "inline-block absolute w-full h-full opacity-0 invisible animate-oldSlide transition-all duration-1000 overflow-hidden rounded-[12px]",
               index === activeSlideNum ? "opacity-100 visible animate-newSlide" : ""
             )}
           >
             <Image
-              src={slide.imgUrl}
-              alt=""
+              src={slide.image}
+              alt={slide.title}
               fill
               className="hover:scale-105 object-cover transition-all duration-500"
               sizes="(max-width:1080px)"
               priority
               draggable={false}
             />
-            {slide.msg && (
-              <div
-                className={cn(
-                  "flex invisible opacity-0 flex-col w-full absolute pt-0 sm:pt-[10%] items-center top-10 bottom-0 lg:w-[50%] text-gray-100 transition-all duration-1000",
-                  index === activeSlideNum && "opacity-100 visible animate-newSlide"
-                )}
-              >
-                <h2 className="sm:text-3xl text-lg font-light">{slide.msg.title}</h2>
-                {slide.msg.desc && (
-                  <span
-                    className={cn(
-                      "text-gray-200  text-sm transition-[margin] duration-[1600ms]",
-                      index === activeSlideNum ? "mt-8" : "mt-14"
-                    )}
-                  >
-                    {slide.msg.desc}
-                  </span>
-                )}
-                <Link
-                  href={slide.url}
-                  className="mt-6 sm:mt-20 text-gray-100 rounded-md text-sm sm:text:base sm:px-6 sm:py-3 px-4 py-2 bg-black/80 transition-all duration-300 hover:font-medium hover:text-gray-900 hover:bg-gray-100"
+            <div
+              className={cn(
+                "flex invisible opacity-0 flex-col w-full absolute pt-0 sm:pt-[10%] items-center top-10 bottom-0 lg:w-[50%] text-gray-100 transition-all duration-1000",
+                index === activeSlideNum && "opacity-100 visible animate-newSlide"
+              )}
+            >
+              <h2 className="sm:text-3xl text-lg font-light">{slide.title}</h2>
+              {slide.subtitle && (
+                <span
+                  className={cn(
+                    "text-gray-200  text-sm transition-[margin] duration-[1600ms]",
+                    index === activeSlideNum ? "mt-8" : "mt-14"
+                  )}
                 >
-                  {slide.msg.buttonText}
-                </Link>
-              </div>
-            )}
+                  {slide.subtitle}
+                </span>
+              )}
+              <Link
+                href={slide.link}
+                className="mt-6 sm:mt-20 text-gray-100 rounded-md text-sm sm:text:base sm:px-6 sm:py-3 px-4 py-2 bg-black/80 transition-all duration-300 hover:font-medium hover:text-gray-900 hover:bg-gray-100"
+              >
+                {slide.buttonText}
+              </Link>
+            </div>
             <span
               className={cn(
                 "absolute top-0 w-0 duration-[5s] h-2 bg-white/30 transition-all ease-linear",
@@ -148,7 +145,7 @@ export const HomeSlider = () => {
         ))}
       </div>
       <div className="absolute bottom-5 left-0 right-0 flex gap-4 sm:gap-6 justify-center items-center">
-        {SlidesData.map((_, index) => (
+        {CarouselData.map((_, index) => (
           <div
             onClick={() => handleSliding(index)}
             key={index}
