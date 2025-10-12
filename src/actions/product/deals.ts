@@ -18,7 +18,7 @@ export const getTodayDeals = async (locale: string = "en") => {
           product:products (
             id,
             url,
-            base_price,
+            price,
             images,
             product_translations!inner (
               language_code,
@@ -57,7 +57,7 @@ export interface ProductVariant {
 export interface Product {
   id: string;
   url: string;
-  base_price: number;
+price: number;
   images: string[];
   product_translations: ProductTranslation[];
   product_variants: ProductVariant[];
