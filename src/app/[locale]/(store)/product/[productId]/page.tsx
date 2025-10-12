@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getOneProduct } from "@/actions/product/product";
+import { getOneProduct, getProductByUrl } from "@/actions/product/product";
 import Gallery from "@/domains/product/components/gallery";
 import ProductBoard from "@/domains/product/components/productBoard";
 import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
@@ -18,12 +18,13 @@ const ProductPage = () => {
   const router = useRouter();
   const { productId } = useParams<{ productId: string[] }>();
   const [productInfo, setProductInfo] = useState<TProductPageInfo | null | undefined>(null);
-  if (!productId) router.push("/");
+  // if (!productId) router.push("/");
 
   useEffect(() => {
     const getProductFromDB = async () => {
-      const response = await getOneProduct(productId.toString());
-      if (response.error) router.push("/");
+      const response = await getProductByUrl("en", "iphone-16-pro-upcoming");
+      // if (response.error) router.push("/");
+      console.log("response ----->", response);
       setProductInfo(response.res);
     };
     getProductFromDB();

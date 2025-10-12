@@ -31,6 +31,52 @@ const convertStringToFloat = (str: string) => {
   return str ? parseFloat(str) : 0.0;
 };
 
+
+
+// ...existing code...
+export const getProductByUrl = async (locale: string = "en", productUrl: string) => {
+  if (!locale || !productUrl) return { error: "Invalid parameters" };
+
+  try {
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from("products")
+      .select(`
+        id,
+        url,
+  
+sku,
+        images,
+        price,
+
+   
+
+        is_available,
+
+        product_translations (
+          language_code,
+          name,
+          description,
+          short_description,
+          special_features
+        )
+      `)
+      .eq("url", "nike-air-max-90")
+            // .eq("product_translations.language_code", locale)
+
+
+      console.log("result ----->", result);
+      console.log("error -----> ", error);
+      return { res: result };
+  } catch (err) {
+    return { error: JSON.stringify(err) };
+  }
+};
+// ...existing code...
+
+
+
+// <==== old functions ====>
 export const addProduct = async (data: TAddProductFormValues) => {
   if (!ValidateAddProduct.safeParse(data).success) return { error: "Invalid Data!" };
 
