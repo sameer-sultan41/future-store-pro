@@ -18,7 +18,7 @@ export const getTodayDeals = async (locale: string = "en") => {
           product:products (
             id,
             url,
-            base_price,
+            price,
             images,
             product_translations!inner (
               language_code,
