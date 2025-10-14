@@ -62,7 +62,10 @@ export interface GetProductByUrlResponse {
 }
 
 // Shipping calculation helper
-const calculateShippingCost = (price: number, weight?: number): { method: string; cost: number; estimatedDays: string }[] => {
+const calculateShippingCost = (
+  price: number,
+  weight?: number
+): { method: string; cost: number; estimatedDays: string }[] => {
   // Define shipping methods with their rules
   const shippingMethods = [
     {
@@ -137,7 +140,7 @@ const ProductPage = () => {
   const [currentLocale, setCurrentLocale] = useState("en");
   const [selectedVariantOptions, setSelectedVariantOptions] = useState<Record<string, string>>({});
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("Standard Shipping");
-  
+
   console.log("params", { locale, productUrl });
   useEffect(() => {
     const getProductFromDB = async () => {
@@ -376,9 +379,7 @@ const ProductPage = () => {
                           <div className="flex items-center gap-3">
                             <div
                               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                selectedShippingMethod === shipping.method
-                                  ? "border-gray-900"
-                                  : "border-gray-300"
+                                selectedShippingMethod === shipping.method ? "border-gray-900" : "border-gray-300"
                               }`}
                             >
                               {selectedShippingMethod === shipping.method && (
@@ -400,7 +401,7 @@ const ProductPage = () => {
                         </button>
                       ))}
                     </div>
-                    
+
                     {/* Total Price with Shipping */}
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                       <div className="flex justify-between items-center text-sm mb-2">
@@ -409,7 +410,9 @@ const ProductPage = () => {
                       </div>
                       <div className="flex justify-between items-center text-sm mb-2">
                         <span className="text-gray-600">Shipping:</span>
-                        <span className={`font-medium ${selectedShipping?.cost === 0 ? "text-green-600" : "text-gray-900"}`}>
+                        <span
+                          className={`font-medium ${selectedShipping?.cost === 0 ? "text-green-600" : "text-gray-900"}`}
+                        >
                           {selectedShipping?.cost === 0 ? "FREE" : `€${selectedShipping?.cost.toFixed(2)}`}
                         </span>
                       </div>
