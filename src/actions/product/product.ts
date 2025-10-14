@@ -31,43 +31,107 @@ const convertStringToFloat = (str: string) => {
   return str ? parseFloat(str) : 0.0;
 };
 
+// --- Interfaces for getProductByUrl response ---
+export interface ProductVariantType {
+  name: string;
+  display_type: string;
+}
+
+export interface ProductVariantOptions {
+  value: string;
+  color_hex: string | null;
+  image_url: string | null;
+  display_value: string;
+  variant_types: ProductVariantType;
+}
+
+export interface ProductVariantOption {
+  variant_option_id: string;
+  variant_options: ProductVariantOptions;
+}
+
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  is_available: boolean;
+  stock_quantity: number;
+  price_adjustment: number;
+  product_variant_options: ProductVariantOption[];
+}
+
+export interface ProductTranslation {
+  language_code: string;
+  name: string;
+  description: string;
+  short_description: string;
+  special_features: string[];
+}
+
+export interface GetProductByUrlResponse {
+  id: string;
+  url: string;
+  sku: string;
+  images: string[];
+  price: number;
+  is_available: boolean;
+  product_translations: ProductTranslation[];
+  product_variants: ProductVariant[];
+}
 
 
-// ...existing code...
+// --- End interfaces ---
+
 export const getProductByUrl = async (locale: string = "en", productUrl: string) => {
   if (!locale || !productUrl) return { error: "Invalid parameters" };
-
+  const supabase = createSupabaseServer();
   try {
-    const supabase = createSupabaseServer();
-    const { data: result, error } = await supabase
-      .from("products")
-      .select(`
-        id,
-        url,
-  
-sku,
-        images,
-        price,
-
-   
-
-        is_available,
-
-        product_translations (
-          language_code,
-          name,
-          description,
-          short_description,
-          special_features
+const { data, error } = await supabase
+  .from("products")
+  .select(`
+    id,
+    url,
+    sku,
+    images,
+    price,
+    is_available,
+    product_translations (
+      language_code,
+      name,
+      description,
+      short_description,
+      specs,
+      special_features
+    ),
+    product_variants (
+      id,
+      sku,
+      price_adjustment,
+      stock_quantity,
+      is_available,
+      product_variant_options (
+        variant_option_id,
+        variant_options (
+          value,
+          display_value,
+          color_hex,
+          image_url,
+          variant_types (
+            name,
+            display_type
+          )
         )
-      `)
-      .eq("url", "nike-air-max-90")
+      )
+    )
+  `)
+ .eq("url", "samsung-galaxy-s24-ultra")
+  .maybeSingle();
+      // .eq("url", "nike-air-max-90")
             // .eq("product_translations.language_code", locale)
 
 
-      console.log("result ----->", result);
+      console.log("result ----->", data);
       console.log("error -----> ", error);
-      return { res: result };
+      return {data};
   } catch (err) {
     return { error: JSON.stringify(err) };
   }
@@ -76,7 +140,6 @@ sku,
 
 
 
-// <==== old functions ====>
 export const addProduct = async (data: TAddProductFormValues) => {
   if (!ValidateAddProduct.safeParse(data).success) return { error: "Invalid Data!" };
 

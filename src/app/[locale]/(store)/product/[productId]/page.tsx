@@ -14,24 +14,168 @@ import { LikeIcon, MinusIcon } from "@/shared/components/icons/svgIcons";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import { TProductPageInfo } from "@/shared/types/product";
 
+export interface ProductVariantType {
+  name: string;
+  display_type: string;
+}
+
+export interface ProductVariantOptions {
+  value: string;
+  color_hex: string | null;
+  image_url: string | null;
+  display_value: string;
+  variant_types: ProductVariantType;
+}
+
+export interface ProductVariantOption {
+  variant_option_id: string;
+  variant_options: ProductVariantOptions;
+}
+
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  is_available: boolean;
+  stock_quantity: number;
+  price_adjustment: number;
+  product_variant_options: ProductVariantOption[];
+}
+
+export interface ProductTranslation {
+  language_code: string;
+  name: string;
+  description: string;
+  short_description: string;
+  special_features: string[];
+  specs?: Record<string, string>;
+}
+
+export interface GetProductByUrlResponse {
+  id: string;
+  url: string;
+  sku: string;
+  images: string[];
+  price: number;
+  is_available: boolean;
+  product_translations: ProductTranslation[];
+  product_variants: ProductVariant[];
+}
+
+// Helper functions to format specs
+const getSpecGroupName = (key: string): string => {
+  const groups: Record<string, string> = {
+    // Display
+    size: "Display",
+    resolution: "Display",
+    technology: "Display",
+    refresh_rate: "Display",
+    brightness: "Display",
+    protection: "Display",
+    // Performance
+    chipset: "Performance",
+    cpu: "Performance",
+    gpu: "Performance",
+    ram: "Performance",
+    storage: "Performance",
+    os: "Performance",
+    ui: "Performance",
+    process: "Performance",
+    // Camera
+    "main camera": "Camera",
+    "front camera": "Camera",
+    "telephoto camera": "Camera",
+    "ultrawide camera": "Camera",
+    periscopecamera: "Camera",
+    "video camera": "Camera",
+    // Battery
+    capacity: "Battery",
+    charging: "Battery",
+    wireless: "Battery",
+    reverse: "Battery",
+    // Connectivity
+    network: "Connectivity",
+    wifi: "Connectivity",
+    bluetooth: "Connectivity",
+    usb: "Connectivity",
+    nfc: "Connectivity",
+    // Design
+    dimensions: "Design",
+    weight: "Design",
+    build: "Design",
+    colors: "Design",
+    water_resistance: "Design",
+    // Security
+    fingerprint: "Security",
+    face_unlock: "Security",
+    // Audio
+    stereo_speakers: "Audio",
+    headphone_jack: "Audio",
+    // Features
+    s_pen: "Special Features",
+    ai_features: "Special Features",
+    // Storage
+    type: "Storage",
+    expandable: "Storage",
+    // Software
+    updates: "Software Support",
+  };
+  return groups[key.toLowerCase()] || "Other";
+};
+
+const formatSpecName = (key: string): string => {
+  return key
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 const ProductPage = () => {
   const router = useRouter();
   const { productId } = useParams<{ productId: string[] }>();
-  const [productInfo, setProductInfo] = useState<TProductPageInfo | null | undefined>(null);
-  // if (!productId) router.push("/");
+  const [productInfo, setProductInfo] = useState<GetProductByUrlResponse | null | undefined>(null);
+  const [currentLocale, setCurrentLocale] = useState("en");
 
   useEffect(() => {
     const getProductFromDB = async () => {
-      const response = await getProductByUrl("en", "iphone-16-pro-upcoming");
-      // if (response.error) router.push("/");
-      console.log("response ----->", response);
-      setProductInfo(response.res);
+      const response = await getProductByUrl("en", "samsung-galaxy-s24-ultra");
+      console.log("response", response);
+      if ("error" in response) {
+        setProductInfo(undefined);
+      } else {
+        setProductInfo(response.data as unknown as GetProductByUrlResponse);
+      }
     };
     getProductFromDB();
   }, [productId, router]);
 
   if (productInfo === undefined) return "";
-  let fullPath = "";
+
+  // Get the translation for the current locale
+  const currentTranslation =
+    productInfo?.product_translations?.find((t) => t.language_code === currentLocale) ||
+    productInfo?.product_translations?.[0];
+
+  // Transform specs object into specification groups
+  const specifications = currentTranslation?.specs
+    ? Object.entries(currentTranslation.specs).reduce(
+        (acc: { groupName: string; specs: { name: string; value: string }[] }[], [key, value]) => {
+          // Group specs by category (you can customize grouping logic)
+          const groupName = getSpecGroupName(key);
+          const existingGroup = acc.find((g) => g.groupName === groupName);
+
+          if (existingGroup) {
+            existingGroup.specs.push({ name: formatSpecName(key), value: value as string });
+          } else {
+            acc.push({
+              groupName,
+              specs: [{ name: formatSpecName(key), value: value as string }],
+            });
+          }
+          return acc;
+        },
+        []
+      )
+    : [];
 
   return (
     <div className="storeContainer">
@@ -44,18 +188,7 @@ const ProductPage = () => {
                   <Link href={"/"} className="hover:font-medium after:mx-1 after:content-['/'] hover:text-gray-800">
                     Home
                   </Link>
-                  {productInfo.path.map((item, index) => {
-                    fullPath += "/" + item.url;
-                    return (
-                      <Link
-                        key={item.url + index}
-                        href={"/list" + fullPath}
-                        className="after:content-['/'] last:after:content-[''] after:mx-1 hover:text-gray-800"
-                      >
-                        {item.name}
-                      </Link>
-                    );
-                  })}
+                  <span className="text-gray-500">Products</span>
                 </>
               ) : (
                 <SK_Box width="60%" height="15px" />
@@ -64,17 +197,17 @@ const ProductPage = () => {
             <Gallery images={productInfo?.images} />
           </div>
           <div className="lg:w-[512px] w-full">
-            {productInfo ? (
+            {productInfo && currentTranslation ? (
               <ProductBoard
                 boardData={{
                   id: productInfo.id,
-                  isAvailable: productInfo.isAvailable,
+                  isAvailable: productInfo.is_available,
                   defaultQuantity: 1,
-                  name: productInfo.name,
+                  name: currentTranslation.name,
                   price: productInfo.price,
-                  dealPrice: productInfo.salePrice || undefined,
-                  shortDesc: productInfo.desc || "",
-                  specialFeatures: productInfo.specialFeatures,
+                  dealPrice: undefined,
+                  shortDesc: currentTranslation.short_description || "",
+                  specialFeatures: currentTranslation.special_features || [],
                 }}
               />
             ) : (
@@ -101,8 +234,8 @@ const ProductPage = () => {
             {/* ----------------- SPECIFICATION SECTION ----------------- */}
             <div className="w-full mb-[100px]">
               <h2 className="font-light block text-2xl text-gray-900 py-5 border-b border-gray-300">Specification</h2>
-              {productInfo ? (
-                productInfo.specifications.map((spec, index) => (
+              {productInfo && specifications.length > 0 ? (
+                specifications.map((spec, index) => (
                   <section key={index} className="w-full py-5 border-b border-gray-300">
                     <div className="flex items-center w-full">
                       <button className="size-8 inline-block relative border-none bg-white rounded-sm hover:bg-gray-200">
@@ -110,24 +243,22 @@ const ProductPage = () => {
                       </button>
                       <h3 className="ml-3 inline-block text-gray-700">{spec.groupName}</h3>
                     </div>
-                    {spec.specs.map((row, index) => (
+                    {spec.specs.map((row, rowIndex) => (
                       <div
-                        key={index}
+                        key={rowIndex}
                         className="w-full pt-3 flex items-stretch bg-white text-sm rounded-lg hover:bg-gray-100"
                       >
                         <div className="min-w-[160px] flex items-start ml-[42px] text-gray-500">
                           <span>{row.name}</span>
                         </div>
                         <div className="font-medium text-gray-800">
-                          <span key={index} className="block leading-5 min-h-8 h-auto">
-                            {row.value}
-                          </span>
+                          <span className="block leading-5 min-h-8 h-auto">{row.value}</span>
                         </div>
                       </div>
                     ))}
                   </section>
                 ))
-              ) : (
+              ) : productInfo === null ? (
                 <>
                   <div className="flex flex-col mt-4 mb-16 gap-4">
                     <SK_Box width="200px" height="30px" />
@@ -152,8 +283,16 @@ const ProductPage = () => {
                     </div>
                   </div>
                 </>
-              )}
+              ) : null}
             </div>
+
+            {/* ----------------- DESCRIPTION SECTION ----------------- */}
+            {currentTranslation?.description && (
+              <div className="w-full mb-[100px]">
+                <h2 className="font-light block text-2xl text-gray-900 py-5 border-b border-gray-300">Description</h2>
+                <p className="mt-5 text-gray-700 leading-7">{currentTranslation.description}</p>
+              </div>
+            )}
 
             {/* ----------------- USER REVIEWS ----------------- */}
             <div className="flex flex-col w-full h-auto">
@@ -214,6 +353,7 @@ const ProductPage = () => {
                 url={product.url}
                 dealPrice={product.dealPrice}
                 staticWidth
+                currency={null}
               />
             ))}
           </div>

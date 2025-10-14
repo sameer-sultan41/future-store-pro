@@ -14,13 +14,22 @@ type TProps = {
 const Gallery = ({ images }: TProps) => {
   const [showZoom, setShowZoom] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Helper function to get image URL (handles both relative and absolute URLs)
+  const getImageUrl = (image: string) => {
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+      return image; // Already a full URL
+    }
+    return process.env.IMG_URL + image; // Relative path
+  };
+
   return (
     <div className="flex">
       <div className="flex relative flex-col gap-4 mr-4">
         {images ? (
           images.map((image, index) => (
             <Image
-              src={process.env.IMG_URL + image}
+              src={getImageUrl(image)}
               alt=""
               width={64}
               height={64}
@@ -43,7 +52,7 @@ const Gallery = ({ images }: TProps) => {
       <div className={"relative w-full h-[300px] sm:h-[540px]"}>
         {images ? (
           <Image
-            src={process.env.IMG_URL + images[selectedIndex]}
+            src={getImageUrl(images[selectedIndex])}
             alt=""
             fill
             className="cursor-zoom-in object-contain rounded-xl border border-white transition-colors duration-300 hover:border-gray-300"
@@ -68,7 +77,7 @@ const Gallery = ({ images }: TProps) => {
               <CloseIcon width={16} />
             </button>
             <Image
-              src={process.env.IMG_URL + images[selectedIndex]}
+              src={getImageUrl(images[selectedIndex])}
               className="object-contain"
               alt=""
               fill
@@ -82,7 +91,7 @@ const Gallery = ({ images }: TProps) => {
           >
             {images.map((image, index) => (
               <Image
-                src={process.env.IMG_URL + image}
+                src={getImageUrl(image)}
                 alt=""
                 width={64}
                 height={64}
