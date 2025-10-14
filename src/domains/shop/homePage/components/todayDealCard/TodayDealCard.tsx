@@ -12,6 +12,7 @@ import { Heart, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Currency, getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
+import { Urls } from "@/shared/constants/urls";
 
 type TProps = {
   productName: string;
@@ -94,7 +95,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
       </motion.div>
 
       <Link
-        href={url}
+        href={Urls.productDetail + "/" + url}
         className="imgWrapper w-full h-[220px] block relative overflow-hidden border-2 border-gray-200 rounded-xl group"
       >
         <motion.div
@@ -123,7 +124,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
           Save {saveAmount.toLocaleString("en-us", { minimumFractionDigits: 2 })} {currencySymbol}
         </span>
       </motion.div>
-      <Link href={url}>
+      <Link href={Urls.productDetail + "/" + url}>
         <motion.h3
           className="mt-3.5 mb-3 ml-2 text-gray-700 font-semibold text-lg truncate"
           initial={{ opacity: 0, y: 10 }}
