@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Urls } from "@/shared/constants/urls";
 
 const TopProductCard = ({
   name,
@@ -28,56 +29,58 @@ const TopProductCard = ({
       )}
     >
       {/* Top right action buttons */}
-      <div className="absolute top-3 right-3 z-10 flex flex-row gap-2 items-center">
-        <span className="cursor-pointer">
-          <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
-        </span>
-        <button
-          title="Compare"
-          className="bg-white rounded-full p-1 shadow hover:bg-gray-100 transition border border-gray-200"
-        >
-          <FontAwesomeIcon icon={faBalanceScale} className="text-gray-500" />
-        </button>
-        <button
-          title="View"
-          className="bg-white rounded-full p-1 shadow hover:bg-gray-100 transition border border-gray-200"
-        >
-          <FontAwesomeIcon icon={faEye} className="text-gray-500" />
-        </button>
-      </div>
-      {!isAvailable && (
-        <div className="flex left-2 right-2 bottom-2 top-2 bg-white/60 backdrop-blur-[2px] absolute z-[1] items-center justify-center rounded-2xl">
-          <span className="mt-14 text-gray-100 font-light px-6 py-1 backdrop-blur-[6px] rounded-md shadow-gray-200 bg-black/60">
-            Out of Stock
+      <Link href={url} className="cursor-pointer">
+        <div className="absolute top-3 right-3 z-10 flex flex-row gap-2 items-center">
+          <span className="cursor-pointer">
+            <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
           </span>
+          <button
+            title="Compare"
+            className="bg-white rounded-full p-1 shadow hover:bg-gray-100 transition border border-gray-200"
+          >
+            <FontAwesomeIcon icon={faBalanceScale} className="text-gray-500" />
+          </button>
+          <button
+            title="View"
+            className="bg-white rounded-full p-1 shadow hover:bg-gray-100 transition border border-gray-200"
+          >
+            <FontAwesomeIcon icon={faEye} className="text-gray-500" />
+          </button>
         </div>
-      )}
-      <div className="imageWrapper w-full h-[200px] block relative rounded-xl border border-gray-100 overflow-hidden transition-all duration-500 bg-gray-50 flex items-center justify-center">
-        <Image
-          src={imgUrl[0]}
-          alt={name}
-          fill
-          sizes="(max-width: 240px)"
-          className="object-contain transition-all duration-400 ease-out group-hover:opacity-0 group-hover:scale-95"
-        />
-        <Image
-          src={imgUrl[1]}
-          alt={name}
-          fill
-          sizes="(max-width: 240px)"
-          className="object-contain transition-all duration-400 ease-out opacity-0 scale-105 group-hover:opacity-100 group-hover:scale-100"
-        />
-      </div>
-      <div className="flex flex-col items-start mt-3 mb-2 px-1">
-        <span className="text-base font-semibold text-gray-900 truncate w-full mb-1">{name}</span>
-        <div className="h-12 flex flex-col w-full">
-          {specs.map((spec, index) => (
-            <span key={index} className="block text-xs text-gray-500 truncate">
-              {spec}
+        {!isAvailable && (
+          <div className="flex left-2 right-2 bottom-2 top-2 bg-white/60 backdrop-blur-[2px] absolute z-[1] items-center justify-center rounded-2xl">
+            <span className="mt-14 text-gray-100 font-light px-6 py-1 backdrop-blur-[6px] rounded-md shadow-gray-200 bg-black/60">
+              Out of Stock
             </span>
-          ))}
+          </div>
+        )}
+        <div className="imageWrapper w-full h-[200px] block relative rounded-xl border border-gray-100 overflow-hidden transition-all duration-500 bg-gray-50 flex items-center justify-center">
+          <Image
+            src={imgUrl[0]}
+            alt={name}
+            fill
+            sizes="(max-width: 240px)"
+            className="object-contain transition-all duration-400 ease-out group-hover:opacity-0 group-hover:scale-95"
+          />
+          <Image
+            src={imgUrl[1]}
+            alt={name}
+            fill
+            sizes="(max-width: 240px)"
+            className="object-contain transition-all duration-400 ease-out opacity-0 scale-105 group-hover:opacity-100 group-hover:scale-100"
+          />
         </div>
-      </div>
+        <div className="flex flex-col items-start mt-3 mb-2 px-1">
+          <span className="text-base font-semibold text-gray-900 truncate w-full mb-1">{name}</span>
+          <div className="h-12 flex flex-col w-full">
+            {specs.map((spec, index) => (
+              <span key={index} className="block text-xs text-gray-500 truncate">
+                {spec}
+              </span>
+            ))}
+          </div>
+        </div>
+      </Link>
       <div className="flex flex-col gap-2 mx-1 mt-auto">
         <div className="flex items-end">
           <div className="flex-grow relative flex flex-col justify-end">
