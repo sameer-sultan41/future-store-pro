@@ -99,15 +99,16 @@ const extractVariantTypes = (variants: ProductVariant[]) => {
 };
 
 const ProductPage = () => {
+  const { locale, productUrl } = useParams<{ locale: string; productUrl: string }>();
   const router = useRouter();
   const { productId } = useParams<{ productId: string[] }>();
   const [productInfo, setProductInfo] = useState<GetProductByUrlResponse | null | undefined>(null);
   const [currentLocale, setCurrentLocale] = useState("en");
   const [selectedVariantOptions, setSelectedVariantOptions] = useState<Record<string, string>>({});
-
+  console.log("params", { locale, productUrl });
   useEffect(() => {
     const getProductFromDB = async () => {
-      const response = await getProductByUrl("en", "nike-mens-tshirt");
+      const response = await getProductByUrl(locale, productUrl);
       console.log("API response:", response);
       if ("error" in response) {
         console.error("Error fetching product:", response.error);
