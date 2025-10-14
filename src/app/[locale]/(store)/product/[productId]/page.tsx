@@ -69,24 +69,76 @@ const formatSpecName = (key: string): string => {
     .join(" ");
 };
 
+// Helper to extract unique variant types and their options
+const extractVariantTypes = (variants: ProductVariant[]) => {
+  const variantTypesMap = new Map<string, Set<string>>();
+  const variantOptionsMap = new Map<string, ProductVariantOptions[]>();
+
+  variants.forEach((variant) => {
+    variant.product_variant_options.forEach((option) => {
+      const typeName = option.variant_options.variant_types.name;
+      const optionValue = option.variant_options.value;
+
+      if (!variantTypesMap.has(typeName)) {
+        variantTypesMap.set(typeName, new Set());
+        variantOptionsMap.set(typeName, []);
+      }
+
+      if (!variantTypesMap.get(typeName)!.has(optionValue)) {
+        variantTypesMap.get(typeName)!.add(optionValue);
+        variantOptionsMap.get(typeName)!.push(option.variant_options);
+      }
+    });
+  });
+
+  return Array.from(variantTypesMap.keys()).map((typeName) => ({
+    name: typeName,
+    displayType: variantOptionsMap.get(typeName)![0].variant_types.display_type,
+    options: variantOptionsMap.get(typeName)!,
+  }));
+};
+
 const ProductPage = () => {
   const router = useRouter();
   const { productId } = useParams<{ productId: string[] }>();
   const [productInfo, setProductInfo] = useState<GetProductByUrlResponse | null | undefined>(null);
   const [currentLocale, setCurrentLocale] = useState("en");
+  const [selectedVariantOptions, setSelectedVariantOptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const getProductFromDB = async () => {
-      const response = await getProductByUrl("en", "samsung-galaxy-s24-ultra");
-      console.log("response", response);
+      const response = await getProductByUrl("en", "nike-mens-tshirt");
+      console.log("API response:", response);
       if ("error" in response) {
+        console.error("Error fetching product:", response.error);
         setProductInfo(undefined);
       } else {
+        console.log("Product data loaded:", response.data);
+        console.log("Has variants:", response.data?.product_variants?.length || 0);
         setProductInfo(response.data as unknown as GetProductByUrlResponse);
       }
     };
     getProductFromDB();
   }, [productId, router]);
+
+  // Auto-select first available variant option for each type
+  useEffect(() => {
+    if (productInfo && productInfo.product_variants.length > 0 && Object.keys(selectedVariantOptions).length === 0) {
+      console.log("Auto-selecting variants from:", productInfo.product_variants);
+      const variantTypesData = extractVariantTypes(productInfo.product_variants);
+      console.log("Extracted variant types:", variantTypesData);
+      const initialSelections: Record<string, string> = {};
+
+      variantTypesData.forEach((type) => {
+        if (type.options.length > 0) {
+          initialSelections[type.name] = type.options[0].value;
+        }
+      });
+
+      console.log("Initial selections:", initialSelections);
+      setSelectedVariantOptions(initialSelections);
+    }
+  }, [productInfo, selectedVariantOptions]);
 
   if (productInfo === undefined) return "";
 
@@ -95,6 +147,8 @@ const ProductPage = () => {
     productInfo?.product_translations?.find((t) => t.language_code === currentLocale) ||
     productInfo?.product_translations?.[0];
 
+  console.log("Current translation:", currentTranslation);
+
   // Transform specs object into flat list of specifications
   const specifications = currentTranslation?.specs
     ? Object.entries(currentTranslation.specs).map(([key, value]) => ({
@@ -102,6 +156,38 @@ const ProductPage = () => {
         value: value as string,
       }))
     : [];
+
+  // Extract variant types and options
+  const variantTypes = productInfo?.product_variants ? extractVariantTypes(productInfo.product_variants) : [];
+  console.log("Variant types for rendering:", variantTypes);
+
+  // Find the matching variant based on selected options
+  const selectedVariant = productInfo?.product_variants?.find((variant) => {
+    const variantOptions = variant.product_variant_options.map((opt) => ({
+      type: opt.variant_options.variant_types.name,
+      value: opt.variant_options.value,
+    }));
+
+    return Object.entries(selectedVariantOptions).every(([type, value]) => {
+      return variantOptions.some((opt) => opt.type === type && opt.value === value);
+    });
+  });
+
+  // Calculate final price with variant adjustment
+  const finalPrice = productInfo?.price ? productInfo.price + (selectedVariant?.price_adjustment || 0) : 0;
+
+  // Check if product/variant is available
+  const isAvailable = selectedVariant
+    ? selectedVariant.is_available && selectedVariant.stock_quantity > 0
+    : productInfo?.is_available || false;
+
+  // Handler for variant option selection
+  const handleVariantOptionChange = (typeName: string, value: string) => {
+    setSelectedVariantOptions((prev) => ({
+      ...prev,
+      [typeName]: value,
+    }));
+  };
 
   return (
     <div className="storeContainer">
@@ -123,19 +209,117 @@ const ProductPage = () => {
             <Gallery images={productInfo?.images} />
           </div>
           <div className="lg:w-[512px] w-full">
-            {productInfo && currentTranslation ? (
-              <ProductBoard
-                boardData={{
-                  id: productInfo.id,
-                  isAvailable: productInfo.is_available,
-                  defaultQuantity: 1,
-                  name: currentTranslation.name,
-                  price: productInfo.price,
-                  dealPrice: undefined,
-                  shortDesc: currentTranslation.short_description || "",
-                  specialFeatures: currentTranslation.special_features || [],
-                }}
-              />
+            {productInfo ? (
+              <div className="w-full relative flex flex-col">
+                <ProductBoard
+                  boardData={{
+                    id: productInfo.id,
+                    isAvailable: isAvailable,
+                    defaultQuantity: 1,
+                    name: currentTranslation?.name || "Product",
+                    price: finalPrice,
+                    dealPrice: undefined,
+                    shortDesc: currentTranslation?.short_description || "",
+                    specialFeatures: currentTranslation?.special_features || [],
+                  }}
+                />
+
+                {/* Variant Selection Section - Shopify Style */}
+                {variantTypes.length > 0 && (
+                  <div className="mt-6 border-t border-gray-200 pt-6">
+                    {variantTypes.map((variantType) => (
+                      <div key={variantType.name} className="mb-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="text-sm font-medium text-gray-900 capitalize">{variantType.name}</label>
+                          {selectedVariantOptions[variantType.name] && (
+                            <span className="text-sm text-gray-600">
+                              {
+                                variantType.options.find(
+                                  (opt) => opt.value === selectedVariantOptions[variantType.name]
+                                )?.display_value
+                              }
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Color Variant - Shopify Style */}
+                        {variantType.displayType === "color" && (
+                          <div className="flex flex-wrap gap-2">
+                            {variantType.options.map((option) => {
+                              const isSelected = selectedVariantOptions[variantType.name] === option.value;
+
+                              return (
+                                <button
+                                  key={option.value}
+                                  onClick={() => handleVariantOptionChange(variantType.name, option.value)}
+                                  className={`group relative flex items-center justify-center w-12 h-12 rounded-lg border-2 transition-all ${
+                                    isSelected ? "border-gray-900 shadow-sm" : "border-gray-200 hover:border-gray-400"
+                                  }`}
+                                  title={option.display_value}
+                                >
+                                  <span
+                                    className="w-8 h-8 rounded-md"
+                                    style={{ backgroundColor: option.color_hex || "#cccccc" }}
+                                  />
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Text-based Variants (Size) - Shopify Style */}
+                        {variantType.displayType !== "color" && (
+                          <div className="flex flex-wrap gap-2">
+                            {variantType.options.map((option) => {
+                              const isSelected = selectedVariantOptions[variantType.name] === option.value;
+
+                              return (
+                                <button
+                                  key={option.value}
+                                  onClick={() => handleVariantOptionChange(variantType.name, option.value)}
+                                  className={`px-5 py-2.5 text-sm font-medium rounded-lg border-2 transition-all min-w-[60px] ${
+                                    isSelected
+                                      ? "border-gray-900 bg-gray-900 text-white"
+                                      : "border-gray-200 bg-white text-gray-900 hover:border-gray-400"
+                                  }`}
+                                >
+                                  {option.display_value}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Stock Info - Clean Badge */}
+                    {selectedVariant && (
+                      <div className="flex items-center gap-3 mt-4 text-sm">
+                        {selectedVariant.stock_quantity > 0 ? (
+                          <>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium ${
+                                selectedVariant.stock_quantity > 10
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-orange-100 text-orange-800"
+                              }`}
+                            >
+                              {selectedVariant.stock_quantity > 10
+                                ? "In Stock"
+                                : `Only ${selectedVariant.stock_quantity} left`}
+                            </span>
+                            <span className="text-gray-500">SKU: {selectedVariant.sku}</span>
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-red-100 text-red-800">
+                            Out of Stock
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="flex flex-col">
                 <SK_Box width="60%" height="14px" />
@@ -158,51 +342,30 @@ const ProductPage = () => {
         <div className="w-full h-auto flex gap-12 mt-10">
           <div className="w-full flex flex-col">
             {/* ----------------- SPECIFICATION SECTION ----------------- */}
-            <div className="w-full mb-[100px]">
-              <h2 className="font-light block text-2xl text-gray-900 py-5 border-b border-gray-300">Specification</h2>
-              {productInfo && specifications.length > 0 ? (
-                <div className="w-full py-5 border-b border-gray-300">
-                  {specifications.map((spec, index) => (
-                    <div
-                      key={index}
-                      className="w-full pt-3 flex items-stretch bg-white text-sm rounded-lg hover:bg-gray-100"
-                    >
-                      <div className="min-w-[200px] flex items-start text-gray-500">
-                        <span>{spec.name}</span>
+            {specifications.length > 0 && (
+              <div className="w-full mb-[100px]">
+                <h2 className="font-light block text-2xl text-gray-900 py-5 border-b border-gray-300">
+                  Specifications
+                </h2>
+                {productInfo ? (
+                  <div className="w-full py-5 border-b border-gray-300">
+                    {specifications.map((spec, index) => (
+                      <div
+                        key={index}
+                        className="w-full pt-3 flex items-stretch bg-white text-sm rounded-lg hover:bg-gray-100"
+                      >
+                        <div className="min-w-[200px] flex items-start text-gray-500">
+                          <span>{spec.name}</span>
+                        </div>
+                        <div className="font-medium text-gray-800 flex-1">
+                          <span className="block leading-5 min-h-8 h-auto">{spec.value}</span>
+                        </div>
                       </div>
-                      <div className="font-medium text-gray-800 flex-1">
-                        <span className="block leading-5 min-h-8 h-auto">{spec.value}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : productInfo === null ? (
-                <>
-                  <div className="flex flex-col mt-4 mb-16 gap-4">
-                    <SK_Box width="200px" height="30px" />
-                    <div className={"flex gap-5 items-center ml-10"}>
-                      <SK_Box width="10%" height="20px" />
-                      <SK_Box width="40%" height="16px" />
-                    </div>
-                    <div className={"flex gap-5 items-center ml-10"}>
-                      <SK_Box width="10%" height="20px" />
-                      <SK_Box width="40%" height="16px" />
-                    </div>
+                    ))}
                   </div>
-                  <div className="flex flex-col mt-4 mb-16 gap-4">
-                    <SK_Box width="200px" height="30px" />
-                    <div className={"flex gap-5 items-center ml-10"}>
-                      <SK_Box width="10%" height="20px" />
-                      <SK_Box width="40%" height="16px" />
-                    </div>
-                    <div className={"flex gap-5 items-center ml-10"}>
-                      <SK_Box width="10%" height="20px" />
-                      <SK_Box width="40%" height="16px" />
-                    </div>
-                  </div>
-                </>
-              ) : null}
-            </div>
+                ) : null}
+              </div>
+            )}
 
             {/* ----------------- DESCRIPTION SECTION ----------------- */}
             {currentTranslation?.description && (

@@ -123,7 +123,9 @@ const { data, error } = await supabase
       )
     )
   `)
- .eq("url", "samsung-galaxy-s24-ultra")
+ .eq("url", productUrl)
+//  .eq("url", "samsung-galaxy-s24-ultra")
+//  .eq("url", "nike-mens-tshirt")
   .maybeSingle();
       // .eq("url", "nike-air-max-90")
             // .eq("product_translations.language_code", locale)
