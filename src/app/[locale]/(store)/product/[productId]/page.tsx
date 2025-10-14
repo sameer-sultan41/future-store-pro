@@ -61,67 +61,7 @@ export interface GetProductByUrlResponse {
   product_variants: ProductVariant[];
 }
 
-// Helper functions to format specs
-const getSpecGroupName = (key: string): string => {
-  const groups: Record<string, string> = {
-    // Display
-    size: "Display",
-    resolution: "Display",
-    technology: "Display",
-    refresh_rate: "Display",
-    brightness: "Display",
-    protection: "Display",
-    // Performance
-    chipset: "Performance",
-    cpu: "Performance",
-    gpu: "Performance",
-    ram: "Performance",
-    storage: "Performance",
-    os: "Performance",
-    ui: "Performance",
-    process: "Performance",
-    // Camera
-    "main camera": "Camera",
-    "front camera": "Camera",
-    "telephoto camera": "Camera",
-    "ultrawide camera": "Camera",
-    periscopecamera: "Camera",
-    "video camera": "Camera",
-    // Battery
-    capacity: "Battery",
-    charging: "Battery",
-    wireless: "Battery",
-    reverse: "Battery",
-    // Connectivity
-    network: "Connectivity",
-    wifi: "Connectivity",
-    bluetooth: "Connectivity",
-    usb: "Connectivity",
-    nfc: "Connectivity",
-    // Design
-    dimensions: "Design",
-    weight: "Design",
-    build: "Design",
-    colors: "Design",
-    water_resistance: "Design",
-    // Security
-    fingerprint: "Security",
-    face_unlock: "Security",
-    // Audio
-    stereo_speakers: "Audio",
-    headphone_jack: "Audio",
-    // Features
-    s_pen: "Special Features",
-    ai_features: "Special Features",
-    // Storage
-    type: "Storage",
-    expandable: "Storage",
-    // Software
-    updates: "Software Support",
-  };
-  return groups[key.toLowerCase()] || "Other";
-};
-
+// Helper function to format spec names
 const formatSpecName = (key: string): string => {
   return key
     .split("_")
@@ -155,26 +95,12 @@ const ProductPage = () => {
     productInfo?.product_translations?.find((t) => t.language_code === currentLocale) ||
     productInfo?.product_translations?.[0];
 
-  // Transform specs object into specification groups
+  // Transform specs object into flat list of specifications
   const specifications = currentTranslation?.specs
-    ? Object.entries(currentTranslation.specs).reduce(
-        (acc: { groupName: string; specs: { name: string; value: string }[] }[], [key, value]) => {
-          // Group specs by category (you can customize grouping logic)
-          const groupName = getSpecGroupName(key);
-          const existingGroup = acc.find((g) => g.groupName === groupName);
-
-          if (existingGroup) {
-            existingGroup.specs.push({ name: formatSpecName(key), value: value as string });
-          } else {
-            acc.push({
-              groupName,
-              specs: [{ name: formatSpecName(key), value: value as string }],
-            });
-          }
-          return acc;
-        },
-        []
-      )
+    ? Object.entries(currentTranslation.specs).map(([key, value]) => ({
+        name: formatSpecName(key),
+        value: value as string,
+      }))
     : [];
 
   return (
@@ -235,29 +161,21 @@ const ProductPage = () => {
             <div className="w-full mb-[100px]">
               <h2 className="font-light block text-2xl text-gray-900 py-5 border-b border-gray-300">Specification</h2>
               {productInfo && specifications.length > 0 ? (
-                specifications.map((spec, index) => (
-                  <section key={index} className="w-full py-5 border-b border-gray-300">
-                    <div className="flex items-center w-full">
-                      <button className="size-8 inline-block relative border-none bg-white rounded-sm hover:bg-gray-200">
-                        <MinusIcon width={12} className="absolute top-3.5 left-2.5 stroke-gray-700" />
-                      </button>
-                      <h3 className="ml-3 inline-block text-gray-700">{spec.groupName}</h3>
-                    </div>
-                    {spec.specs.map((row, rowIndex) => (
-                      <div
-                        key={rowIndex}
-                        className="w-full pt-3 flex items-stretch bg-white text-sm rounded-lg hover:bg-gray-100"
-                      >
-                        <div className="min-w-[160px] flex items-start ml-[42px] text-gray-500">
-                          <span>{row.name}</span>
-                        </div>
-                        <div className="font-medium text-gray-800">
-                          <span className="block leading-5 min-h-8 h-auto">{row.value}</span>
-                        </div>
+                <div className="w-full py-5 border-b border-gray-300">
+                  {specifications.map((spec, index) => (
+                    <div
+                      key={index}
+                      className="w-full pt-3 flex items-stretch bg-white text-sm rounded-lg hover:bg-gray-100"
+                    >
+                      <div className="min-w-[200px] flex items-start text-gray-500">
+                        <span>{spec.name}</span>
                       </div>
-                    ))}
-                  </section>
-                ))
+                      <div className="font-medium text-gray-800 flex-1">
+                        <span className="block leading-5 min-h-8 h-auto">{spec.value}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : productInfo === null ? (
                 <>
                   <div className="flex flex-col mt-4 mb-16 gap-4">
