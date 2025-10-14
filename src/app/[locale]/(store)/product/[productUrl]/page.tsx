@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getOneProduct, getProductByUrl } from "@/actions/product/product";
+import { getShippingRates, ShippingRate, ShippingAddress, ShippingPackage } from "@/actions/shipping/shipping";
 import Gallery from "@/domains/product/components/gallery";
 import ProductBoard from "@/domains/product/components/productBoard";
 import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
@@ -57,43 +58,15 @@ export interface GetProductByUrlResponse {
   images: string[];
   price: number;
   is_available: boolean;
+  weight?: number; // Product weight for shipping calculation
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  };
   product_translations: ProductTranslation[];
   product_variants: ProductVariant[];
 }
-
-// Shipping calculation helper
-const calculateShippingCost = (
-  price: number,
-  weight?: number
-): { method: string; cost: number; estimatedDays: string }[] => {
-  // Define shipping methods with their rules
-  const shippingMethods = [
-    {
-      method: "Standard Shipping",
-      baseCost: 5.99,
-      freeThreshold: 50,
-      estimatedDays: "5-7 business days",
-    },
-    {
-      method: "Express Shipping",
-      baseCost: 12.99,
-      freeThreshold: 100,
-      estimatedDays: "2-3 business days",
-    },
-    {
-      method: "Next Day Delivery",
-      baseCost: 19.99,
-      freeThreshold: 150,
-      estimatedDays: "1 business day",
-    },
-  ];
-
-  return shippingMethods.map((method) => ({
-    method: method.method,
-    cost: price >= method.freeThreshold ? 0 : method.baseCost,
-    estimatedDays: method.estimatedDays,
-  }));
-};
 
 // Helper function to format spec names
 const formatSpecName = (key: string): string => {
@@ -139,7 +112,17 @@ const ProductPage = () => {
   const [productInfo, setProductInfo] = useState<GetProductByUrlResponse | null | undefined>(null);
   const [currentLocale, setCurrentLocale] = useState("en");
   const [selectedVariantOptions, setSelectedVariantOptions] = useState<Record<string, string>>({});
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("Standard Shipping");
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("standard");
+
+  // Shipping state
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [loadingShipping, setLoadingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState<string | null>(null);
+  const [shippingDestination, setShippingDestination] = useState<ShippingAddress>({
+    city: "Karachi", // Default destination
+    postalCode: "75500",
+    country: "PK",
+  });
 
   console.log("params", { locale, productUrl });
   useEffect(() => {
@@ -177,6 +160,47 @@ const ProductPage = () => {
     }
   }, [productInfo, selectedVariantOptions]);
 
+  // Fetch shipping rates when product or destination changes
+  useEffect(() => {
+    const fetchShippingRates = async () => {
+      if (!productInfo) return;
+
+      setLoadingShipping(true);
+      setShippingError(null);
+
+      try {
+        const packageInfo: ShippingPackage = {
+          weight: productInfo.weight || 1, // Default 1kg if no weight
+          length: productInfo.dimensions?.length,
+          width: productInfo.dimensions?.width,
+          height: productInfo.dimensions?.height,
+          declaredValue: finalPrice,
+        };
+
+        const response = await getShippingRates(shippingDestination, packageInfo);
+
+        if (response.success && response.rates) {
+          setShippingRates(response.rates);
+          // Auto-select first shipping option
+          if (response.rates.length > 0 && !selectedShippingMethod) {
+            setSelectedShippingMethod(response.rates[0].serviceType);
+          }
+        } else {
+          setShippingError(response.error || "Failed to fetch shipping rates");
+          setShippingRates(response.rates || []);
+        }
+      } catch (error) {
+        console.error("Error fetching shipping rates:", error);
+        setShippingError("Unable to calculate shipping");
+        setShippingRates([]);
+      } finally {
+        setLoadingShipping(false);
+      }
+    };
+
+    fetchShippingRates();
+  }, [productInfo, shippingDestination]);
+
   if (productInfo === undefined) return "";
 
   // Get the translation for the current locale
@@ -213,9 +237,8 @@ const ProductPage = () => {
   // Calculate final price with variant adjustment
   const finalPrice = productInfo?.price ? productInfo.price + (selectedVariant?.price_adjustment || 0) : 0;
 
-  // Calculate shipping costs based on final price
-  const shippingOptions = calculateShippingCost(finalPrice);
-  const selectedShipping = shippingOptions.find((option) => option.method === selectedShippingMethod);
+  // Get selected shipping rate
+  const selectedShipping = shippingRates.find((rate) => rate.serviceType === selectedShippingMethod);
 
   // Check if product/variant is available
   const isAvailable = selectedVariant
@@ -365,71 +388,103 @@ const ProductPage = () => {
                 {productInfo && (
                   <div className="mt-6 border-t border-gray-200 pt-6">
                     <h3 className="text-sm font-medium text-gray-900 mb-4">Shipping Options</h3>
-                    <div className="space-y-3">
-                      {shippingOptions.map((shipping) => (
-                        <button
-                          key={shipping.method}
-                          onClick={() => setSelectedShippingMethod(shipping.method)}
-                          className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
-                            selectedShippingMethod === shipping.method
-                              ? "border-gray-900 bg-gray-50"
-                              : "border-gray-200 hover:border-gray-400 bg-white"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                selectedShippingMethod === shipping.method ? "border-gray-900" : "border-gray-300"
-                              }`}
-                            >
-                              {selectedShippingMethod === shipping.method && (
-                                <div className="w-3 h-3 rounded-full bg-gray-900" />
+
+                    {/* Shipping Error Message */}
+                    {shippingError && (
+                      <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="text-xs text-orange-800">⚠️ {shippingError}. Showing estimated rates.</p>
+                      </div>
+                    )}
+
+                    {/* Loading State */}
+                    {loadingShipping ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="h-20 bg-gray-200 rounded-lg"></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {shippingRates.map((shipping) => (
+                          <button
+                            key={shipping.serviceType}
+                            onClick={() => setSelectedShippingMethod(shipping.serviceType)}
+                            className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                              selectedShippingMethod === shipping.serviceType
+                                ? "border-gray-900 bg-gray-50"
+                                : "border-gray-200 hover:border-gray-400 bg-white"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                  selectedShippingMethod === shipping.serviceType
+                                    ? "border-gray-900"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {selectedShippingMethod === shipping.serviceType && (
+                                  <div className="w-3 h-3 rounded-full bg-gray-900" />
+                                )}
+                              </div>
+                              <div className="text-left">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {shipping.serviceName}
+                                  {shipping.carrierName && shipping.carrierName !== shipping.serviceName && (
+                                    <span className="text-xs text-gray-500 ml-1">({shipping.carrierName})</span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500">{shipping.estimatedDays}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {shipping.cost === 0 ? (
+                                <span className="text-sm font-semibold text-green-600">FREE</span>
+                              ) : (
+                                <span className="text-sm font-medium text-gray-900">
+                                  {shipping.currency} {shipping.cost.toFixed(2)}
+                                </span>
                               )}
                             </div>
-                            <div className="text-left">
-                              <div className="text-sm font-medium text-gray-900">{shipping.method}</div>
-                              <div className="text-xs text-gray-500">{shipping.estimatedDays}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            {shipping.cost === 0 ? (
-                              <span className="text-sm font-semibold text-green-600">FREE</span>
-                            ) : (
-                              <span className="text-sm font-medium text-gray-900">€{shipping.cost.toFixed(2)}</span>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Total Price with Shipping */}
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-center text-sm mb-2">
-                        <span className="text-gray-600">Product Price:</span>
-                        <span className="font-medium text-gray-900">€{finalPrice.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm mb-2">
-                        <span className="text-gray-600">Shipping:</span>
-                        <span
-                          className={`font-medium ${selectedShipping?.cost === 0 ? "text-green-600" : "text-gray-900"}`}
-                        >
-                          {selectedShipping?.cost === 0 ? "FREE" : `€${selectedShipping?.cost.toFixed(2)}`}
-                        </span>
-                      </div>
-                      <div className="border-t border-gray-200 pt-2 mt-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-base font-semibold text-gray-900">Total:</span>
-                          <span className="text-xl font-bold text-gray-900">
-                            €{((finalPrice || 0) + (selectedShipping?.cost || 0)).toFixed(2)}
+                    {!loadingShipping && (
+                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center text-sm mb-2">
+                          <span className="text-gray-600">Product Price:</span>
+                          <span className="font-medium text-gray-900">
+                            {selectedShipping?.currency || "PKR"} {finalPrice.toFixed(2)}
                           </span>
                         </div>
-                      </div>
-                      {finalPrice < 50 && (
-                        <div className="mt-3 text-xs text-gray-500">
-                          💡 Add €{(50 - finalPrice).toFixed(2)} more to qualify for free standard shipping!
+                        <div className="flex justify-between items-center text-sm mb-2">
+                          <span className="text-gray-600">Shipping:</span>
+                          <span
+                            className={`font-medium ${
+                              selectedShipping?.cost === 0 ? "text-green-600" : "text-gray-900"
+                            }`}
+                          >
+                            {selectedShipping?.cost === 0
+                              ? "FREE"
+                              : `${selectedShipping?.currency || "PKR"} ${selectedShipping?.cost.toFixed(2)}`}
+                          </span>
                         </div>
-                      )}
-                    </div>
+                        <div className="border-t border-gray-200 pt-2 mt-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-base font-semibold text-gray-900">Total:</span>
+                            <span className="text-xl font-bold text-gray-900">
+                              {selectedShipping?.currency || "PKR"}{" "}
+                              {((finalPrice || 0) + (selectedShipping?.cost || 0)).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
