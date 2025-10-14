@@ -4,6 +4,7 @@ import TopProductCard from "../../(home)/_components/TopProductCard";
 import NoResultImage from "./_components/NoResultImage";
 import { getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
+import { Urls } from "@/shared/constants/urls";
 
 const page = async ({
   params,
@@ -49,7 +50,7 @@ const page = async ({
           isAvailable={product.is_available}
           dealPrice={getConvertedPrice(currency, product.flash_deal_price || 0) || undefined}
           specs={product.translation?.special_features || []}
-          url={"/product/" + product.id}
+          url={Urls.productDetail + "/" + product.url}
           currency={currency}
         />
       ))}

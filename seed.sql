@@ -178,7 +178,7 @@ BEGIN
     SELECT id INTO brand_dell_id FROM brands WHERE name = 'Dell';
 
     -- Insert Products
-    INSERT INTO products (id, sku, url, category_id, brand_id, base_price, is_available, is_featured, stock_quantity, weight, images) VALUES
+    INSERT INTO products (id, sku, url, category_id, brand_id, price, is_available, is_featured, stock_quantity, weight, images) VALUES
     -- Smartphones
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'APL-IPH15-PRO', 'iphone-15-pro', cat_smartphones_id, brand_apple_id, 999.99, true, true, 50, 0.2, 
      ARRAY['https://images.unsplash.com/photo-1592286927505-c0d6f6f53584?w=800', 'https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=800']),
@@ -448,7 +448,7 @@ END $$;
 -- 7. UPCOMING PRODUCTS
 -- =====================================================
 
-INSERT INTO products (id, sku, url, category_id, brand_id, base_price, is_available, is_featured, stock_quantity, weight, images) VALUES
+INSERT INTO products (id, sku, url, category_id, brand_id, price, is_available, is_featured, stock_quantity, weight, images) VALUES
 ('99999999-9999-9999-9999-999999999991', 'APL-IPH16-PRO', 'iphone-16-pro-upcoming', '11111111-1111-1111-1111-111111111112', (SELECT id FROM brands WHERE name = 'Apple'), 1099.99, false, true, 0, 0.2, 
  ARRAY['https://images.unsplash.com/photo-1592286927505-c0d6f6f53584?w=800']),
 
