@@ -57,7 +57,7 @@ export interface ProductVariant {
 export interface Product {
   id: string;
   url: string;
-  base_price: number;
+price: number;
   images: string[];
   product_translations: ProductTranslation[];
   product_variants: ProductVariant[];
