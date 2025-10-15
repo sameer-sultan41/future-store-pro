@@ -123,6 +123,7 @@ const { data, error } = await supabase
       )
     )
   `)
+    .eq("product_translations.language_code", locale)
  .eq("url", productUrl)
 //  .eq("url", "samsung-galaxy-s24-ultra")
 //  .eq("url", "nike-mens-tshirt")
