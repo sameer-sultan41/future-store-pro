@@ -31,13 +31,13 @@ export default async function Home({ params }: { params: { locale: string; param
           <HomeCategoryList />
           <HomeSlider CarouselData={settings.carousels} />
         </div>
-        <CollectionCards />
+        <WideCardRow cards={threeSaleCards} />
         {flashDeals?.map((item) => (
           <TodayDealCards key={item.id} DealData={item} />
         ))}
 
-        <WideCardRow cards={threeSaleCards} />
         {/* <WideCardRow cards={twoSaleCards} /> */}
+        <CollectionCards />
         <TopSellingProductsList />
         {/* <LatestBlogPosts /> */}
         {/* <CompanyLogoList /> */}
