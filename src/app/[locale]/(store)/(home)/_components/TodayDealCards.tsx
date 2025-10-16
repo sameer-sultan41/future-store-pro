@@ -32,6 +32,7 @@ export function TodayDealCards({ DealData }: { DealData: FlashDeal }) {
                   desc={deal.product?.product_translations[0].description || ""}
                   dealEndTime={DealData.end_date}
                   url={`${deal.product?.url}`}
+                  productId={deal.product?.id}
                 />
               </CarouselItem>
             ))}

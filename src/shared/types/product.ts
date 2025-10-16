@@ -80,6 +80,7 @@ export type TCartListItemDB = {
   images: string[];
   price: number;
   salePrice: number | null;
+  url?: string;
 };
 
 export type TSpecification = {

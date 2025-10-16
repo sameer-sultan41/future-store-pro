@@ -1,11 +1,12 @@
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 
-import { TCartItem } from "@/shared/types/shoppingCart";
+
 
 import { loadState, saveState } from "./storeLocalStorage";
+import { TCartItemData } from "@/shared/types/shoppingCart";
 
 export type TCartState = {
-  items: TCartItem[];
+  items: TCartItemData[];
   isVisible: boolean;
 };
 
@@ -20,7 +21,7 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    add: (state: TCartState, action: PayloadAction<TCartItem>) => {
+    add: (state: TCartState, action: PayloadAction<TCartItemData>) => {
       const isAvailable = state.items.findIndex((item) => item.productId === action.payload.productId);
       if (isAvailable > -1) {
         state.items[isAvailable].quantity += action.payload.quantity;
