@@ -32,7 +32,7 @@ const Shipping = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {shippingRates.map((shipping) => (
+              {shippingRates.map((shipping: any) => (
                 <button
                   key={shipping.serviceType}
                   onClick={() => setSelectedShippingMethod(shipping.serviceType)}
@@ -77,7 +77,7 @@ const Shipping = ({
           )}
 
           {/* Total Price with Shipping */}
-          {!loadingShipping && (
+          {/* {!loadingShipping && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center text-sm mb-2">
                 <span className="text-gray-600">Product Price:</span>
@@ -103,7 +103,7 @@ const Shipping = ({
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       )}
     </>
