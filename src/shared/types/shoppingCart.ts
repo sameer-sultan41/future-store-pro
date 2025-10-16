@@ -1,7 +1,4 @@
-export type TCartItem = {
-  productId: string;
-  quantity: number;
-};
+
 
 export type TCartItemData = {
   productId: string;

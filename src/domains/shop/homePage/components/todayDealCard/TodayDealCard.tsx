@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
+import { useDispatch } from "react-redux";
 import { ClockIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 // FontAwesome icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Currency, getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
 import { Urls } from "@/shared/constants/urls";
+import { add } from "@/store/shoppingCart";
+import {  TCartItemData } from "@/shared/types/shoppingCart";
 
 type TProps = {
   productName: string;
@@ -22,9 +25,11 @@ type TProps = {
   dealEndTime: string;
   desc?: string;
   url: string;
+  productId?: string;
 };
 
-const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url }: TProps) => {
+const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url, productId }: TProps) => {
+  const dispatch = useDispatch();
   const [currency, setCurrency] = useState<Currency | null>(null);
 
   // Fetch currency from cookie
@@ -67,6 +72,18 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
     const m = String(date.getMinutes()).padStart(2, "0");
     const s = String(date.getSeconds()).padStart(2, "0");
     return `${h}:${m}:${s}`;
+  };
+
+  const handleAddToCart = () => {
+    const cartItem: TCartItemData = {
+      productId: productId || url, // Use productId if available, otherwise fallback to url
+      productName,
+      imgUrl: image[0],
+      price: newPrice,
+      dealPrice: oldPrice,
+      quantity: 1,
+    };
+    dispatch(add(cartItem));
   };
 
   return (
@@ -184,7 +201,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
             </motion.span>
           </motion.section>
         </div>
-        <Button>
+        <Button onClick={handleAddToCart}>
           <FontAwesomeIcon icon={faCartPlus} className="text-white" />
           Add to Cart
         </Button>

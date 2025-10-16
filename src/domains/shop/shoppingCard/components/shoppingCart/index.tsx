@@ -23,43 +23,73 @@ const ShoppingCart = ({ isVisible, quantity, handleOnClose }: TProps) => {
   const [cartItems, setCartItems] = useState<TCartItemData[]>();
   const localCartItems = useSelector((state: RootState) => state.cart);
 
-  useEffect(() => {
-    const convertDBtoCartItems = (rawData: TCartListItemDB[]) => {
-      const cartListItem: TCartItemData[] = [];
-      rawData.forEach((item) => {
-        cartListItem.push({
-          productId: item.id,
-          imgUrl: process.env.IMG_URL + item.images[0],
-          price: item.price,
-          quantity: localCartItems.items.find((f) => f.productId === item.id)?.quantity || 0,
-          productName: item.name,
-          dealPrice: item.salePrice || undefined,
-        });
-      });
-      if (cartListItem.length > 0) return cartListItem;
-      return null;
-    };
-    const getProductsFromDB = async () => {
-      const productsIDs = localCartItems.items.map((s) => s.productId);
+  // useEffect(() => {
+  //   const convertDBtoCartItems = (rawData: TCartListItemDB[]) => {
+  //     const cartListItem: TCartItemData[] = [];
 
-      if (productsIDs?.length === 0) setCartItems([]);
+  //     // Create a map for quick lookups by both ID and URL
+  //     const productMapById = new Map(rawData.map((item) => [item.id, item]));
+  //     const productMapByUrl = new Map(rawData.filter((item: any) => item.url).map((item: any) => [item.url, item]));
 
-      if (productsIDs) {
-        const response = await getCartProducts(productsIDs);
-        if (response.res) {
-          const finalResult = convertDBtoCartItems(response.res);
+  //     // Match each cart item with its product data
+  //     localCartItems.items.forEach((cartItem) => {
+  //       // Try to find product by ID first, then by URL
+  //       const product = productMapById.get(cartItem.productId) || productMapByUrl.get(cartItem.productId);
 
-          if (!finalResult) return;
+  //       if (product) {
+  //         cartListItem.push({
+  //           productId: product.id,
+  //           imgUrl: process.env.IMG_URL + product.images[0],
+  //           price: product.price,
+  //           quantity: cartItem.quantity,
+  //           productName: product.name,
+  //           dealPrice: product.salePrice || undefined,
+  //         });
+  //       } else {
+  //         console.warn(`Product not found for ID: ${cartItem.productId}`);
+  //       }
+  //     });
 
-          setCartItems(finalResult);
-        }
-      }
-    };
+  //     return cartListItem.length > 0 ? cartListItem : null;
+  //   };
 
-    if (localCartItems) {
-      getProductsFromDB();
-    }
-  }, [localCartItems]);
+  //   const getProductsFromDB = async () => {
+  //     const productsIDs = localCartItems.items.map((s) => s.productId);
+
+  //     if (productsIDs?.length === 0) {
+  //       setCartItems([]);
+  //       return;
+  //     }
+
+  //     if (productsIDs && productsIDs.length > 0) {
+  //       console.log("Fetching products with IDs:", productsIDs);
+  //       const response = await getCartProducts(productsIDs);
+
+  //       if (response.error) {
+  //         console.error("Error fetching cart products:", response.error);
+  //         setCartItems([]);
+  //         return;
+  //       }
+
+  //       if (response.res) {
+  //         console.log("Fetched products:", response.res);
+  //         const finalResult = convertDBtoCartItems(response.res);
+
+  //         if (!finalResult) {
+  //           console.warn("No items after conversion");
+  //           setCartItems([]);
+  //           return;
+  //         }
+
+  //         setCartItems(finalResult);
+  //       }
+  //     }
+  //   };
+
+  //   if (localCartItems && localCartItems.items) {
+  //     getProductsFromDB();
+  //   }
+  // }, [localCartItems, localCartItems.items]);
 
   return (
     <div
@@ -82,8 +112,10 @@ const ShoppingCart = ({ isVisible, quantity, handleOnClose }: TProps) => {
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {cartItems && cartItems.length ? (
-            cartItems.map((item) => <CartItem data={item} onLinkClicked={handleOnClose} key={item.productId} />)
+          {localCartItems && localCartItems.items ? (
+            localCartItems.items.map((item) => (
+              <CartItem data={item} onLinkClicked={handleOnClose} key={item.productId} />
+            ))
           ) : (
             <div className="flex flex-col items-center">
               <div className="mt-20 mb-16 p-6 bg-gray-100 rounded-full">

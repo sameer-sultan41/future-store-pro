@@ -271,29 +271,68 @@ export const getOneProduct = async (productID: string) => {
 export const getCartProducts = async (productIDs: string[]) => {
   if (!productIDs || productIDs.length === 0) return { error: "Invalid Product List" };
 
+  // Filter out undefined values
+  const validProductIDs = productIDs.filter(id => id && id !== 'undefined');
+  
+  if (validProductIDs.length === 0) return { error: "No valid product IDs" };
+
   try {
     const supabase = createSupabaseServer();
-    const { data: result, error } = await supabase
-      .from('products')
-      .select(`
-        id,
-        name,
-        images,
-        price,
-        sale_price
-      `)
-      .in('id', productIDs);
+    
+    // Separate UUIDs and slugs (UUID format: 8-4-4-4-12 characters)
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuids = validProductIDs.filter(id => uuidPattern.test(id));
+    const slugs = validProductIDs.filter(id => !uuidPattern.test(id));
+    
+    const allResults: any[] = [];
+    
+    // Fetch by UUID (id column)
+    if (uuids.length > 0) {
+      const { data: uuidResults, error: uuidError } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          images,
+          price,
+          sale_price
+        `)
+        .in('id', uuids);
+      
+      if (uuidResults) {
+        allResults.push(...uuidResults);
+      }
+    }
+    
+    // Fetch by slug (url column)
+    if (slugs.length > 0) {
+      const { data: slugResults, error: slugError } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          images,
+          price,
+          sale_price,
+          url
+        `)
+        .in('url', slugs);
+      
+      if (slugResults) {
+        allResults.push(...slugResults);
+      }
+    }
 
-    if (error) return { error: error.message };
-    if (!result) return { error: "Can't Get Data from Database!" };
+    if (allResults.length === 0) return { error: "No products found" };
     
     // Transform to match expected format
-    const transformedResult = result.map(item => ({
+    const transformedResult = allResults.map(item => ({
       id: item.id,
       name: item.name,
       images: item.images,
       price: item.price,
       salePrice: item.sale_price,
+      url: item.url,
     }));
     
     return { res: transformedResult };
