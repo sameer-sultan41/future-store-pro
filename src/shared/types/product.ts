@@ -32,6 +32,7 @@ export type TProductBoard = {
   name: string;
   isAvailable: boolean;
   shortDesc: string;
+  imgUrl: string;
   price: number;
   dealDate?: Date;
   dealPrice?: number;

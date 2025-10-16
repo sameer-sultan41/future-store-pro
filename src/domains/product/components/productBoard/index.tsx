@@ -7,10 +7,10 @@ import AddToCartButton from "@/domains/shop/shoppingCard/components/addToCartBut
 import Quantity from "@/domains/shop/shoppingCard/components/quantity";
 import { StarIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 import { TProductBoard } from "@/shared/types/product";
-import { TCartItem } from "@/shared/types/shoppingCart";
+import { TCartItem, TCartItemData } from "@/shared/types/shoppingCart";
 
 const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
-  const { name, id, isAvailable, specialFeatures, price, shortDesc, dealPrice, defaultQuantity } = boardData;
+  const { name, id, isAvailable, specialFeatures, price, shortDesc, dealPrice, defaultQuantity, imgUrl } = boardData;
   const [quantity, setQuantity] = useState(defaultQuantity > 1 ? defaultQuantity : 1);
 
   const handleQuantityChange = (isReducing: boolean) => {
@@ -22,8 +22,11 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
     });
   };
 
-  const cartItemData: TCartItem = {
+  const cartItemData: TCartItemData = {
     productId: id,
+    productName: name,
+    imgUrl: imgUrl,
+    price: dealPrice ? dealPrice : price,
     quantity: quantity,
   };
   return (

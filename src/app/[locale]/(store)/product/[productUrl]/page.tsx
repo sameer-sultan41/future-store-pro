@@ -282,6 +282,7 @@ const ProductPage = () => {
                     defaultQuantity: 1,
                     name: currentTranslation?.name || "Product",
                     price: finalPrice,
+                    imgUrl: productInfo.images[0] || "",
                     dealPrice: undefined,
                     shortDesc: currentTranslation?.short_description || "",
                     specialFeatures: currentTranslation?.special_features || [],
@@ -385,7 +386,6 @@ const ProductPage = () => {
                 )}
 
                 {/* Shipping Options Section */}
-             
               </div>
             ) : (
               <div className="flex flex-col">

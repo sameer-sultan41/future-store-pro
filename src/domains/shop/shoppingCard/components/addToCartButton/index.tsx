@@ -3,12 +3,12 @@
 import { useDispatch } from "react-redux";
 
 import { ShoppingIconFill } from "@/shared/components/icons/svgIcons";
-import { TCartItem } from "@/shared/types/shoppingCart";
+import { TCartItemData } from "@/shared/types/shoppingCart";
 import { add } from "@/store/shoppingCart";
 
 type TProps = {
   disabled: boolean;
-  cartItemData: TCartItem;
+  cartItemData: TCartItemData;
 };
 
 const AddToCartButton = ({ cartItemData, disabled }: TProps) => {
