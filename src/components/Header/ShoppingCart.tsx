@@ -11,7 +11,7 @@ import { TCartItemData } from "@/shared/types/shoppingCart";
 import { cn } from "@/shared/utils/styling";
 import { RootState } from "@/store/shoppingCart";
 
-import CartItem from "./_components/cartItem";
+import CartItem from "../../domains/shop/shoppingCard/components/shoppingCart/_components/cartItem";
 
 type TProps = {
   isVisible: boolean;

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-
 import { getAllCategoriesJSON } from "@/actions/category/category";
 import { ListIcon } from "@/shared/components/icons/svgIcons";
 import { Button } from "@/components/ui/button";

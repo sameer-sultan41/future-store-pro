@@ -8,7 +8,7 @@ import { cn } from "@/shared/utils/styling";
 import { RootState } from "@/store/shoppingCart";
 import { Heart } from "lucide-react";
 
-import WishlistItem from "./_components/wishlistItem";
+import WishlistItem from "../../domains/shop/wishlist/components/wishlistSidebar/_components/wishlistItem";
 
 type TProps = {
   isVisible: boolean;

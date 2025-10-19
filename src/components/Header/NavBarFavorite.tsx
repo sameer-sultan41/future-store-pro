@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import WishlistSidebar from "@/domains/shop/wishlist/components/wishlistSidebar";
+import WishlistSidebar from "@/components/Header/WishlistSidebar";
 import { RootState, TWishlistState } from "@/store/shoppingCart";
 import { toggleWishlistVisibility } from "@/store/wishlist";
 import { Heart } from "lucide-react";
