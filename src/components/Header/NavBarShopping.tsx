@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import ShoppingCart from "@/domains/shop/shoppingCard/components/shoppingCart";
+import ShoppingCart from "@/components/Header/ShoppingCart";
 import { ShoppingIconOutline } from "@/shared/components/icons/svgIcons";
 import { cn } from "@/shared/utils/styling";
 import { TCartState, RootState } from "@/store/shoppingCart";

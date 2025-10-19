@@ -1,8 +1,6 @@
 "use client";
 import { Provider } from "react-redux";
-
-import StoreNavBar from "@/app/[locale]/(store)/(home)/_components/StoreNavBar";
-import Warning from "@/domains/shop/shared/components/warning";
+import StoreNavBar from "@/components/Header/StoreNavBar";
 import { shoppingCartStore } from "@/store/shoppingCart";
 
 import StoreFooter from "./(home)/_components/Footer";
