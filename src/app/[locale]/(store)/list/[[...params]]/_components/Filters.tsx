@@ -7,13 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Brands } from "@/actions/brands/type";
 
-const brands = [
-  { id: "b497558c-26f2-4f08-805a-8f96b3e9f717", name: "Apple" },
-  { id: "2575786c-1911-4e00-af49-5b9c3040fc6b", name: "Samsung" },
-];
-
-const Filters = () => {
+const Filters = ({ brands }: { brands: Brands[] }) => {
+  console.log("brand --->", brands);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [availability, setAvailability] = useState(searchParams.get("availability") || "all");

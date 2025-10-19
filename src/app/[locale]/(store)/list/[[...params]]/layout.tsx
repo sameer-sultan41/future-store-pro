@@ -2,21 +2,24 @@ import { Metadata } from "next";
 import BreadCrumb from "./_components/BreadCrumb";
 import DropDownList from "@/shared/components/UI/dropDown";
 import { sortDropdownData } from "@/domains/shop/productList/constants";
-import Filters from "@/domains/shop/productList/components/filters";
+import Filters from "@/app/[locale]/(store)/list/[[...params]]/_components/Filters";
 import Image from "next/image";
 import SortByFilters from "./_components/SortByFilters";
+import { getAllBrands } from "@/actions/brands/brands";
 
 export const metadata: Metadata = {
   title: "future - Products List",
 };
 
-const ListLayout = ({
+const ListLayout = async ({
   children,
   params,
 }: {
   children: React.ReactNode;
   params: { locale: string; params: string[] };
 }) => {
+  const result = await getAllBrands();
+
   return (
     <div className="mt-[136px] bg-white">
       <BreadCrumb params={params.params} />
@@ -32,7 +35,7 @@ const ListLayout = ({
           <DropDownList data={sortDropdownData} width="180px" />
         </div>
         <div className="w-full flex pt-3 lg:mt-9 md:pt-2">
-          <Filters />
+          {result.res && <Filters brands={result.res} />}
           <div className="flex-grow flex flex-col ml-0 2xl:ml-4 lg:ml-3">
             <div className="w-full items-center text-sm mb-5 ml-3 hidden lg:flex">
               <Image src={"/icons/sortIcon.svg"} alt="Sort" width={16} height={12} className="mr-3" />

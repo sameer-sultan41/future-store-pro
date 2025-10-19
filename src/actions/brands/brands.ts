@@ -1,8 +1,10 @@
 "use server";
 import { z } from "zod";
 
-import { createSupabaseServer } from "@/shared/lib/supabaseClient";
+
 import { TBrand } from "@/shared/types";
+import { createSupabaseServer } from "@/supabase/server";
+import { Brands } from "./type";
 
 const ValidateUpdateBrand = z.object({
   id: z.string().min(6),
@@ -13,7 +15,7 @@ export const addBrand = async (brandName: string) => {
   if (!brandName || brandName === "") return { error: "Invalid Data!" };
 
   try {
-    const supabase = createSupabaseServer();
+    const supabase = await createSupabaseServer();
     const { data: result, error } = await supabase
       .from('brands')
       .insert({
@@ -32,14 +34,16 @@ export const addBrand = async (brandName: string) => {
 
 export const getAllBrands = async () => {
   try {
-    const supabase = createSupabaseServer();
-    const { data: result, error } = await supabase
-      .from('brands')
-      .select('*');
+    const supabase = await createSupabaseServer();
+  
+let { data: result, error } = await supabase
+  .from('brands')
+  .select('*')
+          
 
     if (error) return { error: error.message };
     if (!result) return { error: "Can't Get Data from Database!" };
-    return { res: result };
+    return { res: result as Brands[] };
   } catch (error) {
     return { error: JSON.stringify(error) };
   }
