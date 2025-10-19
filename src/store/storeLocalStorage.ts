@@ -6,11 +6,16 @@ export const loadState = () => {
       items: [],
       isVisible: false,
     },
+    wishlist: {
+      items: [],
+    },
   };
   try {
     const serializedState = localStorage.getItem(localStorageName);
     if (!serializedState) return tempState;
-    tempState.cart.items = JSON.parse(serializedState).cart.items;
+    const parsedState = JSON.parse(serializedState);
+    tempState.cart.items = parsedState.cart?.items || [];
+    tempState.wishlist.items = parsedState.wishlist?.items || [];
     return tempState;
   } catch {
     return tempState;

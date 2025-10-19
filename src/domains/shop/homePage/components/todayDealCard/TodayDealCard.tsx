@@ -15,7 +15,9 @@ import { Currency, getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
 import { Urls } from "@/shared/constants/urls";
 import { add } from "@/store/shoppingCart";
-import {  TCartItemData } from "@/shared/types/shoppingCart";
+import { toggleWishlist } from "@/store/wishlist";
+import { TCartItemData } from "@/shared/types/shoppingCart";
+import { TWishlistItem } from "@/shared/types/wishlist";
 
 type TProps = {
   productName: string;
@@ -86,6 +88,17 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
     dispatch(add(cartItem));
   };
 
+  const handleToggleWishlist = () => {
+    const wishlistItem: TWishlistItem = {
+      productId: productId || url,
+      productName,
+      imgUrl: image[0],
+      price: newPrice,
+      dealPrice: oldPrice,
+    };
+    dispatch(toggleWishlist(wishlistItem));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -99,6 +112,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         whileTap={{ scale: 0.8, rotate: -15 }}
         whileHover={{ scale: 1.2 }}
         transition={{ type: "spring", stiffness: 300 }}
+        onClick={handleToggleWishlist}
       >
         <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
       </motion.div>
