@@ -8,6 +8,7 @@ export const loadState = () => {
     },
     wishlist: {
       items: [],
+      isVisible: false,
     },
   };
   try {

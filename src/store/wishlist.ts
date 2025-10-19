@@ -3,9 +3,10 @@ import { TWishlistItem } from "@/shared/types/wishlist";
 
 export type TWishlistState = {
   items: TWishlistItem[];
+  isVisible: boolean;
 };
 
-const initialState: TWishlistState = { items: [] };
+const initialState: TWishlistState = { items: [], isVisible: false };
 
 const wishlistSlice = createSlice({
   name: "wishlist",
@@ -28,8 +29,11 @@ const wishlistSlice = createSlice({
         state.items.push(action.payload);
       }
     },
+    toggleWishlistVisibility: (state: TWishlistState, action: PayloadAction<boolean>) => {
+      state.isVisible = action.payload.valueOf();
+    },
   },
 });
 
-export const { addToWishlist, removeFromWishlist, toggleWishlist } = wishlistSlice.actions;
+export const { addToWishlist, removeFromWishlist, toggleWishlist, toggleWishlistVisibility } = wishlistSlice.actions;
 export default wishlistSlice.reducer;

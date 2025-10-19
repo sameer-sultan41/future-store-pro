@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ClockIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 // FontAwesome icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +18,7 @@ import { add } from "@/store/shoppingCart";
 import { toggleWishlist } from "@/store/wishlist";
 import { TCartItemData } from "@/shared/types/shoppingCart";
 import { TWishlistItem } from "@/shared/types/wishlist";
+import { RootState } from "@/store/shoppingCart";
 
 type TProps = {
   productName: string;
@@ -33,6 +34,9 @@ type TProps = {
 const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, desc = "", url, productId }: TProps) => {
   const dispatch = useDispatch();
   const [currency, setCurrency] = useState<Currency | null>(null);
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
+
+  const isInWishlist = wishlistItems.some((item) => item.productId === (productId || url));
 
   // Fetch currency from cookie
   useEffect(() => {
@@ -114,7 +118,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         transition={{ type: "spring", stiffness: 300 }}
         onClick={handleToggleWishlist}
       >
-        <Heart width={22} className="fill-white drop-shadow-lg stroke-primary" />
+        <Heart width={22} className={`drop-shadow-lg stroke-primary ${isInWishlist ? "fill-primary" : "fill-white"}`} />
       </motion.div>
       <motion.div
         className="absolute top-3 right-12 z-10 cursor-pointer flex gap-2"
