@@ -4,11 +4,14 @@ import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 
 import { loadState, saveState } from "./storeLocalStorage";
 import { TCartItemData } from "@/shared/types/shoppingCart";
+import wishlistReducer, { TWishlistState } from "./wishlist";
 
 export type TCartState = {
   items: TCartItemData[];
   isVisible: boolean;
 };
+
+export type { TWishlistState };
 
 type QuantityChange = {
   productId: string;
@@ -47,6 +50,7 @@ const cartSlice = createSlice({
 export const shoppingCartStore = configureStore({
   reducer: {
     cart: cartSlice.reducer,
+    wishlist: wishlistReducer,
   },
   preloadedState: loadState(),
 });
