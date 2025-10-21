@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { getOptionSetByCatID, getSpecGroupByCatID } from "@/actions/category/categoryOptions";
+// import { getOptionSetByCatID, getSpecGroupByCatID } from "@/actions/category/categoryOptions";
 import { TOptionSet, TSpecGroup } from "@/shared/types/common";
 import { cn } from "@/shared/utils/styling";
 
@@ -21,6 +21,47 @@ const CategoryOptions = ({ categoryName, categoryID }: TProps) => {
   const [optionSetList, setOptionSetList] = useState<TOptionSet[]>([]);
   const [specGroupList, setSpecGroupList] = useState<TSpecGroup[]>([]);
 
+  // Fake data for options
+  const fakeOptionSetList: TOptionSet[] = [
+    {
+      id: "opt1",
+      name: "Color",
+      options: [
+        { name: "Red", value: "Red" },
+        { name: "Blue", value: "Blue" },
+        { name: "Green", value: "Green" },
+      ],
+      type: "select",
+    },
+    {
+      id: "opt2",
+      name: "Size",
+      options: [
+        { name: "S", value: "S" },
+        { name: "M", value: "M" },
+        { name: "L", value: "L" },
+        { name: "XL", value: "XL" },
+      ],
+      type: "select",
+    },
+  ];
+
+  // Fake data for specifications
+  const fakeSpecGroupList: TSpecGroup[] = [
+    {
+      id: "spec1",
+      title: "Material",
+      specs: ["Cotton", "Polyester", "Wool"],
+    },
+    {
+      id: "spec2",
+      title: "Warranty",
+      specs: ["1 Year", "2 Years"],
+    },
+  ];
+
+  // Previous API code commented out for reference:
+  /*
   const getCategoryOptionSet = async () => {
     if (categoryID) {
       const response = await getOptionSetByCatID(categoryID);
@@ -38,21 +79,21 @@ const CategoryOptions = ({ categoryName, categoryID }: TProps) => {
       }
     }
   };
+  */
+
+  // Now using fake data:
+  const getCategoryOptionSet = async () => {
+    setOptionSetList(fakeOptionSetList);
+  };
+
+  const getCategorySpecGroup = async () => {
+    setSpecGroupList(fakeSpecGroupList);
+  };
 
   useEffect(() => {
-    const getOptionAndSpecs = async () => {
-      if (categoryID) {
-        const optionsResponse = await getOptionSetByCatID(categoryID);
-        const specResponse = await getSpecGroupByCatID(categoryID);
-        if (optionsResponse.res) {
-          setOptionSetList(optionsResponse.res);
-        }
-        if (specResponse.res) {
-          setSpecGroupList(specResponse.res);
-        }
-      }
-    };
-    getOptionAndSpecs();
+    // Use fake data instead of API
+    getCategoryOptionSet();
+    getCategorySpecGroup();
   }, [categoryID]);
 
   const handleReloadOptions = async () => {
