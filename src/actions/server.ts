@@ -3,15 +3,8 @@
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
+import { Currency, Language } from "./type";
 
-
-export type Currency = {
-  code: string;
-  symbol: string;
-  exchange_rate_to_usd: number;
-  name: string; // Add label if used in your map
-  isActive: Boolean;
-};
 
 const supabase = createSupabaseServer();
 
@@ -39,7 +32,7 @@ let { data: languages, error } = await supabase
   .from('languages')
   .select('*');
 
-  return { languages, error };
+  return { languages: languages as Language[], error };
 }, ["languages"]);
 
 
