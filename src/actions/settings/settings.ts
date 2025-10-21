@@ -2,6 +2,7 @@ import { createSupabaseServer } from '@/shared/lib/supabaseClient';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { SettingsResponse } from './types';
+import { unstable_cache } from "next/cache";
 
 
 
@@ -10,7 +11,7 @@ import { SettingsResponse } from './types';
 
     const supabase = createSupabaseServer();
 
-export async function getSettingsData() {
+export const getSettingsData = unstable_cache(async () => {
   const { data, error } = await supabase
     .from('settings')
     .select('*')
@@ -22,7 +23,7 @@ export async function getSettingsData() {
   // Adjust the path below based on your settings JSON structure
   // For example, if banners are at site.banners or site.carousel
   return data as SettingsResponse;
-}
+}, ["settings"]);
 
 
 
