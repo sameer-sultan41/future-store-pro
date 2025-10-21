@@ -2,8 +2,10 @@
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 
+import { unstable_cache } from "next/cache";
 
-export const getTodayDeals = async (locale: string = "en") => {
+
+export const getTodayDeals = unstable_cache(async (locale: string = "en") => {
   const supabase = createSupabaseServer();
   try {
     const { data, error } = await supabase
@@ -35,11 +37,12 @@ export const getTodayDeals = async (locale: string = "en") => {
       .gt("end_date", new Date().toISOString())
       .eq("flash_deal_products.product.product_translations.language_code", locale);
     // Only the requested translation is returned
+
     return { data: data as FlashDeal[] | null, error: error ? error.message ?? String(error) : null };
   } catch (error) {
     return { data: null, error: "Can't fetch today's deals" };
   }
-}
+}, ["flash-deals"]);
 
 
 // Types for getTodayDeals response
