@@ -50,6 +50,11 @@ const CategoryOptions = ({ categoryName, categoryID }: TProps) => {
   const fakeSpecGroupList: TSpecGroup[] = [
     {
       id: "spec1",
+      title: "Mobile Specs",
+      specs: ["Camera: 2mp", "Display: 4 inch", "Battery: 3000mAh"],
+    },
+    {
+      id: "spec1",
       title: "Material",
       specs: ["Cotton", "Polyester", "Wool"],
     },
