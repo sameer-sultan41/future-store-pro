@@ -62,7 +62,7 @@ const StoreNavBar = () => {
       <section className="w-full">
         <div className="storeContainer w-full relative flex justify-between items-center">
           <Link href={"/"} className="mr-0 xl:mr-20 lg:mr-10">
-            <Image alt="future Logo" src={"/images/logo.png"} width={125} height={40} quality={100} />
+            <Image src={"/images/logo.png"} width={125} height={40} alt="future Logo" />
           </Link>
           <nav className="header-nav flex gap-6 text-gray-700 font-medium text-sm">
             <Link href="/products" className="flex items-center gap-2 hover:text-blue-500 transition-colors">
