@@ -11,7 +11,7 @@ import { cn } from "@/shared/utils/styling";
 
 const NavBarProfile = () => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [isActive, setIsActive] = useToggleMenu(false, menuRef);
+  const [isActive, setIsActive] = useToggleMenu(false, menuRef as React.RefObject<HTMLDivElement>);
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const router = useRouter();
 

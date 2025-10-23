@@ -52,7 +52,7 @@ let { data: result, error } = await supabase
 export const deleteBrand = async (brandID: string) => {
   if (!brandID || brandID === "") return { error: "Invalid Data!" };
   try {
-    const supabase = createSupabaseServer();
+    const supabase = await createSupabaseServer();
     const { data: result, error } = await supabase
       .from('brands')
       .delete()
@@ -72,7 +72,7 @@ export const updateBrand = async (data: TBrand) => {
   if (!ValidateUpdateBrand.safeParse(data).success) return { error: "Invalid Data!" };
 
   try {
-    const supabase = createSupabaseServer();
+    const supabase =await createSupabaseServer();
     const { data: result, error } = await supabase
       .from('brands')
       .update({

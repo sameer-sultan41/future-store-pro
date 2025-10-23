@@ -1,34 +1,27 @@
-'use client'
-import { redirect, useSearchParams } from 'next/navigation';
-import { z } from 'zod';
-import { useState } from 'react';
+"use client";
+import { redirect, useSearchParams } from "next/navigation";
+import { z } from "zod";
+import { useState } from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast, Toaster } from 'sonner';
-import { login } from '@/actions/auth/login';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast, Toaster } from "sonner";
+import { login } from "@/actions/auth/login";
 
 const signInDefaultValues =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === "development"
     ? {
-         email: 'sameer@gmail.com',
-        password: 'sameer',
+        email: "sameer@gmail.com",
+        password: "sameer",
       }
     : {
-        email: '',
-        password: '',
+        email: "",
+        password: "",
       };
 
 export interface IUserSignIn {
@@ -37,14 +30,14 @@ export interface IUserSignIn {
 }
 
 export const UserSignInSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
 export default function CredentialsSignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const form = useForm<IUserSignIn>({
     resolver: zodResolver(UserSignInSchema),
@@ -57,25 +50,25 @@ export default function CredentialsSignInForm() {
     setIsLoading(true);
     try {
       const res = await login(data);
-      console.log('error signin', res);
+      console.log("error signin", res);
       const { error } = res;
 
       if (error) {
         // Handle email not confirmed error specifically
-        if (error.message.includes('Email not confirmed')) {
-          toast.error('Email not verified', {
-            description: 'Please check your email and click the verification link before signing in.',
+        if (error.message.includes("Email not confirmed")) {
+          toast.error("Email not verified", {
+            description: "Please check your email and click the verification link before signing in.",
             action: {
-              label: 'Resend Email',
+              label: "Resend Email",
               onClick: () => handleResendConfirmation(data.email),
             },
           });
         } else {
-          toast.error('Sign in failed', {
+          toast.error("Sign in failed", {
             description: error.message,
             action: {
-              label: 'Retry',
-              onClick: () => console.log('Retry'),
+              label: "Retry",
+              onClick: () => console.log("Retry"),
             },
           });
         }
@@ -84,7 +77,7 @@ export default function CredentialsSignInForm() {
 
       redirect(callbackUrl);
     } catch (err) {
-      toast.error('An unexpected error occurred.');
+      toast.error("An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -92,24 +85,24 @@ export default function CredentialsSignInForm() {
 
   const handleResendConfirmation = async (email: string) => {
     try {
-      const { createClient } = await import('@/supabase/client');
-      const supabase = createClient();
+      const { createSupabaseClient } = await import("@/supabase/client");
+      const supabase = await createSupabaseClient();
       const { error } = await supabase.auth.resend({
-        type: 'signup',
+        type: "signup",
         email: email,
       });
-      
+
       if (error) {
-        toast.error('Failed to resend confirmation email', {
+        toast.error("Failed to resend confirmation email", {
           description: error.message,
         });
       } else {
-        toast.success('Confirmation email sent!', {
-          description: 'Please check your email for the verification link.',
+        toast.success("Confirmation email sent!", {
+          description: "Please check your email for the verification link.",
         });
       }
     } catch (error) {
-      toast.error('An error occurred while resending the email.');
+      toast.error("An error occurred while resending the email.");
     }
   };
 
@@ -140,11 +133,7 @@ export default function CredentialsSignInForm() {
               <FormItem className="w-full">
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter password"
-                    {...field}
-                  />
+                  <Input type="password" placeholder="Enter password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -153,11 +142,11 @@ export default function CredentialsSignInForm() {
 
           <div>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </div>
           <div className="text-sm">
-            <Link href="/page/conditions-of-use">Conditions of Use</Link> and{' '}
+            <Link href="/page/conditions-of-use">Conditions of Use</Link> and{" "}
             <Link href="/page/privacy-policy">Privacy Notice.</Link>
           </div>
         </div>

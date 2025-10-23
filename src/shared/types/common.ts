@@ -1,5 +1,4 @@
-import { Currency } from "@/actions/server";
-import { C } from "node_modules/framer-motion/dist/types.d-DsEeKk6G";
+import { Currency } from "@/actions/type";
 
 
 export type TProductCard = {

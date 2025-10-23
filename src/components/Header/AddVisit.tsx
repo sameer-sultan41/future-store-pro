@@ -1,20 +1,27 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { addVisit } from "@/actions/pageVisit/pageVisitServices";
 import { TAddPageVisit } from "@/shared/types/common";
 
 const AddVisit = () => {
   const pathName = usePathname();
+  const lastTrackedPathRef = useRef<string | null>(null);
   useEffect(() => {
+    // Avoid duplicate calls caused by React StrictMode double-invoking effects in development
+    if (lastTrackedPathRef.current === pathName) return;
+    lastTrackedPathRef.current = pathName;
+
     const addingVisit = async () => {
-      const deviceResolution = window.screen.width.toString() + " x " + window.screen.height.toString();
+      // Only attempt tracking in production to eliminate noisy dev POSTs
+      if (process.env.NODE_ENV !== "production") return;
+      const deviceResolution = `${window.screen.width} x ${window.screen.height}`;
 
       const data: TAddPageVisit = {
         pageType: "MAIN",
-        deviceResolution: deviceResolution,
+        deviceResolution,
       };
 
       if (pathName.includes("/list/")) {
@@ -27,7 +34,12 @@ const AddVisit = () => {
         const pathArr = pathName.split("/product/");
         data.productID = pathArr[pathArr.length - 1];
       }
-      await addVisit(data);
+      try {
+        await addVisit(data);
+      } catch (e) {
+        // swallow logging errors in production; optionally add client-side logging service
+        if (process.env.NODE_ENV !== "production") console.warn("addVisit failed", e);
+      }
     };
     addingVisit();
   }, [pathName]);

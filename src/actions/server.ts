@@ -9,7 +9,8 @@ import { Currency, Language } from "./type";
 const supabase = createSupabaseServer();
 
 export async function setCurrency(currency: Currency) {
-  cookies().set("currency", JSON.stringify(currency), {
+  const cookieStore = await cookies();
+  cookieStore.set("currency", JSON.stringify(currency), {
     path: "/",
     maxAge: 60 * 60 * 24 * 30, // 30 days
     sameSite: "lax",
@@ -36,8 +37,9 @@ let { data: languages, error } = await supabase
 }, ["languages"]);
 
 
-export const getCurrencyFromCookie = () => {
-   const currencyCookie = cookies().get("currency")?.value;
+export const getCurrencyFromCookie = async () => {
+  const cookieStore = await cookies();
+  const currencyCookie = cookieStore.get("currency")?.value;
   if (!currencyCookie) return null;
   try {
     return JSON.parse(currencyCookie) as Currency;

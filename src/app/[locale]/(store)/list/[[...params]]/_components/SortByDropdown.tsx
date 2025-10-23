@@ -17,7 +17,7 @@ type TProps = {
 };
 
 const SortByDropdown = ({ data, width = "auto", selectedIndex = 0, onChange }: TProps) => {
-  const optionRef = useRef<HTMLDivElement>(null);
+  const optionRef = useRef<HTMLDivElement>(null!);
   const [isActive, setIsActive] = useToggleMenu(false, optionRef);
 
   const toggleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {

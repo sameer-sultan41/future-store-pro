@@ -1,6 +1,7 @@
 "use server";
 
-import { Currency } from "@/actions/server";
+
+import { Currency } from "@/actions/type";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 
 
