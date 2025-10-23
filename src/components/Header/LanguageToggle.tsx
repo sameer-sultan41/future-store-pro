@@ -68,7 +68,8 @@ export function LanguageToggle({
         <Button
           variant="outline"
           className={cn("shadow-sm uppercase", className)}
-          aria-native_name="Change language"
+          // Replaced invalid aria-native_name with aria-label for accessibility compliance
+          aria-label={`Change language (current: ${active?.native_name ?? locale})`}
           title={`Language: ${active?.native_name ?? locale}`}
         >
           <Globe className="h-4 w-4" /> {locale}

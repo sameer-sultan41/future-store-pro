@@ -13,6 +13,8 @@ const nextConfig = {
         port: "",
       },
     ],
+    // Add supported qualities to silence next/image warning when using quality={100}
+    qualities: [75, 100],
   },
   env: {
     IMG_URL: process.env.CLOUDINARY_URL,
