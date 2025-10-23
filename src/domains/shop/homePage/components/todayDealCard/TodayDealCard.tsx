@@ -55,29 +55,37 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
 
   const saveAmount = getConvertedPrice(currency, oldPrice) - getConvertedPrice(currency, newPrice);
 
-  const [remainedTime, setRemainedTime] = useState(() => {
-    // Ensure dealEndTime is a Date object
-    return typeof dealEndTime === "string" ? new Date(dealEndTime) : dealEndTime;
+  const [timeRemaining, setTimeRemaining] = useState<number>(() => {
+    // Calculate the remaining time in milliseconds
+    const endTime = new Date(dealEndTime).getTime();
+    const now = Date.now();
+    return Math.max(0, endTime - now);
   });
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setRemainedTime((prev) => {
-        if (!prev || isNaN(prev.getTime())) return prev; // Prevent error
-        const next = new Date(prev.getTime() - 1000);
-        return next;
+      setTimeRemaining((prev) => {
+        const newTime = prev - 1000;
+        return newTime > 0 ? newTime : 0;
       });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Helper to format time safely
-  const formatTime = (date: Date) => {
-    if (!date || isNaN(date.getTime())) return "00:00:00";
-    const h = String(date.getHours()).padStart(2, "0");
-    const m = String(date.getMinutes()).padStart(2, "0");
-    const s = String(date.getSeconds()).padStart(2, "0");
-    return `${h}:${m}:${s}`;
+  // Helper to format time from milliseconds
+  const formatTime = (ms: number) => {
+    if (ms <= 0) return "0d 00:00:00";
+
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
   };
 
   const handleAddToCart = () => {
@@ -210,12 +218,12 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
           >
             <ClockIcon width={18} className="fill-red-500 my-2 mt-2.5 mx-auto block" />
             <motion.span
-              className="w-24 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
+              className="w-32 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-sm font-semibold tracking-wider shadow-sm"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
             >
-              {formatTime(remainedTime)}
+              {formatTime(timeRemaining)}
             </motion.span>
           </motion.section>
         </div>
