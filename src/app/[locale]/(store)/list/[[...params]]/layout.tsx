@@ -11,18 +11,21 @@ export const metadata: Metadata = {
   title: "future - Products List",
 };
 
+// In Next.js 16 async layouts receive params as a Promise when the layout itself is async.
 const ListLayout = async ({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string; params: string[] };
+  params: Promise<{ locale: string; params?: string[] }>; // Promise-wrapped route params
 }) => {
+  const resolved = await params;
+  const slugParts = resolved.params ?? [];
   const result = await getAllBrands();
 
   return (
     <div className="mt-[136px] bg-white">
-      <BreadCrumb params={params.params} />
+      <BreadCrumb params={slugParts} />
 
       <div className="storeContainer flex flex-col">
         <div className="flex visible lg:hidden w-full mt-3 px-3 justify-between">

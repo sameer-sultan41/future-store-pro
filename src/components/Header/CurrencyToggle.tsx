@@ -1,4 +1,5 @@
-import { Currency, getCurrency, getCurrencyFromCookie, setCurrency } from "@/actions/server";
+import { getCurrency, getCurrencyFromCookie, setCurrency } from "@/actions/server";
+import { Currency } from "@/actions/type";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

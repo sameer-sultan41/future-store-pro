@@ -1,3 +1,5 @@
+import { JSX } from "react";
+
 type TProps = {
   width: number;
   fill?: string;

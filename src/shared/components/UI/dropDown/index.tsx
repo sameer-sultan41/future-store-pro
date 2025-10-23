@@ -18,7 +18,7 @@ type TProps = {
 
 const DropDownList = ({ data, width = "auto", selectedIndex = 0, onChange }: TProps) => {
   const optionRef = useRef<HTMLDivElement>(null);
-  const [isActive, setIsActive] = useToggleMenu(false, optionRef);
+  const [isActive, setIsActive] = useToggleMenu(false, optionRef as React.RefObject<HTMLDivElement>);
 
   const toggleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();

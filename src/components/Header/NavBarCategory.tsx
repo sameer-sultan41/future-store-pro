@@ -14,7 +14,7 @@ type TProps = {
 };
 
 const NavBarCategory = ({ isNavbarVisible: isNavbarHide }: TProps) => {
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null!);
   const [isActive, setIsActive] = useToggleMenu(false, dropdownRef);
   const [categories, setCategories] = useState<TGroupJSON[]>([]);
 
