@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import { TProductCard } from "@/shared/types/common";
@@ -20,7 +19,7 @@ const TopProductCard = ({
   staticWidth = false,
   currency,
 }: TProductCard) => {
-  const currencySymbol = currency?.symbol || "Rs";
+  const currencySymbol = currency?.symbol;
 
   return (
     <div

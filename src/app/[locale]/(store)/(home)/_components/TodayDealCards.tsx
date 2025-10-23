@@ -7,7 +7,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Locale } from "next-intl";
 
 export function TodayDealCards({ DealData }: { DealData: FlashDeal }) {
-  console.log("deals--->", DealData);
   return (
     <section className="w-full mt-14 px-2 md:px-6 ">
       <div className="w-full bg-gray-100 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-10 border border-gray-100">
