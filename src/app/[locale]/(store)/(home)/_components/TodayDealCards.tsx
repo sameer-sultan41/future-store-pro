@@ -25,9 +25,9 @@ export function TodayDealCards({ DealData }: { DealData: FlashDeal }) {
             {DealData.flash_deal_products.map((deal, index) => (
               <CarouselItem key={index} className="pl-1 md:basis-1/2 lg:basis-1/4 p-4">
                 <TodayDealCard
-                  productName={deal.product?.product_translations[0].name || "Product"}
-                  oldPrice={deal.product?.price || 0}
-                  newPrice={deal.deal_price || 0}
+                  productName={deal.product?.product_translations[0].name}
+                  oldPrice={deal.product?.price}
+                  newPrice={deal.deal_price}
                   image={deal.product?.images || ["/images/images/defaultUser.png"]}
                   desc={deal.product?.product_translations[0].description || ""}
                   dealEndTime={DealData.end_date}

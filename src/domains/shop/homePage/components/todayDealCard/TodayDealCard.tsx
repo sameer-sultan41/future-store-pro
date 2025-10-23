@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Currency, getCurrencyFromCookie } from "@/actions/server";
+import { getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
 import { Urls } from "@/shared/constants/urls";
 import { add } from "@/store/shoppingCart";
@@ -19,6 +19,7 @@ import { toggleWishlist } from "@/store/wishlist";
 import { TCartItemData } from "@/shared/types/shoppingCart";
 import { TWishlistItem } from "@/shared/types/wishlist";
 import { RootState } from "@/store/shoppingCart";
+import { Currency } from "@/actions/type";
 
 type TProps = {
   productName: string;
@@ -51,33 +52,41 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
     getCurrency();
   }, []);
 
-  const currencySymbol = currency?.symbol || "€";
+  const currencySymbol = currency?.symbol;
 
   const saveAmount = getConvertedPrice(currency, oldPrice) - getConvertedPrice(currency, newPrice);
 
-  const [remainedTime, setRemainedTime] = useState(() => {
-    // Ensure dealEndTime is a Date object
-    return typeof dealEndTime === "string" ? new Date(dealEndTime) : dealEndTime;
+  const [timeRemaining, setTimeRemaining] = useState<number>(() => {
+    // Calculate the remaining time in milliseconds
+    const endTime = new Date(dealEndTime).getTime();
+    const now = Date.now();
+    return Math.max(0, endTime - now);
   });
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setRemainedTime((prev) => {
-        if (!prev || isNaN(prev.getTime())) return prev; // Prevent error
-        const next = new Date(prev.getTime() - 1000);
-        return next;
+      setTimeRemaining((prev) => {
+        const newTime = prev - 1000;
+        return newTime > 0 ? newTime : 0;
       });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Helper to format time safely
-  const formatTime = (date: Date) => {
-    if (!date || isNaN(date.getTime())) return "00:00:00";
-    const h = String(date.getHours()).padStart(2, "0");
-    const m = String(date.getMinutes()).padStart(2, "0");
-    const s = String(date.getSeconds()).padStart(2, "0");
-    return `${h}:${m}:${s}`;
+  // Helper to format time from milliseconds
+  const formatTime = (ms: number) => {
+    if (ms <= 0) return "0d 00:00:00";
+
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
   };
 
   const handleAddToCart = () => {
@@ -85,8 +94,8 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
       productId: productId || url, // Use productId if available, otherwise fallback to url
       productName,
       imgUrl: image[0],
-      price: newPrice,
-      dealPrice: oldPrice,
+      price: oldPrice,
+      dealPrice: newPrice,
       quantity: 1,
     };
     dispatch(add(cartItem));
@@ -183,7 +192,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <span className="block text-gray-400 text-xs line-through select-none">
               was{" "}
-              {getConvertedPrice(currency, oldPrice).toLocaleString("en-us", {
+              {getConvertedPrice(currency, oldPrice)?.toLocaleString("en-us", {
                 useGrouping: true,
                 minimumFractionDigits: 2,
               })}{" "}
@@ -210,12 +219,12 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
           >
             <ClockIcon width={18} className="fill-red-500 my-2 mt-2.5 mx-auto block" />
             <motion.span
-              className="w-24 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-base font-semibold tracking-wider shadow-sm"
+              className="w-32 h-7 rounded-md border border-red-300 bg-white/60 pt-[1px] text-sm font-semibold tracking-wider shadow-sm"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
             >
-              {formatTime(remainedTime)}
+              {formatTime(timeRemaining)}
             </motion.span>
           </motion.section>
         </div>

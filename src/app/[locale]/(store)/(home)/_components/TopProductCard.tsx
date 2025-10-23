@@ -19,7 +19,7 @@ const TopProductCard = ({
   staticWidth = false,
   currency,
 }: TProductCard) => {
-  const currencySymbol = currency?.symbol || "Rs";
+  const currencySymbol = currency?.symbol;
 
   return (
     <div
@@ -91,18 +91,18 @@ const TopProductCard = ({
                     -{(100 - (dealPrice / price) * 100).toLocaleString("en-us", { maximumFractionDigits: 0 })}%
                   </span>
                   <span className="line-through text-gray-400 text-xs">
-                    was {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}
+                    was {price?.toLocaleString("en-us", { minimumFractionDigits: 2 })}
                     {currencySymbol}
                   </span>
                 </div>
                 <span className="text-lg font-bold text-primary">
-                  {dealPrice.toLocaleString("en-us", { minimumFractionDigits: 2 })}
+                  {dealPrice?.toLocaleString("en-us", { minimumFractionDigits: 2 })}
                   {currencySymbol}
                 </span>
               </>
             ) : (
               <span className="text-lg font-bold text-primary">
-                {price.toLocaleString("en-us", { minimumFractionDigits: 2 })}
+                {price?.toLocaleString("en-us", { minimumFractionDigits: 2 })}
                 {currencySymbol}
               </span>
             )}
