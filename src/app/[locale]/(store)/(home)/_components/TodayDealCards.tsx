@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Locale } from "next-intl";
 
 export function TodayDealCards({ DealData }: { DealData: FlashDeal }) {
+  console.log("deals--->", DealData);
   return (
     <section className="w-full mt-14 px-2 md:px-6 ">
       <div className="w-full bg-gray-100 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-10 border border-gray-100">
@@ -25,9 +26,9 @@ export function TodayDealCards({ DealData }: { DealData: FlashDeal }) {
             {DealData.flash_deal_products.map((deal, index) => (
               <CarouselItem key={index} className="pl-1 md:basis-1/2 lg:basis-1/4 p-4">
                 <TodayDealCard
-                  productName={deal.product?.product_translations[0].name || "Product"}
-                  oldPrice={deal.product?.price || 0}
-                  newPrice={deal.deal_price || 0}
+                  productName={deal.product?.product_translations[0].name}
+                  oldPrice={deal.product?.price}
+                  newPrice={deal.deal_price}
                   image={deal.product?.images || ["/images/images/defaultUser.png"]}
                   desc={deal.product?.product_translations[0].description || ""}
                   dealEndTime={DealData.end_date}

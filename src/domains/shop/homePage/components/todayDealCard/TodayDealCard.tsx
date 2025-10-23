@@ -19,6 +19,7 @@ import { toggleWishlist } from "@/store/wishlist";
 import { TCartItemData } from "@/shared/types/shoppingCart";
 import { TWishlistItem } from "@/shared/types/wishlist";
 import { RootState } from "@/store/shoppingCart";
+import { Currency } from "@/actions/type";
 
 type TProps = {
   productName: string;
@@ -51,7 +52,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
     getCurrency();
   }, []);
 
-  const currencySymbol = currency?.symbol || "€";
+  const currencySymbol = currency?.symbol;
 
   const saveAmount = getConvertedPrice(currency, oldPrice) - getConvertedPrice(currency, newPrice);
 
@@ -191,7 +192,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <span className="block text-gray-400 text-xs line-through select-none">
               was{" "}
-              {getConvertedPrice(currency, oldPrice).toLocaleString("en-us", {
+              {getConvertedPrice(currency, oldPrice)?.toLocaleString("en-us", {
                 useGrouping: true,
                 minimumFractionDigits: 2,
               })}{" "}

@@ -1,4 +1,5 @@
-import { Currency } from "@/actions/server";
+import { Currency } from "@/actions/type";
+
 
 
   // Convert price using exchange rate if currency is set and not USD
