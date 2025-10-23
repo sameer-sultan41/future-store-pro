@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus, faEye, faBalanceScale } from "@fortawesome/free-solid-svg-icons";
 import { Heart, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Currency, getCurrencyFromCookie } from "@/actions/server";
+import { getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
 import { Urls } from "@/shared/constants/urls";
 import { add } from "@/store/shoppingCart";
@@ -85,8 +85,8 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
       productId: productId || url, // Use productId if available, otherwise fallback to url
       productName,
       imgUrl: image[0],
-      price: newPrice,
-      dealPrice: oldPrice,
+      price: oldPrice,
+      dealPrice: newPrice,
       quantity: 1,
     };
     dispatch(add(cartItem));
