@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   title: "Future Store - Homepage",
 };
 
-export default async function Home({ params }: { params: { locale: string; params?: string[] } }) {
-  const { params: pathParams = [], locale } = params;
+export default async function Home({ params }: { params: Promise<{ locale: string; params?: string[] }> }) {
+  const { locale } = await params;
   const settings = await getSettingsData();
 
   const { data: flashDeals, error } = await getTodayDeals(locale);
