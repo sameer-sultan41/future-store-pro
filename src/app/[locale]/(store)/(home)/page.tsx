@@ -13,6 +13,7 @@ import {
 import { threeSaleCards } from "@/domains/shop/homePage/constants";
 import { getSettingsData } from "@/actions/settings/settings";
 import { FlashDeal, getTodayDeals } from "@/actions/product/deals";
+import UpcomingProducts from "./_components/UpcomingProducts";
 
 export const metadata: Metadata = {
   title: "Future Store - Homepage",
@@ -38,6 +39,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
         {/* <WideCardRow cards={twoSaleCards} /> */}
         <CollectionCards />
+        <UpcomingProducts />
         <TopSellingProductsList />
         {/* <LatestBlogPosts /> */}
         {/* <CompanyLogoList /> */}
