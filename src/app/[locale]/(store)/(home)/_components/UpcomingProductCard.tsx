@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Bell, Zap, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Image from "next/image";
 
 interface UpcomingProductCardProps {
   productName: string;
@@ -52,7 +53,7 @@ export function UpcomingProductCard({
   }, [releaseDate]);
 
   return (
-    <Card className="group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 border-2 border-border hover:border-primary/60 transition-all duration-500 h-full flex flex-col hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1">
+    <Card className="group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 border-2 border-border hover:border-primary/60 transition-all duration-500 h-full flex flex-col hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1 p-0 gap-0">
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
@@ -60,11 +61,12 @@ export function UpcomingProductCard({
       <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-primary/10 to-transparent" />
 
       {/* Product Image Container */}
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-secondary to-secondary/70">
-        <img
+      <div className="relative h-56 overflow-hidden bg-gradient-to-br from-secondary to-secondary/70">
+        <Image
           src={image || "/placeholder.svg"}
+          fill
           alt={productName}
-          className="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 ease-out"
+          className="w-full h-full group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 ease-out"
         />
 
         {/* Multi-layer image overlay for depth */}
@@ -137,21 +139,6 @@ export function UpcomingProductCard({
             </p>
           </div>
         )}
-
-        {/* Notify Me Button with enhanced styling */}
-        <Button
-          onClick={() => setIsNotified(!isNotified)}
-          className={`w-full font-bold py-2.5 text-xs transition-all duration-300 shadow-lg group-hover:shadow-xl relative overflow-hidden ${
-            isNotified
-              ? "bg-gradient-to-r from-primary/20 to-primary/10 text-primary border-2 border-primary/60 hover:bg-primary/30 hover:border-primary/80"
-              : "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary shadow-primary/30 hover:shadow-primary/50"
-          }`}
-          variant={isNotified ? "outline" : "default"}
-        >
-          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          <Bell className={`w-3.5 h-3.5 mr-2 ${isNotified ? "animate-pulse" : ""}`} />
-          {isNotified ? "✓ Notified" : "Notify Me"}
-        </Button>
       </div>
     </Card>
   );

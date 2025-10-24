@@ -39,13 +39,13 @@ const UpcomingProducts = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Upcoming <span className="text-primary">Innovations</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg  max-w-2xl mx-auto">
             Get ready for the next generation of products. Be the first to know when they launch.
           </p>
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {upcomingProducts.map((product, index) => (
             <UpcomingProductCard key={index} {...product} />
           ))}
