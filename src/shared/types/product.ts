@@ -84,6 +84,32 @@ export type TCartListItemDB = {
   url?: string;
 };
 
+export type TUpcomingProduct = {
+  id: string;
+  product_id: string;
+  launch_date: string;
+  is_notifiable: boolean;
+  notification_sent: boolean;
+  created_at: string;
+  products: {
+    id: string;
+    sku: string;
+    url: string;
+    images: string[];
+    category_id: string;
+    categories: {
+      id: string;
+      url: string;
+    } | null;
+    product_translations: {
+      language_code: string;
+      name: string;
+      description: string;
+      short_description: string;
+    }[];
+  };
+};
+
 export type TSpecification = {
   groupName: string;
   specs: {

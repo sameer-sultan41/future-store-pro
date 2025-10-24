@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Zap, Sparkles, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Zap, Sparkles, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 
 interface UpcomingProductCardProps {
+  productId: string;
   productName: string;
   description: string;
   releaseDate: Date;
@@ -27,7 +27,6 @@ export function UpcomingProductCard({
     minutes: number;
     seconds: number;
   } | null>(null);
-  const [isNotified, setIsNotified] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
