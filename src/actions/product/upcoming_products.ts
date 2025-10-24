@@ -42,7 +42,7 @@ export const getUpcomingProducts = async (locale: string = "en") => {
       return null;
     }
 
-    console.log("Upcoming products data:", data);
+
     return data;
   } catch (error) {
     console.error("Error fetching upcoming products:", error);
