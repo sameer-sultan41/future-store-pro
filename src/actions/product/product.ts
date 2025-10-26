@@ -113,16 +113,17 @@ export const getProductByUrl = async (
 
     // --- Post-filter deals to "active now" & sort by latest start_date ---
     const now = Date.now();
-    const deals = Array.isArray((data as any).flash_deal_products)
-      ? (data as any).flash_deal_products
-          .filter((fdp: any) => {
+    const productData = data as unknown as ProductFull;
+    const deals = Array.isArray(productData.flash_deal_products)
+      ? productData.flash_deal_products
+          .filter((fdp) => {
             const d = fdp?.flash_deals;
             if (!d || d.is_active === false) return false;
             const s = d.start_date ? new Date(d.start_date).getTime() : 0;
             const e = d.end_date ? new Date(d.end_date).getTime() : 0;
             return s <= now && now <= e;
           })
-          .sort((a: any, b: any) => {
+          .sort((a, b) => {
             const as = a?.flash_deals?.start_date ? new Date(a.flash_deals.start_date).getTime() : 0;
             const bs = b?.flash_deals?.start_date ? new Date(b.flash_deals.start_date).getTime() : 0;
             return bs - as;
@@ -130,7 +131,7 @@ export const getProductByUrl = async (
       : [];
 
     const response: ProductByUrlResponse = {
-      ...(data as any),
+      ...productData,
       flash_deal_products: deals,        
     };
     return { data: response };
