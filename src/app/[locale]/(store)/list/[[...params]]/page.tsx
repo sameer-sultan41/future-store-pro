@@ -39,6 +39,7 @@ const page = async ({
   if (products.length < 1) {
     return <NoResultImage />;
   }
+  console.log("products", products[0]);
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-2 mb-14">
       {products.map((product) => (
@@ -46,10 +47,10 @@ const page = async ({
           key={product.id}
           imgUrl={product.images}
           name={product.translation?.name || product.sku}
-          price={getConvertedPrice(currency, product.base_price)}
+          price={getConvertedPrice(currency, product.price)}
           isAvailable={product.is_available}
-          dealPrice={getConvertedPrice(currency, product.flash_deal_price || 0) || undefined}
-          description={product.translation?.description || []}
+          dealPrice={getConvertedPrice(currency, product.flash_deal_price) || undefined}
+          description={product.translation?.description}
           url={Urls.productDetail + "/" + product.url}
           currency={currency}
         />
