@@ -98,7 +98,7 @@ const TopProductCard = ({
             </span>
           </div>
         )}
-        <div className="imageWrapper w-full h-[200px]  relative rounded-xl border border-gray-100 overflow-hidden transition-all duration-500 bg-gray-50 flex items-center justify-center">
+        <div className="imageWrapper w-full h-[200px] relative rounded-xl border border-gray-100 overflow-hidden transition-all duration-500 bg-gray-50 flex items-center justify-center">
           <Image
             src={imgUrl[0]}
             alt={name}
