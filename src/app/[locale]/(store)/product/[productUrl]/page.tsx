@@ -1,25 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
 import { getProductByUrl, ProductByUrlResponse } from "@/actions/product/product";
 import { getShippingRates, ShippingRate, ShippingAddress, ShippingPackage } from "@/actions/shipping/shipping";
-import { pickActiveDeal, computeEffectivePrice } from "@/actions/product/type";
+import { computeEffectivePrice } from "@/actions/product/type";
 import Gallery from "@/domains/product/components/gallery";
-import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
-import { TopProducts } from "@/domains/product/constants";
-import { LikeIcon, MinusIcon } from "@/shared/components/icons/svgIcons";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import ProductBoard from "./_components/ProductBoard";
-import UserReview from "./_components/UserReview";
 import SimilarProduct from "./_components/SimilarProduct";
 
 // Type aliases for cleaner code
 type ProductVariant = NonNullable<ProductByUrlResponse["product_variants"]>[number];
-type ProductTranslation = NonNullable<ProductByUrlResponse["product_translations"]>[number];
 type VariantOption = NonNullable<ProductVariant["product_variant_options"]>[number];
 type VariantOptionDetails = NonNullable<VariantOption["variant_options"]>;
 
