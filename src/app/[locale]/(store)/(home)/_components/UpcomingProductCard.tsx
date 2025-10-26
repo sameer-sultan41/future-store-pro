@@ -65,7 +65,7 @@ export function UpcomingProductCard({
           src={image || "/placeholder.svg"}
           fill
           alt={productName}
-          className="w-full h-full group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 ease-out"
+          className="group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 ease-out"
         />
 
         {/* Multi-layer image overlay for depth */}
