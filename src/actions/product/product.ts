@@ -46,13 +46,8 @@ export const getProductByUrl = async (
 
   const supabase = createSupabaseServer();
 
-
-
-
-  try {
-const { data, error } = await supabase
-  .from("products")
-  .select(`
+  // LEFT joins by default: keep product even if there are 0 flash deals
+  const select = `
     id,
     url,
     sku,
@@ -80,22 +75,65 @@ const { data, error } = await supabase
           display_value,
           color_hex,
           image_url,
-          variant_types (
-            name,
-            display_type
-          )
+          variant_types (name, display_type)
         )
       )
+    ),
+    flash_deal_products (
+      id,
+      deal_price,
+      stock_limit,
+      flash_deal_id,
+      product_id,
+      flash_deals (
+        id,
+        name,
+        discount_type,
+        discount_value,
+        start_date,
+        end_date,
+        is_active,
+        max_uses,
+        current_uses
+      )
     )
-  `)
-    .eq("product_translations.language_code", locale)
- .eq("url", productUrl)
-//  .eq("url", "samsung-galaxy-s24-ultra")
-//  .eq("url", "nike-mens-tshirt")
-  .maybeSingle();
+  `;
+
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select(select)
+      .eq("url", productUrl)
+      .eq("product_translations.language_code", locale)
+      // ⚠️ DO NOT add any filters on flash_deal_products.* or flash_deal_products.flash_deals.*
+      .maybeSingle();
 
     if (error) return { error: error.message };
-    return { data: data as ProductByUrlResponse | null };
+    if (!data) return { data: null };
+
+    // --- Post-filter deals to "active now" & sort by latest start_date ---
+    const now = Date.now();
+    const deals = Array.isArray((data as any).flash_deal_products)
+      ? (data as any).flash_deal_products
+          .filter((fdp: any) => {
+            const d = fdp?.flash_deals;
+            if (!d || d.is_active === false) return false;
+            const s = d.start_date ? new Date(d.start_date).getTime() : 0;
+            const e = d.end_date ? new Date(d.end_date).getTime() : 0;
+            return s <= now && now <= e;
+          })
+          .sort((a: any, b: any) => {
+            const as = a?.flash_deals?.start_date ? new Date(a.flash_deals.start_date).getTime() : 0;
+            const bs = b?.flash_deals?.start_date ? new Date(b.flash_deals.start_date).getTime() : 0;
+            return bs - as;
+          })
+      : [];
+
+    const response: ProductByUrlResponse = {
+      ...(data as any),
+      flash_deal_products: deals,        
+    };
+    return { data: response };
   } catch (err: any) {
     return { error: err?.message ?? String(err) };
   }

@@ -88,7 +88,7 @@ const ProductPage = () => {
   useEffect(() => {
     const getProductFromDB = async () => {
       const response = await getProductByUrl(locale, productUrl);
-
+      console.log("response--->", response);
       if ("data" in response) {
         setProductInfo(response.data as ProductByUrlResponse);
       } else {
