@@ -5,14 +5,14 @@ import { useState, useEffect } from "react";
 
 import AddToCartButton from "@/domains/shop/shoppingCard/components/addToCartButton";
 import Quantity from "@/domains/shop/shoppingCard/components/quantity";
-import { StarIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
+import { StarIcon } from "@/shared/components/icons/svgIcons";
 import { TProductBoard } from "@/shared/types/product";
-import { TCartItem, TCartItemData } from "@/shared/types/shoppingCart";
+import { TCartItemData } from "@/shared/types/shoppingCart";
 import { getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
 import { Currency } from "@/actions/type";
 import { motion } from "framer-motion";
-import { Heart } from "lucide-react";
+import { Heart, Sparkles, Star } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlist } from "@/store/wishlist";
 import { TWishlistItem } from "@/shared/types/wishlist";
@@ -90,18 +90,19 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
           />
         </motion.div>
       </button>
-      <section className="block w-full">
+      {/* Render star ratings */}
+      {/* <section className="block w-full">
         <div className="flex items-center gap-0.5">
-          <StarIcon width={15} stroke="#856B0F" fill="#FFD643" />
-          <StarIcon width={15} stroke="#856B0F" fill="#FFD643" />
-          <StarIcon width={15} stroke="#856B0F" fill="#FFD643" />
-          <StarIcon width={15} stroke="#856B0F" fill="#FFD643" />
-          <StarIcon width={15} stroke="#856B0F" fill="#FFD643" />
+          <Star width={15} stroke="#856B0F" fill="#FFD643" />
+          <Star width={15} stroke="#856B0F" fill="#FFD643" />
+          <Star width={15} stroke="#856B0F" fill="#FFD643" />
+          <Star width={15} stroke="#856B0F" fill="#FFD643" />
+          <Star width={15} stroke="#856B0F" fill="#FFD643" />
           <Link href={"#"} className="ml-4 text-xs text-future-blue-300">
             880 User Reviews
           </Link>
         </div>
-      </section>
+      </section> */}
       <h1 className="block text-2xl leading-9 font-medium my-2.5 mt-8 text-gray-700">{name}</h1>
       <span className="block text-xs text-gray-700 mb-4">{shortDesc}</span>
       <hr className="w-full border-t border-gray-300 mb-5" />
@@ -117,24 +118,39 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
       </h2>
 
       {dealPrice && (
-        <div className="mb-5 text-sm">
-          <span className="text-white rounded-sm bg-future-red-500 px-3 py-1">
-            {`
-            Save
-            ${getConvertedPrice(currency, price - dealPrice).toLocaleString("en-us", {
-              minimumIntegerDigits: 2,
-              minimumFractionDigits: 2,
-            })} ${currencySymbol}
-            `}
-          </span>
-          <span className="mt-[10px] block text-gray-800">
-            Was{" "}
-            {getConvertedPrice(currency, price).toLocaleString("en-us", {
-              minimumIntegerDigits: 2,
-              minimumFractionDigits: 2,
-            })}{" "}
-            {currencySymbol}
-          </span>
+        <div className="mb-5">
+          {/* Savings Badge */}
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1.5 text-white rounded-lg bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 font-semibold shadow-sm">
+              <Sparkles className="h-4 w-4" />
+
+              <span>
+                Save{" "}
+                {getConvertedPrice(currency, price - dealPrice).toLocaleString("en-us", {
+                  minimumIntegerDigits: 2,
+                  minimumFractionDigits: 2,
+                })}{" "}
+                {currencySymbol}
+              </span>
+            </span>
+
+            {/* Discount Percentage Badge */}
+            <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+              -{Math.round(((price - dealPrice) / price) * 100)}%
+            </span>
+          </div>
+
+          {/* Original Price */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500">Regular price:</span>
+            <span className="text-gray-600 line-through decoration-2">
+              {getConvertedPrice(currency, price).toLocaleString("en-us", {
+                minimumIntegerDigits: 2,
+                minimumFractionDigits: 2,
+              })}{" "}
+              {currencySymbol}
+            </span>
+          </div>
         </div>
       )}
       <hr className="w-full border-t border-gray-300 mb-5" />

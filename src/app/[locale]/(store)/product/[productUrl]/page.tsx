@@ -1,72 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-import { getOneProduct, getProductByUrl } from "@/actions/product/product";
+import { getProductByUrl, ProductByUrlResponse } from "@/actions/product/product";
 import { getShippingRates, ShippingRate, ShippingAddress, ShippingPackage } from "@/actions/shipping/shipping";
+import { computeEffectivePrice } from "@/actions/product/type";
 import Gallery from "@/domains/product/components/gallery";
-import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
-import { TopProducts } from "@/domains/product/constants";
-import { LikeIcon, MinusIcon } from "@/shared/components/icons/svgIcons";
 import { SK_Box } from "@/shared/components/UI/skeleton";
-import { TProductPageInfo } from "@/shared/types/product";
 import ProductBoard from "./_components/ProductBoard";
+import SimilarProduct from "./_components/SimilarProduct";
 
-export interface ProductVariantType {
-  name: string;
-  display_type: string;
-}
-
-export interface ProductVariantOptions {
-  value: string;
-  color_hex: string | null;
-  image_url: string | null;
-  display_value: string;
-  variant_types: ProductVariantType;
-}
-
-export interface ProductVariantOption {
-  variant_option_id: string;
-  variant_options: ProductVariantOptions;
-}
-
-export interface ProductVariant {
-  id: string;
-  sku: string;
-  is_available: boolean;
-  stock_quantity: number;
-  price_adjustment: number;
-  product_variant_options: ProductVariantOption[];
-}
-
-export interface ProductTranslation {
-  language_code: string;
-  name: string;
-  description: string;
-  short_description: string;
-  special_features: string[];
-  specs?: Record<string, string>;
-}
-
-export interface GetProductByUrlResponse {
-  id: string;
-  url: string;
-  sku: string;
-  images: string[];
-  price: number;
-  is_available: boolean;
-  weight?: number; // Product weight for shipping calculation
-  dimensions?: {
-    length?: number;
-    width?: number;
-    height?: number;
-  };
-  product_translations: ProductTranslation[];
-  product_variants: ProductVariant[];
-}
+// Type aliases for cleaner code
+type ProductVariant = NonNullable<ProductByUrlResponse["product_variants"]>[number];
+type VariantOption = NonNullable<ProductVariant["product_variant_options"]>[number];
+type VariantOptionDetails = NonNullable<VariantOption["variant_options"]>;
 
 // Helper function to format spec names
 const formatSpecName = (key: string): string => {
@@ -79,12 +27,18 @@ const formatSpecName = (key: string): string => {
 // Helper to extract unique variant types and their options
 const extractVariantTypes = (variants: ProductVariant[]) => {
   const variantTypesMap = new Map<string, Set<string>>();
-  const variantOptionsMap = new Map<string, ProductVariantOptions[]>();
+  const variantOptionsMap = new Map<string, VariantOptionDetails[]>();
 
   variants.forEach((variant) => {
-    variant.product_variant_options.forEach((option) => {
-      const typeName = option.variant_options.variant_types.name;
-      const optionValue = option.variant_options.value;
+    const options = variant.product_variant_options;
+    if (!options) return;
+
+    options.forEach((option) => {
+      const variantOptions = option.variant_options;
+      if (!variantOptions?.variant_types) return;
+
+      const typeName = variantOptions.variant_types.name;
+      const optionValue = variantOptions.value;
 
       if (!variantTypesMap.has(typeName)) {
         variantTypesMap.set(typeName, new Set());
@@ -93,14 +47,14 @@ const extractVariantTypes = (variants: ProductVariant[]) => {
 
       if (!variantTypesMap.get(typeName)!.has(optionValue)) {
         variantTypesMap.get(typeName)!.add(optionValue);
-        variantOptionsMap.get(typeName)!.push(option.variant_options);
+        variantOptionsMap.get(typeName)!.push(variantOptions);
       }
     });
   });
 
   return Array.from(variantTypesMap.keys()).map((typeName) => ({
     name: typeName,
-    displayType: variantOptionsMap.get(typeName)![0].variant_types.display_type,
+    displayType: variantOptionsMap.get(typeName)![0].variant_types?.display_type || "text",
     options: variantOptionsMap.get(typeName)!,
   }));
 };
@@ -109,7 +63,7 @@ const ProductPage = () => {
   const { locale, productUrl } = useParams<{ locale: string; productUrl: string }>();
   const router = useRouter();
   const { productId } = useParams<{ productId: string[] }>();
-  const [productInfo, setProductInfo] = useState<GetProductByUrlResponse | null | undefined>(null);
+  const [productInfo, setProductInfo] = useState<ProductByUrlResponse | null | undefined>(null);
   const [currentLocale, setCurrentLocale] = useState("en");
   const [selectedVariantOptions, setSelectedVariantOptions] = useState<Record<string, string>>({});
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("standard");
@@ -124,18 +78,14 @@ const ProductPage = () => {
     country: "PK",
   });
 
-  console.log("params", { locale, productUrl });
   useEffect(() => {
     const getProductFromDB = async () => {
       const response = await getProductByUrl(locale, productUrl);
-      console.log("API response:", response);
-      if ("error" in response) {
-        console.error("Error fetching product:", response.error);
-        setProductInfo(undefined);
+      if ("data" in response) {
+        setProductInfo(response.data as ProductByUrlResponse);
       } else {
-        console.log("Product data loaded:", response.data);
-        console.log("Has variants:", response.data?.product_variants?.length || 0);
-        setProductInfo(response.data as unknown as GetProductByUrlResponse);
+        console.error("Error fetching product:", response.error);
+        setProductInfo(null);
       }
     };
     getProductFromDB();
@@ -143,10 +93,14 @@ const ProductPage = () => {
 
   // Auto-select first available variant option for each type
   useEffect(() => {
-    if (productInfo && productInfo.product_variants.length > 0 && Object.keys(selectedVariantOptions).length === 0) {
-      console.log("Auto-selecting variants from:", productInfo.product_variants);
+    if (
+      productInfo &&
+      productInfo.product_variants &&
+      productInfo.product_variants.length > 0 &&
+      Object.keys(selectedVariantOptions).length === 0
+    ) {
       const variantTypesData = extractVariantTypes(productInfo.product_variants);
-      console.log("Extracted variant types:", variantTypesData);
+
       const initialSelections: Record<string, string> = {};
 
       variantTypesData.forEach((type) => {
@@ -155,7 +109,6 @@ const ProductPage = () => {
         }
       });
 
-      console.log("Initial selections:", initialSelections);
       setSelectedVariantOptions(initialSelections);
     }
   }, [productInfo, selectedVariantOptions]);
@@ -170,11 +123,8 @@ const ProductPage = () => {
 
       try {
         const packageInfo: ShippingPackage = {
-          weight: productInfo.weight || 1, // Default 1kg if no weight
-          length: productInfo.dimensions?.length,
-          width: productInfo.dimensions?.width,
-          height: productInfo.dimensions?.height,
-          declaredValue: finalPrice,
+          weight: 1, // Default 1kg - weight not in ProductByUrlResponse
+          declaredValue: typeof finalPrice === "number" ? finalPrice : parseFloat(String(finalPrice)),
         };
 
         const response = await getShippingRates(shippingDestination, packageInfo);
@@ -208,8 +158,6 @@ const ProductPage = () => {
     productInfo?.product_translations?.find((t) => t.language_code === currentLocale) ||
     productInfo?.product_translations?.[0];
 
-  console.log("Current translation:", currentTranslation);
-
   // Transform specs object into flat list of specifications
   const specifications = currentTranslation?.specs
     ? Object.entries(currentTranslation.specs).map(([key, value]) => ({
@@ -220,13 +168,15 @@ const ProductPage = () => {
 
   // Extract variant types and options
   const variantTypes = productInfo?.product_variants ? extractVariantTypes(productInfo.product_variants) : [];
-  console.log("Variant types for rendering:", variantTypes);
 
   // Find the matching variant based on selected options
   const selectedVariant = productInfo?.product_variants?.find((variant) => {
-    const variantOptions = variant.product_variant_options.map((opt) => ({
-      type: opt.variant_options.variant_types.name,
-      value: opt.variant_options.value,
+    const options = variant.product_variant_options;
+    if (!options) return false;
+
+    const variantOptions = options.map((opt) => ({
+      type: opt.variant_options?.variant_types?.name || "",
+      value: opt.variant_options?.value || "",
     }));
 
     return Object.entries(selectedVariantOptions).every(([type, value]) => {
@@ -235,15 +185,22 @@ const ProductPage = () => {
   });
 
   // Calculate final price with variant adjustment
-  const finalPrice = productInfo?.price ? productInfo.price + (selectedVariant?.price_adjustment || 0) : 0;
+  const basePrice = productInfo?.price ? parseFloat(String(productInfo.price)) : 0;
+  const priceAdjustment = selectedVariant?.price_adjustment ? parseFloat(String(selectedVariant.price_adjustment)) : 0;
+  const finalPrice = basePrice + priceAdjustment;
+
+  // Get active deal and apply it
+  const activeDeal = productInfo?.flash_deal_products?.[0] || null;
+  const dealPrice = activeDeal ? computeEffectivePrice(finalPrice, activeDeal) : null;
 
   // Get selected shipping rate
   const selectedShipping = shippingRates.find((rate) => rate.serviceType === selectedShippingMethod);
 
   // Check if product/variant is available
+  const stockQuantity = selectedVariant?.stock_quantity ?? 0;
   const isAvailable = selectedVariant
-    ? selectedVariant.is_available && selectedVariant.stock_quantity > 0
-    : productInfo?.is_available || false;
+    ? selectedVariant.is_available && stockQuantity > 0
+    : productInfo?.is_available ?? false;
 
   // Handler for variant option selection
   const handleVariantOptionChange = (typeName: string, value: string) => {
@@ -270,7 +227,7 @@ const ProductPage = () => {
                 <SK_Box width="60%" height="15px" />
               )}
             </div>
-            <Gallery images={productInfo?.images} />
+            <Gallery images={productInfo?.images ?? undefined} />
           </div>
           <div className="lg:w-[512px] w-full">
             {productInfo ? (
@@ -278,14 +235,14 @@ const ProductPage = () => {
                 <ProductBoard
                   boardData={{
                     id: productInfo.id,
-                    isAvailable: isAvailable,
+                    isAvailable: isAvailable ?? false,
                     defaultQuantity: 1,
                     name: currentTranslation?.name || "Product",
                     price: finalPrice,
-                    imgUrl: productInfo.images[0] || "",
-                    dealPrice: undefined,
+                    imgUrl: productInfo.images?.[0] || "",
+                    dealPrice: dealPrice ?? undefined,
                     shortDesc: currentTranslation?.short_description || "",
-                    specialFeatures: currentTranslation?.special_features || [],
+                    specialFeatures: (currentTranslation?.special_features as string[]) || [],
                   }}
                 />
 
@@ -320,7 +277,7 @@ const ProductPage = () => {
                                   className={`group relative flex items-center justify-center w-12 h-12 rounded-lg border-2 transition-all ${
                                     isSelected ? "border-gray-900 shadow-sm" : "border-gray-200 hover:border-gray-400"
                                   }`}
-                                  title={option.display_value}
+                                  title={option.display_value ?? undefined}
                                 >
                                   <span
                                     className="w-8 h-8 rounded-md"
@@ -360,18 +317,14 @@ const ProductPage = () => {
                     {/* Stock Info - Clean Badge */}
                     {selectedVariant && (
                       <div className="flex items-center gap-3 mt-4 text-sm">
-                        {selectedVariant.stock_quantity > 0 ? (
+                        {stockQuantity > 0 ? (
                           <>
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium ${
-                                selectedVariant.stock_quantity > 10
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-orange-100 text-orange-800"
+                                stockQuantity > 10 ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"
                               }`}
                             >
-                              {selectedVariant.stock_quantity > 10
-                                ? "In Stock"
-                                : `Only ${selectedVariant.stock_quantity} left`}
+                              {stockQuantity > 10 ? "In Stock" : `Only ${stockQuantity} left`}
                             </span>
                             <span className="text-gray-500">SKU: {selectedVariant.sku}</span>
                           </>
@@ -443,69 +396,12 @@ const ProductPage = () => {
             )}
 
             {/* ----------------- USER REVIEWS ----------------- */}
-            <div className="flex flex-col w-full h-auto">
-              <div className="flex justify-between items-center pb-4 border-b border-gray-300">
-                <h2 className="font-light block text-2xl text-gray-900">User Reviews</h2>
-                <button className="text-sm text-gray-900 px-6 py-1.5 rounded-md bg-gray-100 border border-gray-700 hover:bg-gray-200 active:bg-light-300">
-                  New Review
-                </button>
-              </div>
-              <div className="flex flex-col w-full">
-                <div className="flex items-center flex-wrap w-full mt-5 text-sm">
-                  <div className="flex h-8 items-center text-gray-800 font-medium">
-                    <Image
-                      src={"/images/images/defaultUser.png"}
-                      className="rounded-full overflow-hidden mr-3"
-                      alt=""
-                      width={32}
-                      height={32}
-                    />
-                    <span>T. Mihai</span>
-                  </div>
-                  <span className="text-[#f97a1f] ml-8 font-medium">Verified Purchase</span>
-                  <div>
-                    <div className="inline-block ml-8 pl-6 bg-[url('/icons/dateIcon.svg')] bg-no-repeat bg-[position:left_center]">
-                      30 November 2023
-                    </div>
-                    <div className="ml-10 inline-block">
-                      <button className="h-8 mr-3 font-medium px-3 bg-white border border-white rounded-md text-gray-900 hover:border-green-600 hover:bg-green-800 hover:[&>svg]:fill-green-700 active:border-green-500 active:[&>svg]:fill-green-600">
-                        <LikeIcon width={16} className="fill-white stroke-gray-1000 mr-2" />0
-                      </button>
-                      <button className="h-8 mr-3 font-medium px-3 bg-white border border-white rounded-md text-gray-900 hover:border-red-700 hover:bg-[rgba(220,38,38,0.4)] hover:[&>svg]:fill-red-800 active:border-red-500 active:[&>svg]:fill-red-700 [&>svg]:inline-block [&>svg]:[-scale-x-100] [&>svg]:rotate-180 [&>svg]:-translate-y-[3px]">
-                        <LikeIcon width={16} className="fill-white stroke-gray-1000 mr-2" /> 0
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div className="my-4 ml-12 text-sm leading-5 text-gary-900">
-                  <span>
-                    {`Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                    Temporibus suscipit debitis reiciendis repellendus! Repellat rem beatae quo quis 
-                    tenetur. Culpa quae ratione delectus id odit in nesciunt saepe pariatur vitae.`}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* <UserReview/> */}
           </div>
         </div>
-        <div className="w-full my-[100px]">
-          <h2 className="font-light block text-2xl text-gray-900">Similar Products</h2>
-          <div className="flex justify-between gap-3.5 w-full overflow-x-scroll pb-2">
-            {TopProducts.map((product, index) => (
-              <ProductCard
-                key={index}
-                imgUrl={product.imgUrl}
-                name={product.name}
-                price={product.price}
-                description={product.description}
-                url={product.url}
-                dealPrice={product.dealPrice}
-                staticWidth
-                currency={null}
-              />
-            ))}
-          </div>
-        </div>
+
+        {/* ----------------- SIMILAR PRODUCTS SECTION ----------------- */}
+        <SimilarProduct />
       </div>
     </div>
   );

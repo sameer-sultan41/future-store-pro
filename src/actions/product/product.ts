@@ -8,6 +8,13 @@ import {
   TProductPageInfo,
   TSpecification,
 } from "@/shared/types/product";
+import type { ProductFull } from "./type";
+
+// Response type for getProductByUrl - picks only the fields we select
+export type ProductByUrlResponse = Pick<ProductFull, 
+  'id' | 'url' | 'sku' | 'images' | 'price' | 'is_available' | 
+  'product_translations' | 'product_variants' | 'flash_deal_products'
+>;
 
 const ValidateAddProduct = z.object({
   name: z.string().min(3),
@@ -31,63 +38,16 @@ const convertStringToFloat = (str: string) => {
   return str ? parseFloat(str) : 0.0;
 };
 
-// --- Interfaces for getProductByUrl response ---
-export interface ProductVariantType {
-  name: string;
-  display_type: string;
-}
-
-export interface ProductVariantOptions {
-  value: string;
-  color_hex: string | null;
-  image_url: string | null;
-  display_value: string;
-  variant_types: ProductVariantType;
-}
-
-export interface ProductVariantOption {
-  variant_option_id: string;
-  variant_options: ProductVariantOptions;
-}
-
-export interface ProductVariant {
-  id: string;
-  sku: string;
-  is_available: boolean;
-  stock_quantity: number;
-  price_adjustment: number;
-  product_variant_options: ProductVariantOption[];
-}
-
-export interface ProductTranslation {
-  language_code: string;
-  name: string;
-  description: string;
-  short_description: string;
-  special_features: string[];
-}
-
-export interface GetProductByUrlResponse {
-  id: string;
-  url: string;
-  sku: string;
-  images: string[];
-  price: number;
-  is_available: boolean;
-  product_translations: ProductTranslation[];
-  product_variants: ProductVariant[];
-}
-
-
-// --- End interfaces ---
-
-export const getProductByUrl = async (locale: string = "en", productUrl: string) => {
+export const getProductByUrl = async (
+  locale: string = "en",
+  productUrl: string
+): Promise<{ error: string } | { data: ProductByUrlResponse | null }> => {
   if (!locale || !productUrl) return { error: "Invalid parameters" };
+
   const supabase = createSupabaseServer();
-  try {
-const { data, error } = await supabase
-  .from("products")
-  .select(`
+
+  // LEFT joins by default: keep product even if there are 0 flash deals
+  const select = `
     id,
     url,
     sku,
@@ -115,28 +75,68 @@ const { data, error } = await supabase
           display_value,
           color_hex,
           image_url,
-          variant_types (
-            name,
-            display_type
-          )
+          variant_types (name, display_type)
         )
       )
+    ),
+    flash_deal_products (
+      id,
+      deal_price,
+      stock_limit,
+      flash_deal_id,
+      product_id,
+      flash_deals (
+        id,
+        name,
+        discount_type,
+        discount_value,
+        start_date,
+        end_date,
+        is_active,
+        max_uses,
+        current_uses
+      )
     )
-  `)
-    .eq("product_translations.language_code", locale)
- .eq("url", productUrl)
-//  .eq("url", "samsung-galaxy-s24-ultra")
-//  .eq("url", "nike-mens-tshirt")
-  .maybeSingle();
-      // .eq("url", "nike-air-max-90")
-            // .eq("product_translations.language_code", locale)
+  `;
 
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select(select)
+      .eq("url", productUrl)
+      .eq("product_translations.language_code", locale)
+      // ⚠️ DO NOT add any filters on flash_deal_products.* or flash_deal_products.flash_deals.*
+      .maybeSingle();
 
-      console.log("result ----->", data);
-      console.log("error -----> ", error);
-      return {data};
-  } catch (err) {
-    return { error: JSON.stringify(err) };
+    if (error) return { error: error.message };
+    if (!data) return { data: null };
+
+    // --- Post-filter deals to "active now" & sort by latest start_date ---
+    const now = Date.now();
+    const productData = data as unknown as ProductFull;
+    const deals = Array.isArray(productData.flash_deal_products)
+      ? productData.flash_deal_products
+          .filter((fdp) => {
+            const d = fdp?.flash_deals;
+            if (!d || d.is_active === false) return false;
+            const s = d.start_date ? new Date(d.start_date).getTime() : 0;
+            const e = d.end_date ? new Date(d.end_date).getTime() : 0;
+            return s <= now && now <= e;
+          })
+          .sort((a, b) => {
+            const as = a?.flash_deals?.start_date ? new Date(a.flash_deals.start_date).getTime() : 0;
+            const bs = b?.flash_deals?.start_date ? new Date(b.flash_deals.start_date).getTime() : 0;
+            return bs - as;
+          })
+      : [];
+
+    const response: ProductByUrlResponse = {
+      ...productData,
+      flash_deal_products: deals,        
+    };
+    return { data: response };
+  } catch (err: any) {
+    return { error: err?.message ?? String(err) };
   }
 };
 // ...existing code...
