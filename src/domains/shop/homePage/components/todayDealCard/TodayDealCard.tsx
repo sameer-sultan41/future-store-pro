@@ -106,8 +106,8 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
       productId: productId || url,
       productName,
       imgUrl: image[0],
-      price: newPrice,
-      dealPrice: oldPrice,
+      price: oldPrice,
+      dealPrice: newPrice,
     };
     dispatch(toggleWishlist(wishlistItem));
   };
