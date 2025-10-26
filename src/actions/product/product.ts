@@ -83,18 +83,18 @@ export interface GetProductByUrlResponse {
 
 export const getProductByUrl = async (locale: string = "en", productUrl: string) => {
   if (!locale || !productUrl) return { error: "Invalid parameters" };
+
   const supabase = createSupabaseServer();
-  try {
-const { data, error } = await supabase
-  .from("products")
-  .select(`
+  const nowIso = new Date().toISOString();
+
+  const select = `
     id,
     url,
     sku,
     images,
     price,
     is_available,
-    product_translations (
+    product_translations!inner (
       language_code,
       name,
       description,
@@ -121,22 +121,48 @@ const { data, error } = await supabase
           )
         )
       )
+    ),
+    flash_deal_products!inner (
+      id,
+      deal_price,
+      stock_limit,
+      flash_deal_id,
+      product_id,
+      flash_deals (
+        id,
+        name,
+        discount_type,
+        discount_value,
+        start_date,
+        end_date,
+        is_active,
+        max_uses,
+        current_uses
+      )
     )
-  `)
-    .eq("product_translations.language_code", locale)
- .eq("url", productUrl)
-//  .eq("url", "samsung-galaxy-s24-ultra")
-//  .eq("url", "nike-mens-tshirt")
-  .maybeSingle();
-      // .eq("url", "nike-air-max-90")
-            // .eq("product_translations.language_code", locale)
+  `;
 
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select(select)
+      .eq("url", productUrl)
+      .eq("product_translations.language_code", locale)
+      // keep only *currently active* deals (optional—remove if you want any deal)
+      .eq("flash_deal_products.flash_deals.is_active", true)
+      .lte("flash_deal_products.flash_deals.start_date", nowIso)
+      .gte("flash_deal_products.flash_deals.end_date", nowIso)
+      // order by latest deal window
+          .order("start_date", {
+        ascending: false,
+        referencedTable: "flash_deal_products.flash_deals",
+      })
+      .maybeSingle();
 
-      console.log("result ----->", data);
-      console.log("error -----> ", error);
-      return {data};
-  } catch (err) {
-    return { error: JSON.stringify(err) };
+    if (error) return { error: error.message };
+    return { data };
+  } catch (err: any) {
+    return { error: err?.message ?? String(err) };
   }
 };
 // ...existing code...
