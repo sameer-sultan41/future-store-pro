@@ -45,8 +45,8 @@ const UpcomingProducts = async ({ locale = "en" }: UpcomingProductsProps) => {
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {upcomingProductsData.map((product) => {
-            // Handle if products is an array (shouldn't be with the foreign key reference)
-            const productData = Array.isArray(product.products) ? product.products[0] : product.products;
+            // products is always a single object (not an array) due to the foreign key reference
+            const productData = product.products;
 
             if (!productData) return null;
 
