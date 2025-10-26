@@ -164,7 +164,7 @@ export function computeEffectivePrice(
   const discountValue = parseFloat(fd.discount_value as string);
 
   if (fd.discount_type === 'percentage') {
-    return Math.max(0, Math.round((basePrice * (100 - discountValue)) / 100));
+    return Math.max(0, (basePrice * (100 - discountValue)) / 100);
   }
   // 'fixed'
   return Math.max(0, basePrice - discountValue);
