@@ -8,6 +8,13 @@ import {
   TProductPageInfo,
   TSpecification,
 } from "@/shared/types/product";
+import type { ProductFull } from "./type";
+
+// Response type for getProductByUrl - picks only the fields we select
+export type ProductByUrlResponse = Pick<ProductFull, 
+  'id' | 'url' | 'sku' | 'images' | 'price' | 'is_available' | 
+  'product_translations' | 'product_variants' | 'flash_deal_products'
+>;
 
 const ValidateAddProduct = z.object({
   name: z.string().min(3),
@@ -31,57 +38,10 @@ const convertStringToFloat = (str: string) => {
   return str ? parseFloat(str) : 0.0;
 };
 
-// --- Interfaces for getProductByUrl response ---
-export interface ProductVariantType {
-  name: string;
-  display_type: string;
-}
-
-export interface ProductVariantOptions {
-  value: string;
-  color_hex: string | null;
-  image_url: string | null;
-  display_value: string;
-  variant_types: ProductVariantType;
-}
-
-export interface ProductVariantOption {
-  variant_option_id: string;
-  variant_options: ProductVariantOptions;
-}
-
-export interface ProductVariant {
-  id: string;
-  sku: string;
-  is_available: boolean;
-  stock_quantity: number;
-  price_adjustment: number;
-  product_variant_options: ProductVariantOption[];
-}
-
-export interface ProductTranslation {
-  language_code: string;
-  name: string;
-  description: string;
-  short_description: string;
-  special_features: string[];
-}
-
-export interface GetProductByUrlResponse {
-  id: string;
-  url: string;
-  sku: string;
-  images: string[];
-  price: number;
-  is_available: boolean;
-  product_translations: ProductTranslation[];
-  product_variants: ProductVariant[];
-}
-
-
-// --- End interfaces ---
-
-export const getProductByUrl = async (locale: string = "en", productUrl: string) => {
+export const getProductByUrl = async (
+  locale: string = "en",
+  productUrl: string
+): Promise<{ error: string } | { data: ProductByUrlResponse | null }> => {
   if (!locale || !productUrl) return { error: "Invalid parameters" };
 
   const supabase = createSupabaseServer();
@@ -160,7 +120,7 @@ export const getProductByUrl = async (locale: string = "en", productUrl: string)
       .maybeSingle();
 
     if (error) return { error: error.message };
-    return { data };
+    return { data: data as ProductByUrlResponse | null };
   } catch (err: any) {
     return { error: err?.message ?? String(err) };
   }
