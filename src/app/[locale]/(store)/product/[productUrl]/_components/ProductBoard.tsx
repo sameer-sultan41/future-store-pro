@@ -11,11 +11,22 @@ import { TCartItem, TCartItemData } from "@/shared/types/shoppingCart";
 import { getCurrencyFromCookie } from "@/actions/server";
 import { getConvertedPrice } from "@/shared/utils/helper";
 import { Currency } from "@/actions/type";
+import { motion } from "framer-motion";
+import { Heart } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleWishlist } from "@/store/wishlist";
+import { TWishlistItem } from "@/shared/types/wishlist";
+import { RootState } from "@/store/shoppingCart";
 
 const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
   const { name, id, isAvailable, specialFeatures, price, shortDesc, dealPrice, defaultQuantity, imgUrl } = boardData;
   const [quantity, setQuantity] = useState(defaultQuantity > 1 ? defaultQuantity : 1);
   const [currency, setCurrency] = useState<Currency | null>(null);
+
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
+
+  const isInWishlist = wishlistItems.some((item) => item.productId === id);
 
   // Fetch currency from cookie
   useEffect(() => {
@@ -41,6 +52,17 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
     });
   };
 
+  const handleToggleWishlist = () => {
+    const wishlistItem: TWishlistItem = {
+      productId: id,
+      productName: name,
+      imgUrl: imgUrl,
+      price: price,
+      dealPrice: dealPrice,
+    };
+    dispatch(toggleWishlist(wishlistItem));
+  };
+
   const cartItemData: TCartItemData = {
     productId: id,
     productName: name,
@@ -51,10 +73,22 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
   return (
     <div className="w-full relative flex flex-col">
       <button className="absolute right-0 top-0 border-none p-1 bg-white">
-        <HeartIcon
-          width={22}
-          className="fill-white cursor-pointer transition-colors duration-300 stroke-1 stroke-gray-400 hover:fill-gray-300"
-        />
+        <motion.div
+          className="cursor-pointer"
+          whileTap={{ scale: 0.8, rotate: -15 }}
+          whileHover={{ scale: 1.2 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleToggleWishlist();
+          }}
+        >
+          <Heart
+            width={22}
+            className={`drop-shadow-lg stroke-primary ${isInWishlist ? "fill-primary" : "fill-white"}`}
+          />
+        </motion.div>
       </button>
       <section className="block w-full">
         <div className="flex items-center gap-0.5">
