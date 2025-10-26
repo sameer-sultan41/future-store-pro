@@ -1,17 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import AddToCartButton from "@/domains/shop/shoppingCard/components/addToCartButton";
 import Quantity from "@/domains/shop/shoppingCard/components/quantity";
 import { StarIcon, HeartIcon } from "@/shared/components/icons/svgIcons";
 import { TProductBoard } from "@/shared/types/product";
 import { TCartItem, TCartItemData } from "@/shared/types/shoppingCart";
+import { getCurrencyFromCookie } from "@/actions/server";
+import { getConvertedPrice } from "@/shared/utils/helper";
+import { Currency } from "@/actions/type";
 
 const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
   const { name, id, isAvailable, specialFeatures, price, shortDesc, dealPrice, defaultQuantity, imgUrl } = boardData;
   const [quantity, setQuantity] = useState(defaultQuantity > 1 ? defaultQuantity : 1);
+  const [currency, setCurrency] = useState<Currency | null>(null);
+
+  // Fetch currency from cookie
+  useEffect(() => {
+    const getCurrency = async () => {
+      const currency = await getCurrencyFromCookie();
+      if (currency) {
+        setCurrency(currency);
+      } else {
+        setCurrency(null);
+      }
+    };
+    getCurrency();
+  }, []);
+
+  const currencySymbol = currency?.symbol || "€";
 
   const handleQuantityChange = (isReducing: boolean) => {
     setQuantity((prev) => {
@@ -56,11 +75,11 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
         {specialFeatures && specialFeatures?.map((feature, index) => <span key={index}>{feature}</span>)}
       </div>
       <h2 className="text-3xl font-medium text-gray-800 mb-5">
-        {(dealPrice ? dealPrice : price).toLocaleString("en-us", {
+        {getConvertedPrice(currency, dealPrice ? dealPrice : price).toLocaleString("en-us", {
           minimumIntegerDigits: 2,
           minimumFractionDigits: 2,
         })}{" "}
-        €
+        {currencySymbol}
       </h2>
 
       {dealPrice && (
@@ -68,13 +87,20 @@ const ProductBoard = ({ boardData }: { boardData: TProductBoard }) => {
           <span className="text-white rounded-sm bg-future-red-500 px-3 py-1">
             {`
             Save
-            ${(price - dealPrice).toLocaleString("en-us", {
+            ${getConvertedPrice(currency, price - dealPrice).toLocaleString("en-us", {
               minimumIntegerDigits: 2,
               minimumFractionDigits: 2,
-            })} €
+            })} ${currencySymbol}
             `}
           </span>
-          <span className="mt-[10px] block text-gray-800">Was {price} €</span>
+          <span className="mt-[10px] block text-gray-800">
+            Was{" "}
+            {getConvertedPrice(currency, price).toLocaleString("en-us", {
+              minimumIntegerDigits: 2,
+              minimumFractionDigits: 2,
+            })}{" "}
+            {currencySymbol}
+          </span>
         </div>
       )}
       <hr className="w-full border-t border-gray-300 mb-5" />
