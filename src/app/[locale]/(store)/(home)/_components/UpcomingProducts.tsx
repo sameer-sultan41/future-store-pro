@@ -55,12 +55,8 @@ const UpcomingProducts = async ({ locale = "en" }: UpcomingProductsProps) => {
 
             if (!translation) return null;
 
-            // Handle categories which might be an array or single object
-            const categoryName = productData.categories
-              ? Array.isArray(productData.categories)
-                ? productData.categories[0]?.url
-                : (productData.categories as any)?.url
-              : "Coming Soon";
+            // Handle categories as a single object or null
+            const categoryName = productData.categories?.url || "Coming Soon";
 
             return (
               <UpcomingProductCard
