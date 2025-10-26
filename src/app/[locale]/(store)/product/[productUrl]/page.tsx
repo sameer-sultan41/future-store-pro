@@ -89,8 +89,6 @@ const ProductPage = () => {
     const getProductFromDB = async () => {
       const response = await getProductByUrl(locale, productUrl);
 
-      console.log("response ==-->", response);
-
       if ("data" in response) {
         setProductInfo(response.data as ProductByUrlResponse);
       } else {
@@ -109,9 +107,8 @@ const ProductPage = () => {
       productInfo.product_variants.length > 0 &&
       Object.keys(selectedVariantOptions).length === 0
     ) {
-      console.log("Auto-selecting variants from:", productInfo.product_variants);
       const variantTypesData = extractVariantTypes(productInfo.product_variants);
-      console.log("Extracted variant types:", variantTypesData);
+
       const initialSelections: Record<string, string> = {};
 
       variantTypesData.forEach((type) => {
@@ -120,7 +117,6 @@ const ProductPage = () => {
         }
       });
 
-      console.log("Initial selections:", initialSelections);
       setSelectedVariantOptions(initialSelections);
     }
   }, [productInfo, selectedVariantOptions]);
@@ -170,8 +166,6 @@ const ProductPage = () => {
     productInfo?.product_translations?.find((t) => t.language_code === currentLocale) ||
     productInfo?.product_translations?.[0];
 
-  console.log("Current translation:", currentTranslation);
-
   // Transform specs object into flat list of specifications
   const specifications = currentTranslation?.specs
     ? Object.entries(currentTranslation.specs).map(([key, value]) => ({
@@ -182,7 +176,6 @@ const ProductPage = () => {
 
   // Extract variant types and options
   const variantTypes = productInfo?.product_variants ? extractVariantTypes(productInfo.product_variants) : [];
-  console.log("Variant types for rendering:", variantTypes);
 
   // Find the matching variant based on selected options
   const selectedVariant = productInfo?.product_variants?.find((variant) => {
