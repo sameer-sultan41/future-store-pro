@@ -497,7 +497,7 @@ const ProductPage = () => {
                 imgUrl={product.imgUrl}
                 name={product.name}
                 price={product.price}
-                specs={product.specs}
+                description={product.description}
                 url={product.url}
                 dealPrice={product.dealPrice}
                 staticWidth
