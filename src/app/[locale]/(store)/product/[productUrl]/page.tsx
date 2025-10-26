@@ -8,12 +8,12 @@ import { useEffect, useState } from "react";
 import { getOneProduct, getProductByUrl } from "@/actions/product/product";
 import { getShippingRates, ShippingRate, ShippingAddress, ShippingPackage } from "@/actions/shipping/shipping";
 import Gallery from "@/domains/product/components/gallery";
-import ProductBoard from "@/domains/product/components/productBoard";
 import ProductCard from "@/app/[locale]/(store)/(home)/_components/TopProductCard";
 import { TopProducts } from "@/domains/product/constants";
 import { LikeIcon, MinusIcon } from "@/shared/components/icons/svgIcons";
 import { SK_Box } from "@/shared/components/UI/skeleton";
 import { TProductPageInfo } from "@/shared/types/product";
+import ProductBoard from "./_components/ProductBoard";
 
 export interface ProductVariantType {
   name: string;
@@ -497,7 +497,7 @@ const ProductPage = () => {
                 imgUrl={product.imgUrl}
                 name={product.name}
                 price={product.price}
-                specs={product.specs}
+                description={product.description}
                 url={product.url}
                 dealPrice={product.dealPrice}
                 staticWidth

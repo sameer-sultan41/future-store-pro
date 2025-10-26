@@ -45,8 +45,8 @@ const UpcomingProducts = async ({ locale = "en" }: UpcomingProductsProps) => {
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {upcomingProductsData.map((product) => {
-            // products is always a single object (not an array) due to the foreign key reference
-            const productData = product.products;
+            // Handle if products is an array (shouldn't be with the foreign key reference)
+            const productData = Array.isArray(product.products) ? product.products[0] : product.products;
 
             if (!productData) return null;
 
@@ -55,8 +55,12 @@ const UpcomingProducts = async ({ locale = "en" }: UpcomingProductsProps) => {
 
             if (!translation) return null;
 
-            // Handle categories as a single object or null
-            const categoryName = productData.categories?.url || "Coming Soon";
+            // Handle categories which might be an array or single object
+            const categoryName = productData.categories
+              ? Array.isArray(productData.categories)
+                ? productData.categories[0]?.url
+                : (productData.categories as any)?.url
+              : "Coming Soon";
 
             return (
               <UpcomingProductCard

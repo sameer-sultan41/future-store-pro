@@ -227,7 +227,6 @@ export const getProductsByCategory = async (payload: {
       ...p,
       translation: translations[p.id] || null,
     }));
-
     return { res: result };
   } catch (error) {
     return { error: JSON.stringify(error) };

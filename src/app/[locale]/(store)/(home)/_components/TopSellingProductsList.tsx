@@ -29,7 +29,7 @@ export const TopSellingProductsList = async () => {
                     name={product.name}
                     imgUrl={product.imgUrl}
                     price={getConvertedPrice(currency, product.price)}
-                    specs={product.specs}
+                    description={product.description}
                     url={product.url}
                     dealPrice={getConvertedPrice(currency, product.dealPrice || product.price)}
                     key={index}

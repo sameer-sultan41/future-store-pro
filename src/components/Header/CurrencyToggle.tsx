@@ -24,8 +24,6 @@ export function CurrencyToggle() {
         const response = await getCurrency();
         const currency = await getCurrencyFromCookie();
         setCurrentCurrency(currency?.code || "PKR");
-
-        console.log("data from getCurrency", response);
         if (response && response.currencyData) {
           setCurrencies(response.currencyData);
         } else {

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Brands } from "@/actions/brands/type";
 
 const Filters = ({ brands }: { brands: Brands[] }) => {
-  console.log("brand --->", brands);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [availability, setAvailability] = useState(searchParams.get("availability") || "all");

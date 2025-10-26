@@ -17,12 +17,12 @@ type TProps = {
 };
 
 const WishlistItem = ({ data, onLinkClicked }: TProps) => {
-  const { productName, productId, imgUrl, price, dealPrice = 0 } = data;
+  const { productName, productId, imgUrl, price, dealPrice } = data;
 
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const currentPrice = dealPrice === 0 ? price : dealPrice;
+  const currentPrice = dealPrice && dealPrice > 0 ? dealPrice : price;
 
   const handleGoToPage = () => {
     router.push("/product/" + productId);
@@ -57,16 +57,16 @@ const WishlistItem = ({ data, onLinkClicked }: TProps) => {
         </h2>
         <div className={"flex items-center justify-start"}>
           <span className="text-lg text-gray-700">
-            {currentPrice.toLocaleString("en-us", {
+            {currentPrice?.toLocaleString("en-us", {
               minimumFractionDigits: 2,
-            })}{" "}
+            }) || "0.00"}{" "}
             €
           </span>
-          {dealPrice > 0 && (
+          {dealPrice && dealPrice > 0 && (
             <span className="text-sm text-gray-400 line-through ml-3">
-              {price.toLocaleString("en-us", {
+              {price?.toLocaleString("en-us", {
                 maximumFractionDigits: 2,
-              })}{" "}
+              }) || "0.00"}{" "}
               €
             </span>
           )}
