@@ -40,7 +40,7 @@ const UserReview = () => {
               </div>
             </div>
           </div>
-          <div className="my-4 ml-12 text-sm leading-5 text-gary-900">
+          <div className="my-4 ml-12 text-sm leading-5 text-gray-900">
             <span>
               {`Lorem ipsum dolor sit amet consectetur adipisicing elit. 
                     Temporibus suscipit debitis reiciendis repellendus! Repellat rem beatae quo quis 
