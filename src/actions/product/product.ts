@@ -45,16 +45,21 @@ export const getProductByUrl = async (
   if (!locale || !productUrl) return { error: "Invalid parameters" };
 
   const supabase = createSupabaseServer();
-  const nowIso = new Date().toISOString();
 
-  const select = `
+
+
+
+  try {
+const { data, error } = await supabase
+  .from("products")
+  .select(`
     id,
     url,
     sku,
     images,
     price,
     is_available,
-    product_translations!inner (
+    product_translations (
       language_code,
       name,
       description,
@@ -81,43 +86,13 @@ export const getProductByUrl = async (
           )
         )
       )
-    ),
-    flash_deal_products!inner (
-      id,
-      deal_price,
-      stock_limit,
-      flash_deal_id,
-      product_id,
-      flash_deals (
-        id,
-        name,
-        discount_type,
-        discount_value,
-        start_date,
-        end_date,
-        is_active,
-        max_uses,
-        current_uses
-      )
     )
-  `;
-
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select(select)
-      .eq("url", productUrl)
-      .eq("product_translations.language_code", locale)
-      // keep only *currently active* deals (optional—remove if you want any deal)
-      .eq("flash_deal_products.flash_deals.is_active", true)
-      .lte("flash_deal_products.flash_deals.start_date", nowIso)
-      .gte("flash_deal_products.flash_deals.end_date", nowIso)
-      // order by latest deal window
-          .order("start_date", {
-        ascending: false,
-        referencedTable: "flash_deal_products.flash_deals",
-      })
-      .maybeSingle();
+  `)
+    .eq("product_translations.language_code", locale)
+ .eq("url", productUrl)
+//  .eq("url", "samsung-galaxy-s24-ultra")
+//  .eq("url", "nike-mens-tshirt")
+  .maybeSingle();
 
     if (error) return { error: error.message };
     return { data: data as ProductByUrlResponse | null };
