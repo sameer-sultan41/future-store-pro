@@ -4,7 +4,7 @@ import { Currency } from "@/actions/type";
 export type TProductCard = {
   name: string;
   isAvailable?: boolean;
-  specs: string[];
+  description: string;
   price: number;
   dealPrice?: number;
   imgUrl: [string, string];

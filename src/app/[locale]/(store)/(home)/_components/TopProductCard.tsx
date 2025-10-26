@@ -13,7 +13,7 @@ const TopProductCard = ({
   imgUrl,
   price,
   dealPrice = undefined,
-  specs,
+  description,
   url,
   isAvailable = true,
   staticWidth = false,
@@ -54,7 +54,7 @@ const TopProductCard = ({
             </span>
           </div>
         )}
-        <div className="imageWrapper w-full h-[200px] block relative rounded-xl border border-gray-100 overflow-hidden transition-all duration-500 bg-gray-50 flex items-center justify-center">
+        <div className="imageWrapper w-full h-[200px]  relative rounded-xl border border-gray-100 overflow-hidden transition-all duration-500 bg-gray-50 flex items-center justify-center">
           <Image
             src={imgUrl[0]}
             alt={name}
@@ -72,13 +72,7 @@ const TopProductCard = ({
         </div>
         <div className="flex flex-col items-start mt-3 mb-2 px-1">
           <span className="text-base font-semibold text-gray-900 truncate w-full mb-1">{name}</span>
-          <div className="h-12 flex flex-col w-full">
-            {specs.map((spec, index) => (
-              <span key={index} className="block text-xs text-gray-500 truncate">
-                {spec}
-              </span>
-            ))}
-          </div>
+          <div className="h-12 flex flex-col w-full line-clamp-2">{description}</div>
         </div>
       </Link>
       <div className="flex flex-col gap-2 mx-1 mt-auto">

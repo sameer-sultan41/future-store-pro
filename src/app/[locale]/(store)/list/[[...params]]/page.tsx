@@ -49,7 +49,7 @@ const page = async ({
           price={getConvertedPrice(currency, product.base_price)}
           isAvailable={product.is_available}
           dealPrice={getConvertedPrice(currency, product.flash_deal_price || 0) || undefined}
-          specs={product.translation?.special_features || []}
+          description={product.translation?.description || []}
           url={Urls.productDetail + "/" + product.url}
           currency={currency}
         />
