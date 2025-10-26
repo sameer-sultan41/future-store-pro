@@ -10,10 +10,10 @@ const page = async ({
   params,
   searchParams,
 }: {
-  params: { locale: string; params?: string[] };
+  params: Promise<{ locale: string; params?: string[] }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
-  const { params: pathParams = [], locale } = params;
+  const { params: pathParams = [], locale } = await params;
   const { availability, minPrice, maxPrice, brand, sortName, sortType, search } = await searchParams;
 
   const pathName = Array.isArray(pathParams) ? pathParams.join("/") : "";
