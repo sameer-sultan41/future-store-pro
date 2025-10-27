@@ -1,5 +1,9 @@
+"use client";
+
+import AdminDashboardContent from "@/domains/admin/components/dashboard/AdminDashboardContent";
+
 const AdminHome = () => {
-  return <div>Dashboard</div>;
+  return <AdminDashboardContent />;
 };
 
 export default AdminHome;

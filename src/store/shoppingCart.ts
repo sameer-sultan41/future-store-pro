@@ -1,17 +1,16 @@
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 
-
-
 import { loadState, saveState } from "./storeLocalStorage";
 import { TCartItemData } from "@/shared/types/shoppingCart";
 import wishlistReducer, { TWishlistState } from "./wishlist";
+import adminDashboardReducer, { TAdminDashboardState } from "./adminDashboard";
 
 export type TCartState = {
   items: TCartItemData[];
   isVisible: boolean;
 };
 
-export type { TWishlistState };
+export type { TWishlistState, TAdminDashboardState };
 
 type QuantityChange = {
   productId: string;
@@ -51,6 +50,7 @@ export const shoppingCartStore = configureStore({
   reducer: {
     cart: cartSlice.reducer,
     wishlist: wishlistReducer,
+    adminDashboard: adminDashboardReducer,
   },
   preloadedState: loadState(),
 });

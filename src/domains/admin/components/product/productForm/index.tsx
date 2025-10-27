@@ -1,40 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Select from "react-select";
 
 import { getAllBrands } from "@/actions/brands/brands";
 import { getAllCategoriesJSON } from "@/actions/category/category";
 import { getCategorySpecs } from "@/actions/category/specifications";
-import { Button } from "@/components/ui/button";
-import DropDownList from "@/shared/components/UI/dropDown";
 import Input from "@/shared/components/UI/input";
 import { TBrand } from "@/shared/types";
 import { TGroupJSON } from "@/shared/types/categories";
 import { TAddProductFormValues } from "@/shared/types/product";
-import { TDropDown } from "@/shared/types/uiElements";
 import { cn } from "@/shared/utils/styling";
 
-const categoryListFirstItem: TDropDown = {
-  text: "Select A Category....",
-  value: "",
-};
-
-const brandListFirstItem: TDropDown = {
-  text: "Select A Brand....",
-  value: "",
-};
-
-type ProductSpec = {
-  specGroupID: string; // ID of the specification group
-  specValues: string[]; // Array of specification values
+type SelectOption = {
+  value: string;
+  label: string;
 };
 
 type SpecGroup = {
   id: string;
   title: string;
-  specs: string[]; // Array of specifications
-  created_at?: string; // Timestamp (optional)
-  updated_at?: string; // Timestamp (optional)
+  specs: string[];
 };
 
 type TProps = {
@@ -42,319 +28,462 @@ type TProps = {
   onChange: (props: TAddProductFormValues) => void;
 };
 
-const ProductForm = ({ formValues: props, onChange }: TProps) => {
-  const [categoryList, setCategoryList] = useState<TDropDown[]>([categoryListFirstItem]);
-  const [brandList, setBrandList] = useState<TDropDown[]>([brandListFirstItem]);
-  const [selectedCategoryListIndex, setSelectedCategoryListIndex] = useState(0);
-  const [selectedBrandListIndex, setSelectedBrandListIndex] = useState(0);
-
+const SimpleProductForm = ({ formValues: props, onChange }: TProps) => {
+  const [categories, setCategories] = useState<SelectOption[]>([]);
+  const [brands, setBrands] = useState<SelectOption[]>([]);
   const [categorySpecs, setCategorySpecs] = useState<SpecGroup[]>([]);
+  const [isLoadingSpecs, setIsLoadingSpecs] = useState(false);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const result = await getAllCategoriesJSON("en");
-      if (result.res) {
-        setCategoryList(convertJSONtoDropdownList(result.res));
-      }
-    };
-
-    const fetchBrands = async () => {
-      const result = await getAllBrands();
-      if (result.res) {
-        setBrandList(convertBrandsToDropdownList(result.res));
-      }
-    };
-
-    const convertJSONtoDropdownList = (json: TGroupJSON[]): TDropDown[] => {
-      const dropDownData: TDropDown[] = [categoryListFirstItem];
-      json.forEach((group) => {
-        dropDownData.push({
-          text: group.group.name,
-          value: group.group.id,
-        });
-        group.categories.forEach((category) => {
-          dropDownData.push({
-            text: group.group.name + " - " + category.category.name,
-            value: category.category.id,
-          });
-          category.subCategories.forEach((sub) => {
-            dropDownData.push({
-              text: group.group.name + " - " + category.category.name + " - " + sub.name,
-              value: sub.id,
-            });
-          });
-        });
-      });
-
-      return dropDownData;
-    };
-
-    const convertBrandsToDropdownList = (brandList: TBrand[]): TDropDown[] => {
-      const dropDownData: TDropDown[] = [brandListFirstItem];
-      brandList.forEach((brand) => {
-        dropDownData.push({
-          text: brand.name,
-          value: brand.id,
-        });
-      });
-
-      return dropDownData;
-    };
-
-    fetchCategories();
-    fetchBrands();
+    fetchData();
   }, []);
 
-  const handleCategoryChange = (index: number) => {
-    setSelectedCategoryListIndex(index);
-    if (index === 0) {
-      onChange({
-        ...props,
-        specifications: JSON.parse(JSON.stringify(props.specifications)),
-        categoryID: "",
-      });
-      setCategorySpecs([]);
-    } else {
-      getSpecGroup(categoryList[index].value);
+  const fetchData = async () => {
+    const [categoriesResult, brandsResult] = await Promise.all([
+      getAllCategoriesJSON("en"),
+      getAllBrands(),
+    ]);
+
+    if (categoriesResult.res) {
+      const flatCategories = flattenCategories(categoriesResult.res);
+      setCategories(flatCategories);
     }
-  };
 
-  const handleBrandChange = (index: number) => {
-    setSelectedBrandListIndex(index);
-    onChange({ ...props, brandID: brandList[index].value });
-  };
-
-  const getSpecGroup = async (categoryID: string) => {
-    const response = await getCategorySpecs(categoryID);
-    if (response.res) {
-      const specArray: ProductSpec[] = [];
-      response.res.forEach((item) => {
-        specArray.push({
-          specGroupID: item.id,
-          specValues: item.specs.map(() => ""),
-        });
-      });
-      onChange({
-        ...props,
-        specifications: JSON.parse(JSON.stringify(specArray)),
-        categoryID: categoryID,
-      });
-      setCategorySpecs(
-        response.res.map((item) => ({
-          id: item.id,
-          title: item.title,
-          specs: item.specs,
-          // ...(item.created_at),
-          // ...(item.updated_at),
+    if (brandsResult.res) {
+      setBrands(
+        brandsResult.res.map((brand) => ({
+          value: brand.id,
+          label: brand.name,
         }))
       );
     }
   };
 
-  const handleSpecialFeatureChange = (index: number, value: string) => {
-    const newArray = [...props.specialFeatures];
-    newArray[index] = value;
-    onChange({ ...props, specialFeatures: newArray });
+  const flattenCategories = (json: TGroupJSON[]): SelectOption[] => {
+    const result: SelectOption[] = [];
+    json.forEach((group) => {
+      result.push({
+        value: group.group.id,
+        label: group.group.name,
+      });
+      group.categories.forEach((category) => {
+        result.push({
+          value: category.category.id,
+          label: `${group.group.name} > ${category.category.name}`,
+        });
+        category.subCategories.forEach((sub) => {
+          result.push({
+            value: sub.id,
+            label: `${group.group.name} > ${category.category.name} > ${sub.name}`,
+          });
+        });
+      });
+    });
+    return result;
+  };
+
+  const handleCategoryChange = async (option: SelectOption | null) => {
+    const categoryID = option?.value || "";
+    onChange({ ...props, categoryID });
+
+    if (!categoryID) {
+      setCategorySpecs([]);
+      return;
+    }
+
+    setIsLoadingSpecs(true);
+    const response = await getCategorySpecs(categoryID);
+    if (response.res) {
+      const specsObject: any = {};
+      response.res.forEach((group) => {
+        specsObject[group.title] = {};
+        group.specs.forEach((spec) => {
+          specsObject[group.title][spec] = "";
+        });
+      });
+
+      onChange({
+        ...props,
+        categoryID,
+        specs: specsObject,
+      });
+
+      setCategorySpecs(
+        response.res.map((item) => ({
+          id: item.id,
+          title: item.title,
+          specs: item.specs,
+        }))
+      );
+    }
+    setIsLoadingSpecs(false);
+  };
+
+  const addImageField = () => {
+    onChange({ ...props, images: [...props.images, ""] });
+  };
+
+  const removeImageField = (index: number) => {
+    const newImages = props.images.filter((_, i) => i !== index);
+    onChange({ ...props, images: newImages });
+  };
+
+  const updateImage = (index: number, value: string) => {
+    const newImages = [...props.images];
+    newImages[index] = value;
+    onChange({ ...props, images: newImages });
+  };
+
+  const updateSpec = (groupTitle: string, specName: string, value: string) => {
+    const updatedSpecs = { ...props.specs };
+    if (!updatedSpecs[groupTitle]) {
+      updatedSpecs[groupTitle] = {};
+    }
+    updatedSpecs[groupTitle][specName] = value;
+    onChange({ ...props, specs: updatedSpecs });
+  };
+
+  const customSelectStyles = {
+    control: (base: any, state: any) => ({
+      ...base,
+      minHeight: "42px",
+      borderColor: state.isFocused ? "#3b82f6" : "#e2e8f0",
+      boxShadow: state.isFocused ? "0 0 0 1px #3b82f6" : "none",
+      "&:hover": {
+        borderColor: "#3b82f6",
+      },
+    }),
+    menu: (base: any) => ({
+      ...base,
+      zIndex: 50,
+    }),
   };
 
   return (
-    <div className="flex flex-col overflow-y-scroll p-6 rounded-xl bg-white z-10 text-sm">
-      <div className="grid grid-col-4 gap-4">
-        <div className="flex items-center justify-between">
-          <span>Name:</span>
-          <Input
-            type="text"
-            className="w-[200px]"
-            value={props.name}
-            placeholder="Name..."
-            onChange={(e) =>
-              onChange({
-                ...props,
-                name: e.currentTarget.value,
-              })
-            }
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Short Descriptions:</span>
-          <Input
-            type="text"
-            className="w-[200px]"
-            value={props.desc}
-            onChange={(e) =>
-              onChange({
-                ...props,
-                desc: e.currentTarget.value,
-              })
-            }
-            placeholder="Short Description..."
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Special Features:</span>
-          <div className="flex flex-col gap-2 mr-6">
+    <div className="space-y-8">
+      {/* Basic Details */}
+      <div className="">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
+          BASIC DETAILS
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              SKU <span className="text-red-500">*</span>
+            </label>
             <Input
               type="text"
-              value={props.specialFeatures[0]}
-              onChange={(e) => handleSpecialFeatureChange(0, e.currentTarget.value)}
+              value={props.sku}
+              placeholder="e.g., PROD-001"
+              onChange={(e) => onChange({ ...props, sku: e.currentTarget.value })}
+              className = "py-2"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              URL Slug <span className="text-red-500">*</span>
+            </label>
             <Input
               type="text"
-              value={props.specialFeatures[1]}
-              onChange={(e) => handleSpecialFeatureChange(1, e.currentTarget.value)}
+              value={props.url}
+              placeholder="e.g., product-name"
+              onChange={(e) => onChange({ ...props, url: e.currentTarget.value })}
+              className = "py-2"
             />
+          </div>
+
+          <div className="">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Product Name <span className="text-red-500">*</span>
+            </label>
             <Input
               type="text"
-              value={props.specialFeatures[2]}
-              onChange={(e) => handleSpecialFeatureChange(2, e.currentTarget.value)}
+              value={props.name}
+              placeholder="Enter product name"
+              onChange={(e) => onChange({ ...props, name: e.currentTarget.value })}
+              className = "py-2"
             />
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Price:</span>
-          <Input
-            type="number"
-            className="w-[200px]"
-            value={props.price}
-            onChange={(e) =>
-              onChange({
-                ...props,
-                price: e.currentTarget.value,
-              })
-            }
-            placeholder="0.00€"
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Sale Price:</span>
-          <Input
-            type="number"
-            className="w-[200px]"
-            value={props.salePrice}
-            onChange={(e) =>
-              onChange({
-                ...props,
-                salePrice: e.currentTarget.value,
-              })
-            }
-            placeholder="0.00€"
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Is In Stock:</span>
-          <div className="flex gap-2 items-center">
-            <span
-              className={cn(
-                "select-none border rounded-sm px-3 py-1 ml-1 transition-colors duration-300",
-                props.isAvailable
-                  ? "text-gray-100 bg-green-500 border-green-500"
-                  : "cursor-pointer hover:bg-gray-100 border border-gray-200"
-              )}
-              onClick={() => onChange({ ...props, isAvailable: true })}
-            >
-              In Stock
-            </span>
-            <span
-              className={cn(
-                "select-none border rounded-sm px-3 py-1 ml-1 transition-colors duration-300",
-                !props.isAvailable
-                  ? "text-gray-100 bg-red-500 hover:bg-red-500 border-red-500"
-                  : "cursor-pointer hover:bg-gray-100 border border-gray-200"
-              )}
-              onClick={() => onChange({ ...props, isAvailable: false })}
-            >
-              Out Of Stock
-            </span>
+
+          <div className="">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Short Description
+            </label>
+            <Input
+              type="text"
+              value={props.shortDescription}
+              placeholder="Brief description (1-2 lines)"
+              onChange={(e) => onChange({ ...props, shortDescription: e.currentTarget.value })}
+              className = "py-2"
+            />
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Brand:</span>
-          <DropDownList
-            data={brandList}
-            width="200px"
-            selectedIndex={selectedBrandListIndex}
-            onChange={handleBrandChange}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Images:</span>
-          <div className="flex flex-col gap-2 mr-6 w-[200px] justify-between">
-            {props.images.map((img, index) => (
-              <Input
-                key={index}
-                type="text"
-                value={img}
-                onChange={(e) => {
-                  props.images[index] = e.currentTarget.value;
-                  onChange({ ...props });
-                }}
-              />
-            ))}
+
+          <div className="">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Description
+            </label>
+            <textarea
+              value={props.description}
+              placeholder="Full product description"
+              onChange={(e) => onChange({ ...props, description: e.target.value })}
+              rows={4}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            />
           </div>
-          <Button
-            onClick={() => {
-              props.images.push("");
-              onChange({ ...props });
-            }}
-          >
-            +
-          </Button>
-          <Button
-            onClick={() => {
-              props.images.pop();
-              onChange({ ...props });
-            }}
-          >
-            -
-          </Button>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Category</span>
-          <DropDownList
-            data={categoryList}
-            width="430px"
-            selectedIndex={selectedCategoryListIndex}
-            onChange={handleCategoryChange}
-          />
         </div>
       </div>
-      <div className="mt-5 border-t border-gray-200 w-full h-auto py-4 flex flex-col">
-        <span className="text-base mb-4">Specifications:</span>
-        <div className="flex-grow flex flex-col items-start gap-4 mb-6">
-          {categorySpecs.length ? (
-            <>
-              {categorySpecs.map((specGroup, groupIndex) => (
-                <div className="w-full flex flex-col p-3 rounded-md border border-gray-300" key={specGroup.id}>
-                  <span className="w-full pb-3 mb-3 border-b border-gray-200">{specGroup.title}</span>
-                  <>
-                    {specGroup.specs.map((spec, specIndex) => (
-                      <div
-                        className="w-full flex items-center justify-between p-2 pl-4 rounded-md transition-colors duration-600 hover:bg-gray-100"
-                        key={specIndex}
-                      >
-                        <span>{spec}</span>
-                        <Input
-                          type="text"
-                          className="w-[200px]"
-                          value={props.specifications[groupIndex]?.specValues[specIndex]}
-                          onChange={(e) => {
-                            props.specifications[groupIndex].specValues[specIndex] = e.currentTarget.value;
-                            onChange({ ...props });
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </>
-                </div>
-              ))}
-            </>
+
+      {/* Category & Brand */}
+      <div className="">
+        <h3 className="text-bse font-semibold text-slate-900 dark:text-white mb-4 uppercase">
+          Category & Brand
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <Select
+              options={categories}
+              value={categories.find((c) => c.value === props.categoryID) || null}
+              onChange={handleCategoryChange}
+              placeholder="Select category..."
+              isClearable
+              styles={customSelectStyles}
+              classNamePrefix="react-select"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Brand <span className="text-red-500">*</span>
+            </label>
+            <Select
+              options={brands}
+              value={brands.find((b) => b.value === props.brandID) || null}
+              onChange={(option) => onChange({ ...props, brandID: option?.value || "" })}
+              placeholder="Select brand..."
+              isClearable
+              styles={customSelectStyles}
+              classNamePrefix="react-select"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div className="">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">Pricing</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Selling Price <span className="text-red-500">*</span>
+            </label>
+            <Input
+              type="number"
+              value={props.price}
+              placeholder="0.00"
+              onChange={(e) => onChange({ ...props, price: e.currentTarget.value })}
+              className = "py-2"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Cost Price
+            </label>
+            <Input
+              type="number"
+              value={props.costPrice}
+              placeholder="0.00"
+              onChange={(e) => onChange({ ...props, costPrice: e.currentTarget.value })}
+              className = "py-2"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Inventory */}
+      <div className="">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 uppercase">Inventory</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Stock Quantity <span className="text-red-500">*</span>
+            </label>
+            <Input
+              type="number"
+              value={props.stockQuantity}
+              placeholder="0"
+              onChange={(e) => onChange({ ...props, stockQuantity: e.currentTarget.value })}
+              className = "py-2"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Low Stock Alert
+            </label>
+            <Input
+              type="number"
+              value={props.lowStockThreshold}
+              placeholder="5"
+              onChange={(e) => onChange({ ...props, lowStockThreshold: e.currentTarget.value })}
+              className = "py-2"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Weight (kg)
+            </label>
+            <Input
+              type="number"
+              value={props.weight}
+              placeholder="0.0"
+              onChange={(e) => onChange({ ...props, weight: e.currentTarget.value })}
+              className = "py-2"
+            />
+          </div>
+
+          <div className="col-span-3">
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={props.isAvailable}
+                  onChange={(e) => onChange({ ...props, isAvailable: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Available for Sale
+                </span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={props.isFeatured}
+                  onChange={(e) => onChange({ ...props, isFeatured: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Featured Product
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Images */}
+      <div className="">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white uppercase">Product Images</h3>
+          <button
+            type="button"
+            onClick={addImageField}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            + Add Image
+          </button>
+        </div>
+        <div className="space-y-2">
+          {props.images.length === 0 ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+              No images added yet
+            </p>
           ) : (
-            <span>Can not Find! </span>
+            props.images.map((img, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  type="text"
+                  value={img}
+                  placeholder={`Image URL ${index + 1}`}
+                  onChange={(e) => updateImage(index, e.currentTarget.value)}
+                  className="flex-1 py-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImageField(index)}
+                  className="px-3 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            ))
           )}
         </div>
       </div>
+
+      {/* Specifications */}
+      {props.categoryID && (
+        <div className="">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
+            Specifications
+          </h3>
+          {isLoadingSpecs ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : categorySpecs.length > 0 ? (
+            <div className="space-y-6">
+              {categorySpecs.map((group) => (
+                <div key={group.id}>
+                  <h4 className="text-sm font-medium text-slate-900 dark:text-white mb-3">
+                    {group.title}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {group.specs.map((spec, index) => (
+                      <div key={index}>
+                        <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1.5">
+                          {spec}
+                        </label>
+                        <Input
+                          type="text"
+                          value={props.specs?.[group.title]?.[spec] || ""}
+                          placeholder={`Enter ${spec.toLowerCase()}`}
+                          onChange={(e) => updateSpec(group.title, spec, e.currentTarget.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+              No specifications available for this category
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Additional Settings */}
+      {/* <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
+          Additional Settings
+        </h3>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            Sort Order
+          </label>
+          <Input
+            type="number"
+            value={props.sortOrder}
+            placeholder="0"
+            onChange={(e) => onChange({ ...props, sortOrder: e.currentTarget.value })}
+            className="w-48"
+          />
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Lower numbers appear first
+          </p>
+        </div>
+      </div> */}
     </div>
   );
 };
 
-export default ProductForm;
+export default SimpleProductForm;
+

@@ -2,35 +2,41 @@
 import { z } from "zod";
 
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
-import {
-  TAddProductFormValues,
-  TPath,
-  TProductPageInfo,
-  TSpecification,
-} from "@/shared/types/product";
+import { TAddProductFormValues, TPath, TProductPageInfo, TSpecification } from "@/shared/types/product";
 import type { ProductFull } from "./type";
 
 // Response type for getProductByUrl - picks only the fields we select
-export type ProductByUrlResponse = Pick<ProductFull, 
-  'id' | 'url' | 'sku' | 'images' | 'price' | 'is_available' | 
-  'product_translations' | 'product_variants' | 'flash_deal_products'
+export type ProductByUrlResponse = Pick<
+  ProductFull,
+  | "id"
+  | "url"
+  | "sku"
+  | "images"
+  | "price"
+  | "is_available"
+  | "product_translations"
+  | "product_variants"
+  | "flash_deal_products"
 >;
 
 const ValidateAddProduct = z.object({
+  sku: z.string().min(1),
+  url: z.string().min(1),
   name: z.string().min(3),
-  brandID: z.string().min(6),
-  specialFeatures: z.array(z.string()),
-  desc: z.string().optional(),
-  images: z.array(z.string()),
+  description: z.string().optional(),
+  shortDescription: z.string().optional(),
   categoryID: z.string().min(6),
+  brandID: z.string().min(6),
   price: z.string().min(1),
-  salePrice: z.string(),
-  specifications: z.array(
-    z.object({
-      specGroupID: z.string().min(6),
-      specValues: z.array(z.string()),
-    })
-  ),
+  costPrice: z.string().optional(),
+  isAvailable: z.boolean(),
+  isFeatured: z.boolean(),
+  stockQuantity: z.string(),
+  lowStockThreshold: z.string().optional(),
+  weight: z.string().optional(),
+  images: z.array(z.string()),
+  sortOrder: z.string().optional(),
+  specs: z.any(),
 });
 
 const convertStringToFloat = (str: string) => {
@@ -132,7 +138,7 @@ export const getProductByUrl = async (
 
     const response: ProductByUrlResponse = {
       ...productData,
-      flash_deal_products: deals,        
+      flash_deal_products: deals,
     };
     return { data: response };
   } catch (err: any) {
@@ -141,35 +147,59 @@ export const getProductByUrl = async (
 };
 // ...existing code...
 
-
-
 export const addProduct = async (data: TAddProductFormValues) => {
-  if (!ValidateAddProduct.safeParse(data).success) return { error: "Invalid Data!" };
+  const validation = ValidateAddProduct.safeParse(data);
+  if (!validation.success) {
+    console.error("Validation error:", validation.error);
+    return { error: "Invalid Data!" };
+  }
 
   try {
     const supabase = createSupabaseServer();
     const price = convertStringToFloat(data.price);
-    const salePrice = data.salePrice ? convertStringToFloat(data.salePrice) : null;
+    const costPrice = data.costPrice ? convertStringToFloat(data.costPrice) : null;
+    const stockQuantity = parseInt(data.stockQuantity) || 0;
+    const lowStockThreshold = data.lowStockThreshold ? parseInt(data.lowStockThreshold) : 5;
+    const weight = data.weight ? convertStringToFloat(data.weight) : null;
+    const sortOrder = data.sortOrder ? parseInt(data.sortOrder) : 0;
 
     const { data: result, error } = await supabase
-      .from('products')
+      .from("products")
       .insert({
-        name: data.name,
-        description: data.desc,
-        brand_id: data.brandID,
-        special_features: data.specialFeatures,
-        is_available: data.isAvailable,
-        price: price,
-        sale_price: salePrice,
-        images: [...data.images],
-        specs: data.specifications,
+        sku: data.sku,
+        url: data.url,
         category_id: data.categoryID,
+        brand_id: data.brandID,
+        price: price,
+        cost_price: costPrice,
+        is_available: data.isAvailable,
+        is_featured: data.isFeatured,
+        stock_quantity: stockQuantity,
+        low_stock_threshold: lowStockThreshold,
+        weight: weight,
+        images: [...data.images],
+        sort_order: sortOrder,
+        specs: data.specs,
       })
       .select()
       .single();
 
     if (error) return { error: error.message };
     if (!result) return { error: "Can't Insert Data" };
+
+    // Now insert translations
+    const { error: translationError } = await supabase.from("product_translations").insert({
+      product_id: result.id,
+      language_code: "en",
+      name: data.name,
+      description: data.description || "",
+      short_description: data.shortDescription || "",
+    });
+
+    if (translationError) {
+      console.error("Translation insert error:", translationError);
+    }
+
     return { res: result };
   } catch (error) {
     return { error: JSON.stringify(error) };
@@ -180,31 +210,58 @@ export const getAllProducts = async () => {
   try {
     const supabase = createSupabaseServer();
     const { data: result, error } = await supabase
-      .from('products')
-      .select(`
+      .from("products")
+      .select(
+        `
         id,
-        name,
+        sku,
+        price,
+        is_available,
+        product_translations!inner (
+          name,
+          language_code
+        ),
         categories (
+          id,
+          category_translations!inner (
+            name,
+            language_code
+          )
+        ),
+        brands (
           id,
           name
         )
-      `);
+      `
+      )
+      .eq("product_translations.language_code", "en")
+      .eq("categories.category_translations.language_code", "en");
 
     if (error) return { error: error.message };
     if (!result) return { error: "Can't Get Data from Database!" };
-    
+
     // Transform to match expected format
-    const transformedResult = result.map(item => ({
+    const transformedResult = result.map((item) => ({
       id: item.id,
-      name: item.name,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      name: (item.product_translations as any)?.[0]?.name || "Unnamed Product",
+      price: item.price || 0,
+      salePrice: null,
+      isAvailable: item.is_available || false,
+      brand: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        id: (item.brands as any)?.id || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: (item.brands as any)?.name || "-",
+      },
       category: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        id: (item.categories as any).id,
+        id: (item.categories as any)?.id || "",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: (item.categories as any).name,
+        name: (item.categories as any)?.category_translations?.[0]?.name || "Uncategorized",
       },
     }));
-    
+
     return { res: transformedResult };
   } catch (error) {
     return { error: JSON.stringify(error) };
@@ -217,8 +274,9 @@ export const getOneProduct = async (productID: string) => {
   try {
     const supabase = createSupabaseServer();
     const { data: result, error } = await supabase
-      .from('products')
-      .select(`
+      .from("products")
+      .select(
+        `
         id,
         name,
         description,
@@ -233,8 +291,9 @@ export const getOneProduct = async (productID: string) => {
           id,
           parent_id
         )
-      `)
-      .eq('id', productID)
+      `
+      )
+      .eq("id", productID)
       .single();
 
     if (error) return { error: error.message };
@@ -244,7 +303,10 @@ export const getOneProduct = async (productID: string) => {
     if (!specifications || specifications.length === 0) return { error: "Invalid Date" };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pathArray: TPath[] | null = await getPathByCategoryID((result.categories as any).id, (result.categories as any).parent_id);
+    const pathArray: TPath[] | null = await getPathByCategoryID(
+      (result.categories as any).id,
+      (result.categories as any).parent_id
+    );
     if (!pathArray || pathArray.length === 0) return { error: "Invalid Date" };
 
     // Transform to match expected format
@@ -272,61 +334,65 @@ export const getCartProducts = async (productIDs: string[]) => {
   if (!productIDs || productIDs.length === 0) return { error: "Invalid Product List" };
 
   // Filter out undefined values
-  const validProductIDs = productIDs.filter(id => id && id !== 'undefined');
-  
+  const validProductIDs = productIDs.filter((id) => id && id !== "undefined");
+
   if (validProductIDs.length === 0) return { error: "No valid product IDs" };
 
   try {
     const supabase = createSupabaseServer();
-    
+
     // Separate UUIDs and slugs (UUID format: 8-4-4-4-12 characters)
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const uuids = validProductIDs.filter(id => uuidPattern.test(id));
-    const slugs = validProductIDs.filter(id => !uuidPattern.test(id));
-    
+    const uuids = validProductIDs.filter((id) => uuidPattern.test(id));
+    const slugs = validProductIDs.filter((id) => !uuidPattern.test(id));
+
     const allResults: any[] = [];
-    
+
     // Fetch by UUID (id column)
     if (uuids.length > 0) {
       const { data: uuidResults, error: uuidError } = await supabase
-        .from('products')
-        .select(`
+        .from("products")
+        .select(
+          `
           id,
           name,
           images,
           price,
           sale_price
-        `)
-        .in('id', uuids);
-      
+        `
+        )
+        .in("id", uuids);
+
       if (uuidResults) {
         allResults.push(...uuidResults);
       }
     }
-    
+
     // Fetch by slug (url column)
     if (slugs.length > 0) {
       const { data: slugResults, error: slugError } = await supabase
-        .from('products')
-        .select(`
+        .from("products")
+        .select(
+          `
           id,
           name,
           images,
           price,
           sale_price,
           url
-        `)
-        .in('url', slugs);
-      
+        `
+        )
+        .in("url", slugs);
+
       if (slugResults) {
         allResults.push(...slugResults);
       }
     }
 
     if (allResults.length === 0) return { error: "No products found" };
-    
+
     // Transform to match expected format
-    const transformedResult = allResults.map(item => ({
+    const transformedResult = allResults.map((item) => ({
       id: item.id,
       name: item.name,
       images: item.images,
@@ -334,7 +400,7 @@ export const getCartProducts = async (productIDs: string[]) => {
       salePrice: item.sale_price,
       url: item.url,
     }));
-    
+
     return { res: transformedResult };
   } catch (error) {
     return { error: JSON.stringify(error) };
@@ -345,12 +411,7 @@ export const deleteProduct = async (productID: string) => {
   if (!productID || productID === "") return { error: "Invalid Data!" };
   try {
     const supabase = createSupabaseServer();
-    const { data: result, error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', productID)
-      .select()
-      .single();
+    const { data: result, error } = await supabase.from("products").delete().eq("id", productID).select().single();
 
     if (error) return { error: error.message };
     if (!result) return { error: "Can't Delete!" };
@@ -365,10 +426,7 @@ const generateSpecTable = async (rawSpec: { specGroupID: string; specValues: str
     const specGroupIDs = rawSpec.map((spec) => spec.specGroupID);
 
     const supabase = createSupabaseServer();
-    const { data: result, error } = await supabase
-      .from('spec_groups')
-      .select('*')
-      .in('id', specGroupIDs);
+    const { data: result, error } = await supabase.from("spec_groups").select("*").in("id", specGroupIDs);
 
     if (error || !result || result.length === 0) return null;
 
@@ -401,16 +459,18 @@ const getPathByCategoryID = async (categoryID: string, parentID: string | null) 
   try {
     if (!categoryID || categoryID === "") return null;
     if (!parentID || parentID === "") return null;
-    
+
     const supabase = createSupabaseServer();
     const { data: result, error } = await supabase
-      .from('categories')
-      .select(`
+      .from("categories")
+      .select(
+        `
         id,
         parent_id,
         name,
         url
-      `)
+      `
+      )
       .or(`id.eq.${categoryID},id.eq.${parentID},parent_id.is.null`);
 
     if (error || !result || result.length === 0) return null;

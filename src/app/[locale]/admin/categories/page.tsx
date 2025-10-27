@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FolderTree } from "lucide-react";
 
 import { TGetAllCategories, getAllCategories } from "@/actions/category/category";
 import AddCategoryGroup from "@/domains/admin/components/category/addCategoryGroup";
 import CatGroupRow from "@/domains/admin/components/category/rowGroup";
+import EmptyState from "@/domains/admin/components/common/EmptyState";
 
 const fakeCategories: TGetAllCategories[] = [
   {
@@ -82,19 +84,30 @@ const AdminCategories = () => {
     });
   }
   return (
-    <div className="flex flex-col">
-      <div className="w-full mt-3 flex gap-4 items-center">
-        <h3 className="text-xl font-light text-gray-600">Add a main group:</h3>
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+      <div className="flex gap-4 items-center mb-6">
+        <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Add Main Category:</h3>
         <AddCategoryGroup onReset={getData} />
       </div>
-      <div className="mt-6">
-        {groups.length > 0 &&
-          groups.map((group) => (
-            <div className="mb-8 rounded-lg border border-gray-200" key={group.id}>
+
+      {groups.length > 0 ? (
+        <div className="space-y-4">
+          {groups.map((group) => (
+            <div
+              className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-shadow duration-200"
+              key={group.id}
+            >
               <CatGroupRow onReset={getData} data={group} categories={categories} />
             </div>
           ))}
-      </div>
+        </div>
+      ) : (
+        <EmptyState
+          icon={FolderTree}
+          title="No categories yet"
+          description="Create your first main category to organize your products"
+        />
+      )}
     </div>
   );
 };

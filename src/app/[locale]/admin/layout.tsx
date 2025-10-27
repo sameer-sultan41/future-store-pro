@@ -1,11 +1,15 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import AdminSidebar from "@/domains/admin/components/sideBar";
+import AdminSidebar from "@/domains/admin/components/sidebar/AdminSidebar";
+import AdminHeader from "@/domains/admin/components/header/AdminHeader";
+import AdminProvider from "@/domains/admin/components/AdminProvider";
+import AdminPageLayoutWrapper from "@/domains/admin/components/layout/AdminPageLayoutWrapper";
 import { createSupabaseServer } from "@/shared/lib/supabaseClient";
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: "Admin Dashboard - Future Store",
+  description: "Admin dashboard for managing Future Store",
 };
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
@@ -14,14 +18,27 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
     data: { session },
   } = await supabase.auth.getSession();
   // if (!session) redirect("/");
+
   return (
-    <div className="styles.adminLayout flex min-h-screen">
-      <AdminSidebar />
-      <div className="w-full p-6">
-        <h1 className="w-full block text-gray-700 text-2xl font-light pb-5 mb-2 border-b border-gray-300">Page Name</h1>
-        {children}
+    <AdminProvider>
+      <div className="flex h-screen bg-white dark:bg-slate-900 overflow-hidden">
+        {/* Sidebar with independent scroll */}
+        <div className="h-screen overflow-y-auto">
+          <AdminSidebar />
+        </div>
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          <AdminHeader title="Dashboard" />
+          <main className="flex-1 p-6 overflow-y-auto">
+            {/* Automatically wrap all admin pages with breadcrumbs and structure */}
+            <AdminPageLayoutWrapper>
+              {children}
+            </AdminPageLayoutWrapper>
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminProvider>
   );
 };
 
