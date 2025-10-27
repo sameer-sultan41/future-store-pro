@@ -189,9 +189,31 @@ const ProductPage = () => {
   const priceAdjustment = selectedVariant?.price_adjustment ? parseFloat(String(selectedVariant.price_adjustment)) : 0;
   const finalPrice = basePrice + priceAdjustment;
 
-  // Get active deal and apply it
+  // Get active deal and apply it with variant adjustment
   const activeDeal = productInfo?.flash_deal_products?.[0] || null;
-  const dealPrice = activeDeal ? computeEffectivePrice(finalPrice, activeDeal) : null;
+
+  // Calculate deal price considering variant adjustment
+  let dealPrice: number | null = null;
+  if (activeDeal) {
+    const flashDeal = activeDeal.flash_deals;
+
+    // If deal has a fixed deal_price, we need to add the variant adjustment
+    if (activeDeal.deal_price != null) {
+      const baseDealPrice = parseFloat(String(activeDeal.deal_price));
+      dealPrice = baseDealPrice + priceAdjustment;
+    }
+    // If deal uses percentage or fixed discount, apply to adjusted price
+    else if (flashDeal) {
+      const discountValue = parseFloat(String(flashDeal.discount_value));
+
+      if (flashDeal.discount_type === "percentage") {
+        dealPrice = Math.max(0, (finalPrice * (100 - discountValue)) / 100);
+      } else {
+        // 'fixed' discount
+        dealPrice = Math.max(0, finalPrice - discountValue);
+      }
+    }
+  }
 
   // Get selected shipping rate
   const selectedShipping = shippingRates.find((rate) => rate.serviceType === selectedShippingMethod);
