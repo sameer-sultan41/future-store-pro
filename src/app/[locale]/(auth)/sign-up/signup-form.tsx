@@ -39,8 +39,8 @@ export const UserSignUpSchema = z
 const signUpDefaultValues =
   process.env.NODE_ENV === "development"
     ? {
-        name: "john doe",
-        email: "sameer@gmail.com",
+        name: "sameer",
+        email: "sameer1001sultan@gmail.com",
         password: "sameer",
         confirmPassword: "sameer",
       }
