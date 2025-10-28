@@ -83,14 +83,33 @@ const NavBarProfile = () => {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" onClick={() => router.push(Urls.signIn)} className="hidden sm:flex">
-          Sign In
-        </Button>
-        <Button onClick={() => router.push(Urls.signUp)} size="sm">
-          Sign Up
-        </Button>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-10 gap-2 px-2">
+            <ProfileIcon width={16} className="fill-white transition-all duration-300 stroke-gray-500 stroke-2" />
+            <span className="select-none hidden lg:block">Account</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="py-2">
+              <p className="text-sm font-semibold">Welcome!</p>
+              <p className="text-xs text-muted-foreground">Sign in to access your account</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => router.push(Urls.signIn)} className="cursor-pointer py-2">
+              <User className="mr-2 h-4 w-4" />
+              <span>Sign In</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(Urls.signUp)} className="cursor-pointer py-2">
+              <User className="mr-2 h-4 w-4" />
+              <span>Sign Up</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
@@ -148,7 +167,7 @@ const NavBarProfile = () => {
           </DropdownMenuItem>
         </DropdownMenuGroup> */}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 py-2">
+        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600  py-2">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign Out</span>
         </DropdownMenuItem>
