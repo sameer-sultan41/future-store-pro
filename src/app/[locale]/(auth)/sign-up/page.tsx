@@ -70,7 +70,14 @@ export default function SignUpPage() {
                     <Label htmlFor="name" className="text-sm font-medium">
                       {t("fullName")}
                     </Label>
-                    <Input id="name" name="name" type="text" placeholder={t("fullNamePlaceholder")} required disabled={loading} />
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder={t("fullNamePlaceholder")}
+                      required
+                      disabled={loading}
+                    />
                   </div>
 
                   <div>
@@ -137,7 +144,11 @@ export default function SignUpPage() {
                     className="w-full h-11 text-base font-medium"
                     disabled={loading || !isPasswordStrong}
                   >
-                    {loading ? <span className="flex items-center gap-2">{t("creatingAccount")}</span> : t("createAccount")}
+                    {loading ? (
+                      <span className="flex items-center gap-2">{t("creatingAccount")}</span>
+                    ) : (
+                      t("createAccount")
+                    )}
                   </Button>
                 </form>
 

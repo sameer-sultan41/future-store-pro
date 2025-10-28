@@ -64,7 +64,14 @@ export default function SignInPage() {
                 <Label htmlFor="email" className="text-sm font-medium">
                   {t("email")}
                 </Label>
-                <Input id="email" name="email" type="email" placeholder={t("emailPlaceholder")} required disabled={loading} />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder={t("emailPlaceholder")}
+                  required
+                  disabled={loading}
+                />
               </div>
 
               <div>
