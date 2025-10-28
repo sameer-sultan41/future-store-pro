@@ -157,7 +157,7 @@ export default function SignUpPage() {
                           </div>
 
                           {password && (
-                            <div className="mt-3 p-3 rounded-md bg-muted/50">
+                            <div className="mt-3 p-3 rounded-md bg-gray-100">
                               <p className="text-xs font-medium mb-2">Password strength</p>
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 <PasswordRequirement met={passwordStrength.hasMinLength} text="6+ characters" />
@@ -210,12 +210,8 @@ export default function SignUpPage() {
 function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
   return (
     <div className="flex items-center gap-2 text-xs">
-      {met ? (
-        <CheckCircle2 className="h-3 w-3 text-green-600" />
-      ) : (
-        <XCircle className="h-3 w-3 text-muted-foreground" />
-      )}
-      <span className={met ? "text-green-600 font-medium" : "text-muted-foreground"}>{text}</span>
+      {met ? <CheckCircle2 className="h-3 w-3 text-green-600" /> : <XCircle className="h-3 w-3 text-red-600" />}
+      <span className={met ? "text-green-600 font-medium" : "text-red-600"}>{text}</span>
     </div>
   );
 }
