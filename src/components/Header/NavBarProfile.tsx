@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ProfileIcon } from "@/shared/components/icons/svgIcons";
 import { Button } from "@/components/ui/button";
 import { createSupabaseClient } from "@/shared/lib/supabaseClient";
@@ -27,6 +28,7 @@ interface UserData {
 }
 
 const NavBarProfile = () => {
+  const t = useTranslations("NavBar");
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -76,7 +78,7 @@ const NavBarProfile = () => {
     return (
       <Button variant="ghost" disabled>
         <ProfileIcon width={16} className="fill-white transition-all duration-300 stroke-gray-500 stroke-2" />
-        <span className="select-none hidden lg:block">Account</span>
+        <span className="select-none hidden lg:block">{t("account")}</span>
       </Button>
     );
   }
@@ -93,19 +95,19 @@ const NavBarProfile = () => {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="py-2">
-              <p className="text-sm font-semibold">Welcome!</p>
-              <p className="text-xs text-muted-foreground">Sign in to access your account</p>
+              <p className="text-sm font-semibold">{t("welcome")}</p>
+              <p className="text-xs text-muted-foreground">{t("signInPrompt")}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={() => router.push(Urls.signIn)} className="cursor-pointer py-2">
               <User className="mr-2 h-4 w-4" />
-              <span>Sign In</span>
+              <span>{t("signIn")}</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push(Urls.signUp)} className="cursor-pointer py-2">
               <User className="mr-2 h-4 w-4" />
-              <span>Sign Up</span>
+              <span>{t("signUp")}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -144,7 +146,7 @@ const NavBarProfile = () => {
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer py-2">
             <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <span>{t("profile")}</span>
           </DropdownMenuItem>
           {/* <DropdownMenuItem onClick={() => router.push("/orders")} className="cursor-pointer py-2">
             <ShoppingBag className="mr-2 h-4 w-4" />
@@ -169,7 +171,7 @@ const NavBarProfile = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600  py-2">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign Out</span>
+          <span>{t("signOut")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

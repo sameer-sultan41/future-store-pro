@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { signIn } from "@/actions/auth/login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock, Eye, EyeOff, CheckCircle2, XCircle, ArrowRight, ShoppingBag, Heart, Star } from "lucide-react";
 
 export default function SignInPage() {
+  const t = useTranslations("Auth.signIn");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -46,8 +48,8 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-            <CardDescription className="text-sm">Sign in to your account</CardDescription>
+            <CardTitle className="text-2xl font-bold">{t("title")}</CardTitle>
+            <CardDescription className="text-sm">{t("subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {message && (
@@ -60,18 +62,18 @@ export default function SignInPage() {
             <form action={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address
+                  {t("email")}
                 </Label>
-                <Input id="email" name="email" type="email" placeholder="you@example.com" required disabled={loading} />
+                <Input id="email" name="email" type="email" placeholder={t("emailPlaceholder")} required disabled={loading} />
               </div>
 
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-sm font-medium">
-                    Password
+                    {t("password")}
                   </Label>
                   <Link href="/forgot-password" className="text-xs text-primary hover:underline font-medium">
-                    Forgot password?
+                    {t("forgotPassword")}
                   </Link>
                 </div>
                 <div className="relative">
@@ -79,7 +81,7 @@ export default function SignInPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder={t("passwordPlaceholder")}
                     required
                     disabled={loading}
                   />
@@ -103,7 +105,7 @@ export default function SignInPage() {
                   htmlFor="remember"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  Remember me for 30 days
+                  {t("rememberMe")}
                 </label>
               </div>
 
@@ -116,10 +118,10 @@ export default function SignInPage() {
 
               <Button type="submit" className="w-full h-11 text-base font-medium" disabled={loading}>
                 {loading ? (
-                  <span className="flex items-center gap-2">Signing in...</span>
+                  <span className="flex items-center gap-2">{t("signingIn")}</span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Sign In
+                    {t("signIn")}
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 )}
@@ -127,9 +129,9 @@ export default function SignInPage() {
             </form>
 
             <div className="mt-4 text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
+              <span className="text-muted-foreground">{t("dontHaveAccount")} </span>
               <Link href="/sign-up" className="text-primary hover:underline font-semibold">
-                Sign up
+                {t("signUp")}
               </Link>
             </div>
           </CardContent>

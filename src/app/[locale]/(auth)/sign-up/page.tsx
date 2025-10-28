@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { signUp } from "@/actions/auth/login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, Truck, CreditCard, ShoppingCart } from "lucide-react";
 
 export default function SignUpPage() {
+  const t = useTranslations("Auth.signUp");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,8 +46,8 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-            <CardDescription className="text-sm">Quick and secure registration</CardDescription>
+            <CardTitle className="text-2xl font-bold">{t("title")}</CardTitle>
+            <CardDescription className="text-sm">{t("subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {success ? (
@@ -54,11 +56,11 @@ export default function SignUpPage() {
                   <CheckCircle2 className="w-10 h-10 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Account Created!</h3>
-                  <p className="text-muted-foreground">Check your email to verify your account before signing in.</p>
+                  <h3 className="text-xl font-semibold mb-2">{t("accountCreated")}</h3>
+                  <p className="text-muted-foreground">{t("checkEmail")}</p>
                 </div>
                 <Link href="/sign-in">
-                  <Button className="mt-4">Go to Sign In</Button>
+                  <Button className="mt-4">{t("goToSignIn")}</Button>
                 </Link>
               </div>
             ) : (
@@ -66,20 +68,20 @@ export default function SignUpPage() {
                 <form action={handleSubmit} className="space-y-4">
                   <div>
                     <Label htmlFor="name" className="text-sm font-medium">
-                      Full Name
+                      {t("fullName")}
                     </Label>
-                    <Input id="name" name="name" type="text" placeholder="John Doe" required disabled={loading} />
+                    <Input id="name" name="name" type="text" placeholder={t("fullNamePlaceholder")} required disabled={loading} />
                   </div>
 
                   <div>
                     <Label htmlFor="email" className="text-sm font-medium">
-                      Email Address
+                      {t("email")}
                     </Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder={t("emailPlaceholder")}
                       required
                       disabled={loading}
                     />
@@ -87,14 +89,14 @@ export default function SignUpPage() {
 
                   <div>
                     <Label htmlFor="password" className="text-sm font-medium">
-                      Password
+                      {t("password")}
                     </Label>
                     <div className="relative">
                       <Input
                         id="password"
                         name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Create a strong password"
+                        placeholder={t("passwordPlaceholder")}
                         required
                         minLength={6}
                         disabled={loading}
@@ -112,12 +114,12 @@ export default function SignUpPage() {
 
                     {password && (
                       <div className="mt-3 p-3 rounded-md bg-gray-100">
-                        <p className="text-xs font-medium mb-2">Password strength</p>
+                        <p className="text-xs font-medium mb-2">{t("passwordStrength")}</p>
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                          <PasswordRequirement met={passwordStrength.hasMinLength} text="6+ characters" />
-                          <PasswordRequirement met={passwordStrength.hasUpperCase} text="Uppercase" />
-                          <PasswordRequirement met={passwordStrength.hasLowerCase} text="Lowercase" />
-                          <PasswordRequirement met={passwordStrength.hasNumber} text="Number" />
+                          <PasswordRequirement met={passwordStrength.hasMinLength} text={t("characters")} />
+                          <PasswordRequirement met={passwordStrength.hasUpperCase} text={t("uppercase")} />
+                          <PasswordRequirement met={passwordStrength.hasLowerCase} text={t("lowercase")} />
+                          <PasswordRequirement met={passwordStrength.hasNumber} text={t("number")} />
                         </div>
                       </div>
                     )}
@@ -135,14 +137,14 @@ export default function SignUpPage() {
                     className="w-full h-11 text-base font-medium"
                     disabled={loading || !isPasswordStrong}
                   >
-                    {loading ? <span className="flex items-center gap-2">Creating account...</span> : "Create Account"}
+                    {loading ? <span className="flex items-center gap-2">{t("creatingAccount")}</span> : t("createAccount")}
                   </Button>
                 </form>
 
                 <div className="mt-4 text-center text-sm">
-                  <span className="text-muted-foreground">Already have an account? </span>
+                  <span className="text-muted-foreground">{t("alreadyHaveAccount")} </span>
                   <Link href="/sign-in" className="text-primary hover:underline font-semibold">
-                    Sign in
+                    {t("signIn")}
                   </Link>
                 </div>
               </>
