@@ -1,5 +1,6 @@
 import { getSetting } from "@/actions/settings/settings";
 import { getLogo } from "@/lib/utils";
+import { Heart, ShoppingBag, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -23,7 +24,57 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           />
         </Link>
       </header>
-      <main className="mx-auto w-full max-w-sm md:max-w-5xl p-4">{children}</main>
+      <main className="mx-auto w-full max-w-sm md:max-w-5xl p-4">
+        <div className="py-12">
+          <div className="mx-auto max-w-5xl px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              {/* Left: marketing / benefits */}
+              <div className="space-y-6">
+                <h2 className="text-4xl font-extrabold leading-tight">Welcome back to your favorite store.</h2>
+                <p className="text-lg text-muted-foreground">
+                  Sign in to access your saved items, track orders, and enjoy personalized shopping.
+                </p>
+
+                <ul className="space-y-4 mt-6">
+                  <li className="flex items-start gap-3">
+                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary">
+                      <ShoppingBag className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="font-semibold">Continue shopping</p>
+                      <p className="text-sm text-muted-foreground">Pick up where you left off with your saved cart.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary">
+                      <Heart className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="font-semibold">Your wishlist</p>
+                      <p className="text-sm text-muted-foreground">
+                        Access your favorite products and get notified of price drops.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary">
+                      <Star className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="font-semibold">Exclusive deals</p>
+                      <p className="text-sm text-muted-foreground">
+                        Get early access to sales and member-only discounts.
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {children}
+            </div>
+          </div>
+        </div>
+      </main>
       <footer className=" flex-1 mt-8  bg-gray-800 w-full flex flex-col gap-4 items-center p-8 text-sm">
         <div className="flex justify-center space-x-4">
           <Link href="/page/conditions-of-use">Conditions of Use</Link>
