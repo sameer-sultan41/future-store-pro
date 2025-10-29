@@ -1,4 +1,10 @@
 {
+  "Navigation": {
+    "products": "Products",
+    "upcoming": "Upcoming",
+    "community": "Community",
+    "support": "Support"
+  },
   "NavBar": {
     "account": "Account",
     "welcome": "Welcome!",

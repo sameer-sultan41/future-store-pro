@@ -1,4 +1,10 @@
 {
+  "Navigation": {
+    "products": "مصنوعات",
+    "upcoming": "آنے والا",
+    "community": "کمیونٹی",
+    "support": "سپورٹ"
+  },
   "NavBar": {
     "account": "اکاؤنٹ",
     "welcome": "خوش آمدید!",
