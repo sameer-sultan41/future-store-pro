@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 import { getCartProducts } from "@/actions/product/product";
 import { CloseIcon, ShoppingIconEmpty } from "@/shared/components/icons/svgIcons";
@@ -21,6 +22,12 @@ type TProps = {
 
 const ShoppingCart = ({ isVisible, quantity, handleOnClose }: TProps) => {
   const localCartItems = useSelector((state: RootState) => state.cart);
+  const router = useRouter();
+
+  const handleCheckout = () => {
+    handleOnClose();
+    router.push("/checkout");
+  };
 
   return (
     <div
@@ -58,7 +65,10 @@ const ShoppingCart = ({ isVisible, quantity, handleOnClose }: TProps) => {
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-[140px] bg-white border-t border-gray-300 flex flex-col items-center justify-center gap-4 mx-6">
           {!!localCartItems.items?.length && (
-            <Button className="w-4/5 text-sm font-semibold text-green-700 hover:bg-green-700 hover:text-green-50 border-green-300 bg-green-50">
+            <Button
+              onClick={handleCheckout}
+              className="w-4/5 text-sm font-semibold text-green-700 hover:bg-green-700 hover:text-green-50 border-green-300 bg-green-50"
+            >
               CHECKOUT
             </Button>
           )}
