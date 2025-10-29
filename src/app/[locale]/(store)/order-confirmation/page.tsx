@@ -136,7 +136,7 @@ const OrderConfirmationPage = () => {
           {/* Order Status Timeline */}
           <div className="mb-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -145,39 +145,55 @@ const OrderConfirmationPage = () => {
               </svg>
               Order Tracking
             </h3>
-            <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+            <div className="relative" role="list" aria-label="Order tracking progress: 2 of 4 steps completed">
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" aria-hidden="true"></div>
 
               {/* Step 1 - Completed */}
-              <div className="relative flex items-start mb-6 pl-12">
-                <div className="absolute left-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="relative flex items-start mb-6 pl-12" role="listitem">
+                <div
+                  className="absolute left-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg"
+                  aria-label="Completed"
+                >
+                  <span className="sr-only">Step 1 of 4: Completed</span>
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Order Placed</p>
                   <p className="text-sm text-gray-500">Your order has been received and confirmed</p>
-                  <p className="text-xs text-green-600 mt-1">✓ Completed - {orderData.orderDate}</p>
+                  <p className="text-xs text-green-600 mt-1">
+                    <span aria-hidden="true">✓</span> Completed - {orderData.orderDate}
+                  </p>
                 </div>
               </div>
 
               {/* Step 2 - In Progress */}
-              <div className="relative flex items-start mb-6 pl-12">
-                <div className="absolute left-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
+              <div className="relative flex items-start mb-6 pl-12" role="listitem">
+                <div
+                  className="absolute left-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg animate-pulse"
+                  aria-label="In progress"
+                >
+                  <span className="sr-only">Step 2 of 4: In Progress</span>
+                  <div className="w-3 h-3 bg-white rounded-full" aria-hidden="true"></div>
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Processing</p>
                   <p className="text-sm text-gray-500">We're preparing your items for shipment</p>
-                  <p className="text-xs text-blue-600 mt-1">● In Progress</p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    <span aria-hidden="true">●</span> In Progress
+                  </p>
                 </div>
               </div>
 
               {/* Step 3 - Pending */}
-              <div className="relative flex items-start mb-6 pl-12">
-                <div className="absolute left-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="relative flex items-start mb-6 pl-12" role="listitem">
+                <div
+                  className="absolute left-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center"
+                  aria-label="Pending"
+                >
+                  <span className="sr-only">Step 3 of 4: Pending</span>
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -193,9 +209,13 @@ const OrderConfirmationPage = () => {
               </div>
 
               {/* Step 4 - Pending */}
-              <div className="relative flex items-start pl-12">
-                <div className="absolute left-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="relative flex items-start pl-12" role="listitem">
+                <div
+                  className="absolute left-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center"
+                  aria-label="Pending"
+                >
+                  <span className="sr-only">Step 4 of 4: Pending</span>
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
