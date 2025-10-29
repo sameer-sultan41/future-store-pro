@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, Settings, ShoppingBag, Heart, Bell } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 
 interface UserData {
   email?: string;
