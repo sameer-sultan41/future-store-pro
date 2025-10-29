@@ -331,13 +331,13 @@ const CheckoutPage = () => {
 
                   <div
                     className={`flex items-center space-x-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      formData.paymentMethod === "paypal"
+                      formData.paymentMethod === "strip"
                         ? "border-blue-500 bg-blue-50 shadow-md"
                         : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
                     }`}
-                    onClick={() => handlePaymentMethodChange("paypal")}
+                    onClick={() => handlePaymentMethodChange("strip")}
                   >
-                    <RadioGroupItem value="paypal" id="paypal" />
+                    <RadioGroupItem value="strip" id="strip" />
                     <div className="flex items-center gap-3 flex-1">
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                         <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -345,7 +345,7 @@ const CheckoutPage = () => {
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">PayPal</p>
+                        <p className="font-semibold text-gray-900">strip</p>
                         <p className="text-xs text-gray-500">Fast & secure payment</p>
                       </div>
                     </div>
@@ -372,7 +372,7 @@ const CheckoutPage = () => {
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Cash on Delivery</p>
+                        <p className="font-semibold text-gray-900">Easy paisa</p>
                         <p className="text-xs text-gray-500">Pay when you receive</p>
                       </div>
                     </div>
@@ -457,7 +457,7 @@ const CheckoutPage = () => {
                 </div>
               )}
 
-              {formData.paymentMethod === "paypal" && (
+              {formData.paymentMethod === "strip" && (
                 <div className="mt-6 p-5 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl animate-in fade-in duration-300">
                   <div className="flex items-start gap-3">
                     <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -468,7 +468,7 @@ const CheckoutPage = () => {
                       />
                     </svg>
                     <p className="text-sm text-gray-800 font-medium">
-                      You will be redirected to PayPal to complete your purchase securely.
+                      You will be redirected to strip to complete your purchase securely.
                     </p>
                   </div>
                 </div>
