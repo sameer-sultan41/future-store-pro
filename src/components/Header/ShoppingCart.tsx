@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 import { getCartProducts } from "@/actions/product/product";
 import { CloseIcon, ShoppingIconEmpty } from "@/shared/components/icons/svgIcons";
@@ -11,7 +12,7 @@ import { TCartItemData } from "@/shared/types/shoppingCart";
 import { cn } from "@/shared/utils/styling";
 import { RootState } from "@/store/shoppingCart";
 
-import CartItem from "../../domains/shop/shoppingCard/components/shoppingCart/_components/cartItem";
+import CartItem from "../../domains/shop/shoppingCard/components/shoppingCart/_components/cartItem/CartItem";
 
 type TProps = {
   isVisible: boolean;
@@ -20,76 +21,13 @@ type TProps = {
 };
 
 const ShoppingCart = ({ isVisible, quantity, handleOnClose }: TProps) => {
-  const [cartItems, setCartItems] = useState<TCartItemData[]>();
   const localCartItems = useSelector((state: RootState) => state.cart);
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   const convertDBtoCartItems = (rawData: TCartListItemDB[]) => {
-  //     const cartListItem: TCartItemData[] = [];
-
-  //     // Create a map for quick lookups by both ID and URL
-  //     const productMapById = new Map(rawData.map((item) => [item.id, item]));
-  //     const productMapByUrl = new Map(rawData.filter((item: any) => item.url).map((item: any) => [item.url, item]));
-
-  //     // Match each cart item with its product data
-  //     localCartItems.items.forEach((cartItem) => {
-  //       // Try to find product by ID first, then by URL
-  //       const product = productMapById.get(cartItem.productId) || productMapByUrl.get(cartItem.productId);
-
-  //       if (product) {
-  //         cartListItem.push({
-  //           productId: product.id,
-  //           imgUrl: process.env.IMG_URL + product.images[0],
-  //           price: product.price,
-  //           quantity: cartItem.quantity,
-  //           productName: product.name,
-  //           dealPrice: product.salePrice || undefined,
-  //         });
-  //       } else {
-  //         console.warn(`Product not found for ID: ${cartItem.productId}`);
-  //       }
-  //     });
-
-  //     return cartListItem.length > 0 ? cartListItem : null;
-  //   };
-
-  //   const getProductsFromDB = async () => {
-  //     const productsIDs = localCartItems.items.map((s) => s.productId);
-
-  //     if (productsIDs?.length === 0) {
-  //       setCartItems([]);
-  //       return;
-  //     }
-
-  //     if (productsIDs && productsIDs.length > 0) {
-  //       console.log("Fetching products with IDs:", productsIDs);
-  //       const response = await getCartProducts(productsIDs);
-
-  //       if (response.error) {
-  //         console.error("Error fetching cart products:", response.error);
-  //         setCartItems([]);
-  //         return;
-  //       }
-
-  //       if (response.res) {
-  //         console.log("Fetched products:", response.res);
-  //         const finalResult = convertDBtoCartItems(response.res);
-
-  //         if (!finalResult) {
-  //           console.warn("No items after conversion");
-  //           setCartItems([]);
-  //           return;
-  //         }
-
-  //         setCartItems(finalResult);
-  //       }
-  //     }
-  //   };
-
-  //   if (localCartItems && localCartItems.items) {
-  //     getProductsFromDB();
-  //   }
-  // }, [localCartItems, localCartItems.items]);
+  const handleCheckout = () => {
+    handleOnClose();
+    router.push("/checkout");
+  };
 
   return (
     <div
@@ -126,8 +64,11 @@ const ShoppingCart = ({ isVisible, quantity, handleOnClose }: TProps) => {
           )}
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-[140px] bg-white border-t border-gray-300 flex flex-col items-center justify-center gap-4 mx-6">
-          {!!cartItems?.length && (
-            <Button className="w-4/5 text-sm font-semibold text-green-700 border-green-300 bg-green-50">
+          {!!localCartItems.items?.length && (
+            <Button
+              onClick={handleCheckout}
+              className="w-4/5 text-sm font-semibold text-green-700 hover:bg-green-700 hover:text-green-50 border-green-300 bg-green-50"
+            >
               CHECKOUT
             </Button>
           )}

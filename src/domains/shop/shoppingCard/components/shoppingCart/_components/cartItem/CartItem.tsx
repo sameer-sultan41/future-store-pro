@@ -8,6 +8,10 @@ import { TCartItemData } from "@/shared/types/shoppingCart";
 import { modifyQuantity, remove } from "@/store/shoppingCart";
 
 import Quantity from "../../../quantity";
+import { useEffect, useState } from "react";
+import { Currency } from "@/actions/type";
+import { getCurrencyFromCookie } from "@/actions/server";
+import { getConvertedPrice } from "@/shared/utils/helper";
 
 type TProps = {
   data: TCartItemData;
@@ -16,7 +20,7 @@ type TProps = {
 
 const CartItem = ({ data, onLinkClicked }: TProps) => {
   const { productName, productId, imgUrl, price, dealPrice = 0, quantity } = data;
-
+  const [currency, setCurrency] = useState<Currency | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
   const handleQuantityChange = (isReduced: boolean) => {
@@ -28,6 +32,19 @@ const CartItem = ({ data, onLinkClicked }: TProps) => {
     router.push("/product/" + productId);
     onLinkClicked();
   };
+
+  // Fetch currency from cookie
+  useEffect(() => {
+    const getCurrency = async () => {
+      const currency = await getCurrencyFromCookie();
+      if (currency) {
+        setCurrency(currency);
+      } else {
+        setCurrency(null);
+      }
+    };
+    getCurrency();
+  }, []);
 
   return (
     <div className="flex md:flex-row flex-col mt-5 mx-7 pb-5 justify-between gap-4 border-b border-gray-200">
@@ -45,16 +62,16 @@ const CartItem = ({ data, onLinkClicked }: TProps) => {
         </h2>
         <div className={"flex items-center justify-start"}>
           <span className="text-lg text-gray-700">
-            {(quantity * currentPrice).toLocaleString("en-us", {
+            {(quantity * getConvertedPrice(currency, currentPrice)).toLocaleString("en-us", {
               minimumFractionDigits: 2,
             })}{" "}
-            €
+            {currency?.symbol}
           </span>
           <span className="text-sm text-gray-500 ml-3">
             {quantity > 1
-              ? `${quantity} x ${currentPrice?.toLocaleString("en-us", {
+              ? `${quantity} x ${getConvertedPrice(currency, currentPrice)?.toLocaleString("en-us", {
                   maximumFractionDigits: 2,
-                })} €`
+                })} ${currency?.symbol}`
               : ""}{" "}
           </span>
         </div>
