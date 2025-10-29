@@ -89,7 +89,7 @@ const NavBarProfile = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 gap-2 px-2">
             <ProfileIcon width={16} className="fill-white transition-all duration-300 stroke-gray-500 stroke-2" />
-            <span className="select-none hidden lg:block">Account</span>
+            <span className="select-none hidden lg:block">{t("account")}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
