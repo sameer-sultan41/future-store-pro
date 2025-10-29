@@ -1,8 +1,69 @@
 {
-  "Navigation": {
-    "products": "Products",
-    "upcoming": "Upcoming",
-    "community": "Community",
-    "support": "Support"
+  "NavBar": {
+    "account": "Account",
+    "welcome": "Welcome!",
+    "signInPrompt": "Sign in to access your account",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "profile": "Profile",
+    "signOut": "Sign Out"
+  },
+  "Auth": {
+    "signUp": {
+      "title": "Create an account",
+      "subtitle": "Join us today and start your journey",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account...",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "accountCreated": "Account Created!",
+      "checkEmail": "Check your email to verify your account before signing in.",
+      "goToSignIn": "Go to Sign In",
+      "passwordStrength": "Password strength:",
+      "characters": "6+ characters",
+      "uppercase": "Uppercase",
+      "lowercase": "Lowercase",
+      "number": "Number",
+      "benefits": {
+        "title": "Create your account — shop faster.",
+        "subtitle": "Sign up to get exclusive offers, faster checkout, and order tracking.",
+        "checkout": "One-click checkout",
+        "checkoutDesc": "Save your addresses and payment methods for quick purchases.",
+        "shipping": "Fast, reliable shipping",
+        "shippingDesc": "Track your orders and receive updates in real-time.",
+        "payments": "Secure payments",
+        "paymentsDesc": "PCI-compliant payments with saved cards option."
+      }
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me for 30 days",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "dontHaveAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "benefits": {
+        "title": "Welcome back to your favorite store.",
+        "subtitle": "Sign in to access your saved items, track orders, and enjoy personalized shopping.",
+        "shopping": "Continue shopping",
+        "shoppingDesc": "Pick up where you left off with your saved cart.",
+        "wishlist": "Your wishlist",
+        "wishlistDesc": "Access your favorite products and get notified of price drops.",
+        "deals": "Exclusive deals",
+        "dealsDesc": "Get early access to sales and member-only discounts."
+      }
+    }
   }
 }
