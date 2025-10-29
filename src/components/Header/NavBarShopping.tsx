@@ -10,11 +10,8 @@ const NavBarShopping = () => {
   const dispatch = useDispatch();
 
   const localCartData: TCartState | undefined = useSelector((state: RootState) => state.cart);
-  let cartItemQuantity = 0;
 
-  if (localCartData && localCartData.items.length > 0) {
-    localCartData.items.map((item) => (cartItemQuantity += item.quantity));
-  }
+  const cartItemQuantity = localCartData?.items.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
   const handleCartVisibility = (visibility: boolean) => {
     dispatch(toggleCart(visibility));
