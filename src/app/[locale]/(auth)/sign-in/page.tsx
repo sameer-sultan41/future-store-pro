@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Lock, Eye, EyeOff, CheckCircle2, XCircle, ArrowRight, ShoppingBag, Heart, Star } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 
 export default function SignInPage() {
   const t = useTranslations("Auth.signIn");
