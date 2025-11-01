@@ -1,8 +1,75 @@
 {
   "Navigation": {
-  "products": "المنتجات",
-  "upcoming": "القادم",
-  "community": "المجتمع",
-  "support": "الدعم"
-}  
+    "products": "المنتجات",
+    "upcoming": "القادم",
+    "community": "المجتمع",
+    "support": "الدعم"
+  },
+  "NavBar": {
+    "account": "الحساب",
+    "welcome": "مرحباً!",
+    "signInPrompt": "سجل الدخول للوصول إلى حسابك",
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "profile": "الملف الشخصي",
+    "signOut": "تسجيل الخروج"
+  },
+  "Auth": {
+    "signUp": {
+      "title": "إنشاء حساب",
+      "subtitle": "انضم إلينا اليوم وابدأ رحلتك",
+      "fullName": "الاسم الكامل",
+      "fullNamePlaceholder": "جون دو",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "أنشئ كلمة مرور قوية",
+      "createAccount": "إنشاء حساب",
+      "creatingAccount": "جاري إنشاء الحساب...",
+      "alreadyHaveAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "accountCreated": "تم إنشاء الحساب!",
+      "checkEmail": "تحقق من بريدك الإلكتروني للتحقق من حسابك قبل تسجيل الدخول.",
+      "goToSignIn": "الذهاب إلى تسجيل الدخول",
+      "passwordStrength": "قوة كلمة المرور:",
+      "characters": "6+ أحرف",
+      "uppercase": "حرف كبير",
+      "lowercase": "حرف صغير",
+      "number": "رقم",
+      "benefits": {
+        "title": "أنشئ حسابك — تسوق أسرع.",
+        "subtitle": "سجل للحصول على عروض حصرية ودفع أسرع وتتبع الطلبات.",
+        "checkout": "الدفع بنقرة واحدة",
+        "checkoutDesc": "احفظ عناوينك وطرق الدفع للشراء السريع.",
+        "shipping": "شحن سريع وموثوق",
+        "shippingDesc": "تتبع طلباتك واحصل على التحديثات في الوقت الفعلي.",
+        "payments": "مدفوعات آمنة",
+        "paymentsDesc": "مدفوعات متوافقة مع PCI مع خيار حفظ البطاقات."
+      }
+    },
+    "signIn": {
+      "title": "مرحباً بعودتك",
+      "subtitle": "سجل الدخول إلى حسابك",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "أدخل كلمة المرور الخاصة بك",
+      "rememberMe": "تذكرني لمدة 30 يوماً",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "signIn": "تسجيل الدخول",
+      "signingIn": "جاري تسجيل الدخول...",
+      "dontHaveAccount": "ليس لديك حساب؟",
+      "signUp": "إنشاء حساب",
+      "benefits": {
+        "title": "مرحباً بعودتك إلى متجرك المفضل.",
+        "subtitle": "سجل الدخول للوصول إلى عناصرك المحفوظة وتتبع الطلبات والاستمتاع بالتسوق الشخصي.",
+        "shopping": "متابعة التسوق",
+        "shoppingDesc": "استأنف من حيث توقفت مع سلة التسوق المحفوظة.",
+        "wishlist": "قائمة الرغبات الخاصة بك",
+        "wishlistDesc": "الوصول إلى منتجاتك المفضلة والحصول على إشعارات انخفاض الأسعار.",
+        "deals": "عروض حصرية",
+        "dealsDesc": "احصل على الوصول المبكر للتخفيضات وعروض الأعضاء فقط."
+      }
+    }
+  }
 }
