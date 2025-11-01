@@ -54,22 +54,48 @@ export type TProduct = {
   reviews: TUserReview[];
 };
 
-export type TAddProductFormValues = {
+export type ProductTranslation = {
   name: string;
-  isAvailable: boolean;
-  specialFeatures: string[];
-  brandID: string;
-  desc?: string;
-  price: string;
-  salePrice?: string;
-  images: string[];
+  description: string;
+  shortDescription: string;
+  specialFeatures?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+};
+
+export type TAddProductFormValues = {
+  sku: string;
+  url: string;
+  // Default English translation (for backwards compatibility)
+  name: string;
+  description: string;
+  shortDescription: string;
+  // Multi-language translations
+  translations?: Record<string, ProductTranslation>;
   categoryID: string;
-  specifications: any[];
+  brandID: string;
+  price: string;
+  costPrice: string;
+  isAvailable: boolean;
+  isFeatured: boolean;
+  stockQuantity: string;
+  lowStockThreshold: string;
+  weight: string;
+  images: string[];
+  sortOrder: string;
+  specs: any;
 };
 
 export type TProductListItem = {
   id: string;
   name: string;
+  price: number;
+  salePrice: number | null;
+  isAvailable: boolean;
+  brand: {
+    id: string;
+    name: string;
+  }
   category: {
     id: string;
     name: string;

@@ -32,7 +32,7 @@ export const addVisit = async (data: TAddPageVisit) => {
   try {
     const supabase = createSupabaseServer();
     const { data: result, error } = await supabase
-      .from('page_visits')
+      .from("page_visits")
       .insert({
         page_type: data.pageType,
         page_path: data.pagePath,
@@ -53,49 +53,64 @@ export const addVisit = async (data: TAddPageVisit) => {
 export const getTrafficReport = async (skip: number = 0) => {
   try {
     const supabase = createSupabaseServer();
+
+    // First get the page visits
     const [listResult, countResult] = await Promise.all([
       supabase
-        .from('page_visits')
-        .select(`
-          id,
-          time,
-          page_type,
-          page_path,
-          product_id,
-          device_resolution,
-          products (
-            name,
-            categories (
-              name
-            )
-          )
-        `)
-        .order('id', { ascending: false })
+        .from("page_visits")
+        .select("*")
+        .order("id", { ascending: false })
         .range(skip, skip + TRAFFIC_LIST_PAGE_SIZE - 1),
-      supabase
-        .from('page_visits')
-        .select('*', { count: 'exact', head: true })
+      supabase.from("page_visits").select("*", { count: "exact", head: true }),
     ]);
 
     if (listResult.error) return { error: listResult.error.message };
     if (countResult.error) return { error: countResult.error.message };
 
-    const list = listResult.data?.map(item => ({
-      id: item.id,
-      time: item.time,
-      pageType: item.page_type,
-      pagePath: item.page_path,
-      productID: item.product_id,
-      deviceResolution: item.device_resolution,
-      product: item.products ? {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: (item.products as any).name,
-        category: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          name: (item.products as any).categories?.name || ''
+    // Then get product details for items that have product_id
+    const list = await Promise.all(
+      (listResult.data || []).map(async (item) => {
+        let product = null;
+
+        if (item.product_id) {
+          try {
+            const { data: productData } = await supabase
+              .from("products")
+              .select("name, category_id")
+              .eq("id", item.product_id)
+              .single();
+
+            if (productData) {
+              const { data: categoryData } = await supabase
+                .from("categories")
+                .select("name")
+                .eq("id", productData.category_id)
+                .single();
+
+              product = {
+                name: productData.name,
+                category: {
+                  name: categoryData?.name || "Unknown",
+                },
+              };
+            }
+          } catch (error) {
+            // If product fetch fails, just set product to null
+            product = null;
+          }
         }
-      } : null
-    })) || [];
+
+        return {
+          id: item.id,
+          time: item.time,
+          pageType: item.page_type,
+          pagePath: item.page_path,
+          productID: item.product_id,
+          deviceResolution: item.device_resolution,
+          product,
+        };
+      })
+    );
 
     const totalCount = countResult.count || 0;
 
@@ -110,12 +125,7 @@ export const deleteTraffic = async (id: string) => {
 
   try {
     const supabase = createSupabaseServer();
-    const { data: result, error } = await supabase
-      .from('page_visits')
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
+    const { data: result, error } = await supabase.from("page_visits").delete().eq("id", id).select().single();
 
     if (error) return { error: error.message };
     if (!result) return { error: "Can not delete Data!" };
