@@ -421,6 +421,149 @@ export const deleteProduct = async (productID: string) => {
   }
 };
 
+export const getProductById = async (productID: string) => {
+  if (!productID || productID === "") return { error: "Invalid Data!" };
+  try {
+    const supabase = createSupabaseServer();
+    const { data: result, error } = await supabase
+      .from("products")
+      .select(
+        `
+        id,
+        sku,
+        url,
+        category_id,
+        brand_id,
+        price,
+        cost_price,
+        is_available,
+        is_featured,
+        stock_quantity,
+        low_stock_threshold,
+        weight,
+        images,
+        sort_order,
+        specs,
+        product_translations!inner (
+          name,
+          description,
+          short_description,
+          language_code
+        ),
+        categories (
+          category_translations!inner (
+            name,
+            language_code
+          )
+        ),
+        brands (
+          name
+        )
+      `
+      )
+      .eq("id", productID)
+      .eq("product_translations.language_code", "en")
+      .eq("categories.category_translations.language_code", "en")
+      .single();
+
+    if (error) return { error: error.message };
+    if (!result) return { error: "Product not found!" };
+
+    // Transform to flat structure
+    const transformedResult = {
+      id: result.id,
+      sku: result.sku,
+      url: result.url,
+      categoryId: result.category_id,
+      brandId: result.brand_id,
+      name: result.product_translations[0]?.name || "",
+      description: result.product_translations[0]?.description || "",
+      shortDescription: result.product_translations[0]?.short_description || "",
+      categoryName: result.categories?.category_translations?.[0]?.name || "",
+      brandName: result.brands?.name || "",
+      price: result.price,
+      costPrice: result.cost_price,
+      isAvailable: result.is_available,
+      isFeatured: result.is_featured,
+      stockQuantity: result.stock_quantity,
+      lowStockThreshold: result.low_stock_threshold,
+      weight: result.weight,
+      images: result.images,
+      sortOrder: result.sort_order,
+      specs: result.specs,
+    };
+
+    return { data: transformedResult };
+  } catch (error) {
+    return { error: JSON.stringify(error) };
+  }
+};
+
+export const updateProduct = async (productID: string, data: TAddProductFormValues) => {
+  if (!productID || productID === "") return { error: "Invalid Product ID!" };
+  
+  const validation = ValidateAddProduct.safeParse(data);
+  if (!validation.success) {
+    console.error("Validation error:", validation.error);
+    return { error: "Invalid Data!" };
+  }
+
+  try {
+    const supabase = createSupabaseServer();
+    const price = convertStringToFloat(data.price);
+    const costPrice = data.costPrice ? convertStringToFloat(data.costPrice) : null;
+    const stockQuantity = parseInt(data.stockQuantity) || 0;
+    const lowStockThreshold = data.lowStockThreshold ? parseInt(data.lowStockThreshold) : 5;
+    const weight = data.weight ? convertStringToFloat(data.weight) : null;
+    const sortOrder = data.sortOrder ? parseInt(data.sortOrder) : 0;
+
+    // Update product
+    const { data: result, error } = await supabase
+      .from("products")
+      .update({
+        sku: data.sku,
+        url: data.url,
+        category_id: data.categoryID,
+        brand_id: data.brandID,
+        price: price,
+        cost_price: costPrice,
+        is_available: data.isAvailable,
+        is_featured: data.isFeatured,
+        stock_quantity: stockQuantity,
+        low_stock_threshold: lowStockThreshold,
+        weight: weight,
+        images: [...data.images],
+        sort_order: sortOrder,
+        specs: data.specs,
+      })
+      .eq("id", productID)
+      .select()
+      .single();
+
+    if (error) return { error: error.message };
+    if (!result) return { error: "Can't Update Product" };
+
+    // Update translations
+    const { error: translationError } = await supabase
+      .from("product_translations")
+      .update({
+        name: data.name,
+        description: data.description || "",
+        short_description: data.shortDescription || "",
+      })
+      .eq("product_id", productID)
+      .eq("language_code", "en");
+
+    if (translationError) {
+      console.error("Translation update error:", translationError);
+    }
+
+    return { res: result };
+  } catch (error) {
+    return { error: JSON.stringify(error) };
+  }
+};
+
 const generateSpecTable = async (rawSpec: { specGroupID: string; specValues: string[] }[]) => {
   try {
     const specGroupIDs = rawSpec.map((spec) => spec.specGroupID);

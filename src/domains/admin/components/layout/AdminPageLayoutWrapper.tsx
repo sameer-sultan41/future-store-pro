@@ -60,16 +60,27 @@ interface AdminPageLayoutWrapperProps {
 const AdminPageLayoutWrapper = ({ children }: AdminPageLayoutWrapperProps) => {
     const pathname = usePathname();
 
-    // Find the matching page config
-    const currentPage = pageConfigs.find((config) => {
+    // Detect dynamic product routes
+    let currentPage = pageConfigs.find((config) => {
         if (config.path === "/admin") {
             return pathname === "/admin" || pathname.endsWith("/admin");
         }
         return pathname.includes(config.path);
-    }) || pageConfigs[0]; // Default to dashboard if no match
+    });
+
+    // Handle dynamic routes (view/edit product)
+    let pageTitle = currentPage?.title || "Dashboard";
+    if (pathname.includes("/admin/products/") && !pathname.includes("/new")) {
+        if (pathname.includes("/edit")) {
+            pageTitle = "Edit Product";
+        } else {
+            pageTitle = "View Product";
+        }
+        currentPage = { path: "/admin/products", title: pageTitle, icon: Package };
+    }
 
     const isHomePage = pathname === "/admin" || pathname.endsWith("/admin");
-    const PageIcon = currentPage.icon;
+    const PageIcon = currentPage?.icon || LayoutDashboard;
 
     return (
         <div className="h-full flex flex-col">
@@ -89,7 +100,7 @@ const AdminPageLayoutWrapper = ({ children }: AdminPageLayoutWrapperProps) => {
                             <>
                                 <ChevronRight className="w-4 h-4 text-slate-400" />
                                 <span className="text-slate-500 dark:text-slate-400">
-                                    {currentPage.title}
+                                    {pageTitle}
                                 </span>
                             </>
                         )}

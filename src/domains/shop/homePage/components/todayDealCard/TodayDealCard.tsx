@@ -56,14 +56,20 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
 
   const saveAmount = getConvertedPrice(currency, oldPrice) - getConvertedPrice(currency, newPrice);
 
-  const [timeRemaining, setTimeRemaining] = useState<number>(() => {
-    // Calculate the remaining time in milliseconds
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize time remaining on mount (client-side only)
+  useEffect(() => {
     const endTime = new Date(dealEndTime).getTime();
     const now = Date.now();
-    return Math.max(0, endTime - now);
-  });
+    setTimeRemaining(Math.max(0, endTime - now));
+    setMounted(true);
+  }, [dealEndTime]);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         const newTime = prev - 1000;
@@ -71,7 +77,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [mounted]);
 
   // Helper to format time from milliseconds
   const formatTime = (ms: number) => {
@@ -149,7 +155,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
           className="w-full h-full"
         >
           <Image
-            alt={productName}
+            alt={productName || "Product image"}
             src={image[0]}
             fill
             sizes="(max-width:240px)"
@@ -164,7 +170,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
       >
-        <span className="font-bold tracking-wide">
+        <span className="font-bold tracking-wide" suppressHydrationWarning>
           Save {saveAmount.toLocaleString("en-us", { minimumFractionDigits: 2 })} {currencySymbol}
         </span>
       </motion.div>
@@ -190,7 +196,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
       <div className="flex flex-col gap-2 mx-2 mt-2">
         <div className="flex justify-between items-end">
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <span className="block text-gray-400 text-xs line-through select-none">
+            <span className="block text-gray-400 text-xs line-through select-none" suppressHydrationWarning>
               was{" "}
               {getConvertedPrice(currency, oldPrice)?.toLocaleString("en-us", {
                 useGrouping: true,
@@ -203,6 +209,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              suppressHydrationWarning
             >
               {getConvertedPrice(currency, newPrice).toLocaleString("en-us", {
                 useGrouping: true,
@@ -223,6 +230,7 @@ const TodayDealCard = ({ productName, newPrice, oldPrice, image, dealEndTime, de
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+              suppressHydrationWarning
             >
               {formatTime(timeRemaining)}
             </motion.span>

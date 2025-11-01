@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 
 import { deleteProduct } from "@/actions/product/product";
 import { Button } from "@/components/ui/button";
@@ -88,21 +89,24 @@ const ProductListItem = ({ data, requestReload }: TProps) => {
         {/* Actions */}
         <td className="table-td">
           <div className="flex justify-center items-center">
-            <button
-              onClick={() => console.log("view product", data.id)}
-              className="cursor-pointer text-[20px] text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+            <Link
+              href={`/admin/products/${data.id}`}
+              className="cursor-pointer text-[20px] text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+              title="View Product"
             >
               <Eye className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => console.log("edit product", data.id)}
-              className="cursor-pointer text-[20px] mx-4 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+            </Link>
+            <Link
+              href={`/admin/products/${data.id}/edit`}
+              className="cursor-pointer text-[20px] mx-4 text-slate-600 hover:text-green-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+              title="Edit Product"
             >
               <Edit className="w-5 h-5" />
-            </button>
+            </Link>
             <button
               onClick={() => setShowDelete(true)}
-              className="cursor-pointer text-[20px] text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+              className="cursor-pointer text-[20px] text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+              title="Delete Product"
             >
               <Trash2 className="w-5 h-5" />
             </button>

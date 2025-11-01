@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Select from "react-select";
+import Image from "next/image";
 
 import { getAllBrands } from "@/actions/brands/brands";
 import { getAllCategoriesJSON } from "@/actions/category/category";
@@ -24,11 +25,56 @@ type SpecGroup = {
 };
 
 type TProps = {
-  formValues: TAddProductFormValues;
-  onChange: (props: TAddProductFormValues) => void;
+  formValues?: TAddProductFormValues;
+  onChange?: (props: TAddProductFormValues) => void;
+  initialData?: TAddProductFormValues;
+  onSubmit?: (values: TAddProductFormValues) => void;
+  isLoading?: boolean;
 };
 
-const SimpleProductForm = ({ formValues: props, onChange }: TProps) => {
+const SimpleProductForm = ({ 
+  formValues: externalFormValues, 
+  onChange: externalOnChange,
+  initialData,
+  onSubmit,
+  isLoading: externalLoading = false
+}: TProps) => {
+  // Use internal state if no external formValues provided (for edit mode)
+  const [internalFormValues, setInternalFormValues] = useState<TAddProductFormValues>(
+    initialData || externalFormValues || {
+      sku: "",
+      url: "",
+      name: "",
+      description: "",
+      shortDescription: "",
+      categoryID: "",
+      brandID: "",
+      price: "",
+      costPrice: "",
+      isAvailable: true,
+      isFeatured: false,
+      stockQuantity: "",
+      lowStockThreshold: "5",
+      weight: "",
+      images: [],
+      sortOrder: "0",
+      specs: {},
+    }
+  );
+
+  // Use external or internal form values
+  const props = externalFormValues || internalFormValues;
+  
+  // Use external or internal onChange
+  const handleChange = (newValues: TAddProductFormValues) => {
+    if (externalOnChange) {
+      externalOnChange(newValues);
+    } else {
+      setInternalFormValues(newValues);
+    }
+  };
+  
+  const onChange = externalOnChange || handleChange;
   const [categories, setCategories] = useState<SelectOption[]>([]);
   const [brands, setBrands] = useState<SelectOption[]>([]);
   const [categorySpecs, setCategorySpecs] = useState<SpecGroup[]>([]);
@@ -159,8 +205,15 @@ const SimpleProductForm = ({ formValues: props, onChange }: TProps) => {
     }),
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit(props);
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <form id="product-form" onSubmit={handleSubmit} className="space-y-8">
       {/* Basic Details */}
       <div className="">
         <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
@@ -389,28 +442,58 @@ const SimpleProductForm = ({ formValues: props, onChange }: TProps) => {
             + Add Image
           </button>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-4">
           {props.images.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
               No images added yet
             </p>
           ) : (
             props.images.map((img, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  type="text"
-                  value={img}
-                  placeholder={`Image URL ${index + 1}`}
-                  onChange={(e) => updateImage(index, e.currentTarget.value)}
-                  className="flex-1 py-2"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImageField(index)}
-                  className="px-3 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
+              <div key={index} className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    value={img}
+                    placeholder={`Image URL ${index + 1}`}
+                    onChange={(e) => updateImage(index, e.target.value)}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pastedText = e.clipboardData.getData('text');
+                      updateImage(index, pastedText);
+                    }}
+                    className="flex-1 py-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImageField(index)}
+                    className="px-3 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+                {/* Image Preview */}
+                {img && img.trim() !== "" && (
+                  <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                    <Image
+                      src={img}
+                      alt={`Preview ${index + 1}`}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = "none";
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector(".error-message")) {
+                          const errorDiv = document.createElement("div");
+                          errorDiv.className = "error-message absolute inset-0 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400 p-2 text-center bg-slate-100 dark:bg-slate-700";
+                          errorDiv.innerHTML = '<span>⚠️ Failed to load<br/>image</span>';
+                          parent.appendChild(errorDiv);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -481,7 +564,7 @@ const SimpleProductForm = ({ formValues: props, onChange }: TProps) => {
           </p>
         </div>
       </div> */}
-    </div>
+    </form>
   );
 };
 

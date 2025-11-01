@@ -47,7 +47,7 @@ export function CurrencyToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button variant="outline">
           {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <DollarSign className="h-4 w-4" />}{" "}
           {currentCurrency}

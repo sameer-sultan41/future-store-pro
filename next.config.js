@@ -9,10 +9,15 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
       },
     ],
+    // Allow all remote images (for admin image previews)
+    unoptimized: process.env.NODE_ENV === "development",
     // Add supported qualities to silence next/image warning when using quality={100}
     qualities: [75, 100],
   },

@@ -64,7 +64,7 @@ export function LanguageToggle({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           className={cn("shadow-sm uppercase", className)}
