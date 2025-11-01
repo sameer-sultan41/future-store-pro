@@ -79,13 +79,7 @@ export default function ViewProductPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <Link href="/admin/products">
-                    <Button variant="outline" size="sm">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Products
-                    </Button>
-                </Link>
+            <div className="flex items-center justify-end">
                 <Link href={`/admin/products/${product.id}/edit`}>
                     <Button>Edit Product</Button>
                 </Link>

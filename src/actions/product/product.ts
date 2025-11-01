@@ -187,17 +187,31 @@ export const addProduct = async (data: TAddProductFormValues) => {
     if (error) return { error: error.message };
     if (!result) return { error: "Can't Insert Data" };
 
-    // Now insert translations
-    const { error: translationError } = await supabase.from("product_translations").insert({
+    // Insert translations for all languages
+    const translations = data.translations || {
+      en: {
+        name: data.name,
+        description: data.description || "",
+        shortDescription: data.shortDescription || "",
+      },
+    };
+
+    const translationRecords = Object.entries(translations).map(([langCode, trans]) => ({
       product_id: result.id,
-      language_code: "en",
-      name: data.name,
-      description: data.description || "",
-      short_description: data.shortDescription || "",
-    });
+      language_code: langCode,
+      name: trans.name,
+      description: trans.description || "",
+      short_description: trans.shortDescription || "",
+      special_features: trans.specialFeatures || null,
+      meta_title: trans.metaTitle || null,
+      meta_description: trans.metaDescription || null,
+    }));
+
+    const { error: translationError } = await supabase.from("product_translations").insert(translationRecords);
 
     if (translationError) {
       console.error("Translation insert error:", translationError);
+      // Don't fail the whole operation if translations fail
     }
 
     return { res: result };
@@ -425,6 +439,8 @@ export const getProductById = async (productID: string) => {
   if (!productID || productID === "") return { error: "Invalid Data!" };
   try {
     const supabase = createSupabaseServer();
+
+    // Get product with all translations
     const { data: result, error } = await supabase
       .from("products")
       .select(
@@ -444,12 +460,6 @@ export const getProductById = async (productID: string) => {
         images,
         sort_order,
         specs,
-        product_translations!inner (
-          name,
-          description,
-          short_description,
-          language_code
-        ),
         categories (
           category_translations!inner (
             name,
@@ -462,12 +472,39 @@ export const getProductById = async (productID: string) => {
       `
       )
       .eq("id", productID)
-      .eq("product_translations.language_code", "en")
       .eq("categories.category_translations.language_code", "en")
       .single();
 
     if (error) return { error: error.message };
     if (!result) return { error: "Product not found!" };
+
+    // Get all translations separately
+    const { data: allTranslations } = await supabase
+      .from("product_translations")
+      .select("*")
+      .eq("product_id", productID);
+
+    // Build translations object
+    const translations: Record<string, any> = {};
+    if (allTranslations) {
+      allTranslations.forEach((trans) => {
+        translations[trans.language_code] = {
+          name: trans.name,
+          description: trans.description || "",
+          shortDescription: trans.short_description || "",
+          specialFeatures: trans.special_features,
+          metaTitle: trans.meta_title,
+          metaDescription: trans.meta_description,
+        };
+      });
+    }
+
+    // Get English translation for backwards compatibility
+    const enTranslation = translations.en || {
+      name: "",
+      description: "",
+      shortDescription: "",
+    };
 
     // Transform to flat structure
     const transformedResult = {
@@ -476,11 +513,12 @@ export const getProductById = async (productID: string) => {
       url: result.url,
       categoryId: result.category_id,
       brandId: result.brand_id,
-      name: result.product_translations[0]?.name || "",
-      description: result.product_translations[0]?.description || "",
-      shortDescription: result.product_translations[0]?.short_description || "",
-      categoryName: result.categories?.category_translations?.[0]?.name || "",
-      brandName: result.brands?.name || "",
+      name: enTranslation.name,
+      description: enTranslation.description,
+      shortDescription: enTranslation.shortDescription,
+      translations: translations,
+      categoryName: (result.categories as any)?.category_translations?.[0]?.name || "",
+      brandName: (result.brands as any)?.name || "",
       price: result.price,
       costPrice: result.cost_price,
       isAvailable: result.is_available,
@@ -501,7 +539,7 @@ export const getProductById = async (productID: string) => {
 
 export const updateProduct = async (productID: string, data: TAddProductFormValues) => {
   if (!productID || productID === "") return { error: "Invalid Product ID!" };
-  
+
   const validation = ValidateAddProduct.safeParse(data);
   if (!validation.success) {
     console.error("Validation error:", validation.error);
@@ -543,22 +581,107 @@ export const updateProduct = async (productID: string, data: TAddProductFormValu
     if (error) return { error: error.message };
     if (!result) return { error: "Can't Update Product" };
 
-    // Update translations
-    const { error: translationError } = await supabase
-      .from("product_translations")
-      .update({
+    // Update or insert translations for all languages
+    const translations = data.translations || {
+      en: {
         name: data.name,
         description: data.description || "",
-        short_description: data.shortDescription || "",
-      })
-      .eq("product_id", productID)
-      .eq("language_code", "en");
+        shortDescription: data.shortDescription || "",
+      },
+    };
 
-    if (translationError) {
-      console.error("Translation update error:", translationError);
+    // Delete existing translations and insert new ones (easier than updating each)
+    await supabase.from("product_translations").delete().eq("product_id", productID);
+
+    const translationRecords = Object.entries(translations)
+      .filter(([_, trans]) => trans.name && trans.name.trim() !== "") // Only insert languages with name filled
+      .map(([langCode, trans]) => ({
+        product_id: productID,
+        language_code: langCode,
+        name: trans.name,
+        description: trans.description || "",
+        short_description: trans.shortDescription || "",
+        special_features: trans.specialFeatures || null,
+        meta_title: trans.metaTitle || null,
+        meta_description: trans.metaDescription || null,
+      }));
+
+    if (translationRecords.length > 0) {
+      const { error: translationError } = await supabase.from("product_translations").insert(translationRecords);
+
+      if (translationError) {
+        console.error("Translation insert error:", translationError);
+        // Don't fail the whole operation if translations fail
+      }
     }
 
     return { res: result };
+  } catch (error) {
+    return { error: JSON.stringify(error) };
+  }
+};
+
+export const getProductTranslations = async (productID: string) => {
+  if (!productID || productID === "") return { error: "Invalid Product ID!" };
+  try {
+    const supabase = createSupabaseServer();
+    const { data: translations, error } = await supabase
+      .from("product_translations")
+      .select("*")
+      .eq("product_id", productID);
+
+    if (error) return { error: error.message };
+
+    // Build translations object
+    const translationsObj: Record<string, any> = {};
+    if (translations) {
+      translations.forEach((trans) => {
+        translationsObj[trans.language_code] = {
+          name: trans.name,
+          description: trans.description || "",
+          shortDescription: trans.short_description || "",
+          specialFeatures: trans.special_features,
+          metaTitle: trans.meta_title,
+          metaDescription: trans.meta_description,
+        };
+      });
+    }
+
+    return { res: translationsObj };
+  } catch (error) {
+    return { error: JSON.stringify(error) };
+  }
+};
+
+export const updateProductTranslations = async (productID: string, translations: Record<string, any>) => {
+  if (!productID || productID === "") return { error: "Invalid Product ID!" };
+  try {
+    const supabase = createSupabaseServer();
+
+    // Delete existing translations (except English, which comes from main form)
+    await supabase.from("product_translations").delete().eq("product_id", productID).neq("language_code", "en");
+
+    // Insert new translations (except English)
+    const translationRecords = Object.entries(translations)
+      .filter(([langCode, trans]: [string, any]) => langCode !== "en" && trans.name && trans.name.trim() !== "")
+      .map(([langCode, trans]: [string, any]) => ({
+        product_id: productID,
+        language_code: langCode,
+        name: trans.name,
+        description: trans.description || "",
+        short_description: trans.shortDescription || "",
+        special_features: trans.specialFeatures || null,
+        meta_title: trans.metaTitle || null,
+        meta_description: trans.metaDescription || null,
+      }));
+
+    if (translationRecords.length > 0) {
+      const { error } = await supabase.from("product_translations").insert(translationRecords);
+
+      if (error) return { error: error.message };
+    }
+
+    return { res: "Translations updated successfully" };
   } catch (error) {
     return { error: JSON.stringify(error) };
   }

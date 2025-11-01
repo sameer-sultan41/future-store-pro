@@ -54,12 +54,24 @@ export type TProduct = {
   reviews: TUserReview[];
 };
 
-export type TAddProductFormValues = {
-  sku: string;
-  url: string;
+export type ProductTranslation = {
   name: string;
   description: string;
   shortDescription: string;
+  specialFeatures?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+};
+
+export type TAddProductFormValues = {
+  sku: string;
+  url: string;
+  // Default English translation (for backwards compatibility)
+  name: string;
+  description: string;
+  shortDescription: string;
+  // Multi-language translations
+  translations?: Record<string, ProductTranslation>;
   categoryID: string;
   brandID: string;
   price: string;

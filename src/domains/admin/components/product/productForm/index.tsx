@@ -10,8 +10,9 @@ import { getCategorySpecs } from "@/actions/category/specifications";
 import Input from "@/shared/components/UI/input";
 import { TBrand } from "@/shared/types";
 import { TGroupJSON } from "@/shared/types/categories";
-import { TAddProductFormValues } from "@/shared/types/product";
+import { TAddProductFormValues, ProductTranslation } from "@/shared/types/product";
 import { cn } from "@/shared/utils/styling";
+import LanguageTabs from "./LanguageTabs";
 
 type SelectOption = {
   value: string;
@@ -32,8 +33,8 @@ type TProps = {
   isLoading?: boolean;
 };
 
-const SimpleProductForm = ({ 
-  formValues: externalFormValues, 
+const SimpleProductForm = ({
+  formValues: externalFormValues,
   onChange: externalOnChange,
   initialData,
   onSubmit,
@@ -64,7 +65,7 @@ const SimpleProductForm = ({
 
   // Use external or internal form values
   const props = externalFormValues || internalFormValues;
-  
+
   // Use external or internal onChange
   const handleChange = (newValues: TAddProductFormValues) => {
     if (externalOnChange) {
@@ -73,12 +74,37 @@ const SimpleProductForm = ({
       setInternalFormValues(newValues);
     }
   };
-  
+
   const onChange = externalOnChange || handleChange;
   const [categories, setCategories] = useState<SelectOption[]>([]);
   const [brands, setBrands] = useState<SelectOption[]>([]);
   const [categorySpecs, setCategorySpecs] = useState<SpecGroup[]>([]);
   const [isLoadingSpecs, setIsLoadingSpecs] = useState(false);
+  const [activeLanguage, setActiveLanguage] = useState<string>("en");
+
+  // Initialize translations if not present
+  useEffect(() => {
+    if (!props.translations) {
+      const initialTranslations: Record<string, ProductTranslation> = {
+        en: {
+          name: props.name || "",
+          description: props.description || "",
+          shortDescription: props.shortDescription || "",
+        },
+        ur: {
+          name: "",
+          description: "",
+          shortDescription: "",
+        },
+        ar: {
+          name: "",
+          description: "",
+          shortDescription: "",
+        },
+      };
+      onChange({ ...props, translations: initialTranslations });
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -180,6 +206,44 @@ const SimpleProductForm = ({
     onChange({ ...props, images: newImages });
   };
 
+  // Helper functions for translations
+  const getCurrentTranslation = () => {
+    return props.translations?.[activeLanguage] || {
+      name: "",
+      description: "",
+      shortDescription: "",
+    };
+  };
+
+  const updateTranslation = (field: keyof ProductTranslation, value: string) => {
+    const translations = props.translations || {};
+    const currentLangTranslation = translations[activeLanguage] || {
+      name: "",
+      description: "",
+      shortDescription: "",
+    };
+
+    const updatedTranslations = {
+      ...translations,
+      [activeLanguage]: {
+        ...currentLangTranslation,
+        [field]: value,
+      },
+    };
+
+    // Also update the main fields for English (for backwards compatibility)
+    const mainFields: Partial<TAddProductFormValues> = {};
+    if (activeLanguage === "en") {
+      mainFields[field as keyof TAddProductFormValues] = value as any;
+    }
+
+    onChange({
+      ...props,
+      ...mainFields,
+      translations: updatedTranslations,
+    });
+  };
+
   const updateSpec = (groupTitle: string, specName: string, value: string) => {
     const updatedSpecs = { ...props.specs };
     if (!updatedSpecs[groupTitle]) {
@@ -212,6 +276,8 @@ const SimpleProductForm = ({
     }
   };
 
+  const currentTranslation = getCurrentTranslation();
+
   return (
     <form id="product-form" onSubmit={handleSubmit} className="space-y-8">
       {/* Basic Details */}
@@ -229,7 +295,7 @@ const SimpleProductForm = ({
               value={props.sku}
               placeholder="e.g., PROD-001"
               onChange={(e) => onChange({ ...props, sku: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
 
@@ -242,7 +308,7 @@ const SimpleProductForm = ({
               value={props.url}
               placeholder="e.g., product-name"
               onChange={(e) => onChange({ ...props, url: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
 
@@ -254,8 +320,8 @@ const SimpleProductForm = ({
               type="text"
               value={props.name}
               placeholder="Enter product name"
-              onChange={(e) => onChange({ ...props, name: e.currentTarget.value })}
-              className = "py-2"
+              onChange={(e) => onChange({ ...props, name: e.target.value })}
+              className="py-2"
             />
           </div>
 
@@ -267,8 +333,8 @@ const SimpleProductForm = ({
               type="text"
               value={props.shortDescription}
               placeholder="Brief description (1-2 lines)"
-              onChange={(e) => onChange({ ...props, shortDescription: e.currentTarget.value })}
-              className = "py-2"
+              onChange={(e) => onChange({ ...props, shortDescription: e.target.value })}
+              className="py-2"
             />
           </div>
 
@@ -338,7 +404,7 @@ const SimpleProductForm = ({
               value={props.price}
               placeholder="0.00"
               onChange={(e) => onChange({ ...props, price: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
 
@@ -351,7 +417,7 @@ const SimpleProductForm = ({
               value={props.costPrice}
               placeholder="0.00"
               onChange={(e) => onChange({ ...props, costPrice: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
         </div>
@@ -370,7 +436,7 @@ const SimpleProductForm = ({
               value={props.stockQuantity}
               placeholder="0"
               onChange={(e) => onChange({ ...props, stockQuantity: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
 
@@ -383,7 +449,7 @@ const SimpleProductForm = ({
               value={props.lowStockThreshold}
               placeholder="5"
               onChange={(e) => onChange({ ...props, lowStockThreshold: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
 
@@ -396,7 +462,7 @@ const SimpleProductForm = ({
               value={props.weight}
               placeholder="0.0"
               onChange={(e) => onChange({ ...props, weight: e.currentTarget.value })}
-              className = "py-2"
+              className="py-2"
             />
           </div>
 

@@ -3,12 +3,13 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 
-import { deleteProduct } from "@/actions/product/product";
+import { deleteProduct, getProductTranslations, updateProductTranslations } from "@/actions/product/product";
 import { Button } from "@/components/ui/button";
 import Popup from "@/shared/components/UI/popup";
-import { TProductListItem } from "@/shared/types/product";
+import { TProductListItem, ProductTranslation } from "@/shared/types/product";
 import { cn } from "@/lib/utils";
-import { Edit, Trash2, Eye } from "lucide-react";
+import { Edit, Trash2, Eye, Globe } from "lucide-react";
+import TranslationModal from "../TranslationModal";
 
 type TProps = {
   data: TProductListItem;
@@ -17,7 +18,10 @@ type TProps = {
 
 const ProductListItem = ({ data, requestReload }: TProps) => {
   const [showDelete, setShowDelete] = useState(false);
+  const [showTranslations, setShowTranslations] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, ProductTranslation>>({});
+  const [isLoadingTranslations, setIsLoadingTranslations] = useState(false);
 
   const handleDelete = async () => {
     setIsLoading(true);
@@ -29,6 +33,24 @@ const ProductListItem = ({ data, requestReload }: TProps) => {
       setIsLoading(false);
       setShowDelete(false);
       requestReload();
+    }
+  };
+
+  const handleOpenTranslations = async () => {
+    setIsLoadingTranslations(true);
+    setShowTranslations(true);
+    const response = await getProductTranslations(data.id);
+    if (response.res) {
+      setTranslations(response.res);
+    }
+    setIsLoadingTranslations(false);
+  };
+
+  const handleSaveTranslations = async (updatedTranslations: Record<string, ProductTranslation>) => {
+    const response = await updateProductTranslations(data.id, updatedTranslations);
+    if (response.error) {
+      console.error("Error saving translations:", response.error);
+      throw new Error(response.error);
     }
   };
 
@@ -88,24 +110,31 @@ const ProductListItem = ({ data, requestReload }: TProps) => {
 
         {/* Actions */}
         <td className="table-td">
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center gap-1">
             <Link
               href={`/admin/products/${data.id}`}
-              className="cursor-pointer text-[20px] text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+              className="cursor-pointer p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded transition-colors"
               title="View Product"
             >
               <Eye className="w-5 h-5" />
             </Link>
             <Link
               href={`/admin/products/${data.id}/edit`}
-              className="cursor-pointer text-[20px] mx-4 text-slate-600 hover:text-green-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
+              className="cursor-pointer p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 dark:text-slate-400 dark:hover:text-green-400 dark:hover:bg-green-900/20 rounded transition-colors"
               title="Edit Product"
             >
               <Edit className="w-5 h-5" />
             </Link>
             <button
+              onClick={handleOpenTranslations}
+              className="cursor-pointer p-2 text-slate-600 hover:text-purple-600 hover:bg-purple-50 dark:text-slate-400 dark:hover:text-purple-400 dark:hover:bg-purple-900/20 rounded transition-colors"
+              title="Manage Translations"
+            >
+              <Globe className="w-5 h-5" />
+            </button>
+            <button
               onClick={() => setShowDelete(true)}
-              className="cursor-pointer text-[20px] text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+              className="cursor-pointer p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded transition-colors"
               title="Delete Product"
             >
               <Trash2 className="w-5 h-5" />
@@ -131,6 +160,18 @@ const ProductListItem = ({ data, requestReload }: TProps) => {
           onSubmit={() => handleDelete()}
           cancelBtnText="Cancel"
           confirmBtnText="Delete"
+        />,
+        document.body
+      )}
+
+      {showTranslations && typeof document !== "undefined" && createPortal(
+        <TranslationModal
+          isOpen={showTranslations}
+          onClose={() => setShowTranslations(false)}
+          productId={data.id}
+          productName={data.name}
+          existingTranslations={translations}
+          onSave={handleSaveTranslations}
         />,
         document.body
       )}
