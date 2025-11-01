@@ -17,7 +17,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  // if (!session) redirect("/");
+  if (!session) redirect("/");
 
   return (
     <AdminProvider>

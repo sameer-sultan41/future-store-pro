@@ -8,6 +8,7 @@ import ProductListItem from "@/domains/admin/components/product/productListItem"
 import { Button } from "@/components/ui/button";
 import Input from "@/shared/components/UI/input";
 import { TProductListItem } from "@/shared/types/product";
+import { Plus } from "lucide-react";
 
 const AdminProducts = () => {
   const [isFetching, setIsFetching] = useState(true);
@@ -41,67 +42,87 @@ const AdminProducts = () => {
   }, [productsList, searchQuery]);
 
   return (
-    <>
-      <div className="flex justify-between items-center gap-4 mb-4">
-        <div className="flex-1 max-w-md">
+    <div className="w-full">
+      {/* Search and Actions */}
+      <div className="flex max-sm:flex-col sm:justify-between sm:items-center sm:mb-6 mb-2 w-full">
+        <div className="max-sm:mb-4 w-[30%]">
           <Input
             type="text"
-            placeholder="Search..."
+            placeholder="Search Products..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full py-2"
+            onChange={(e: any) => setSearchQuery(e.target.value)}
+            className="w-full py-2 capitalize"
           />
         </div>
-        <Link href="/admin/products/new">
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            + Add Product
-          </Button>
-        </Link>
+
+        <div className="flex flex-wrap">
+          <Link href="/admin/products/new">
+            <Button className="bg-primary cursor-pointer text-white hover:bg-primary/90 w-full font-normal">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Product
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-        {isFetching ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      {/* Product Table */}
+      <div className="overflow-x-auto">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden">
+            <table className="min-w-full divide-y divide-slate-100 table-fixed dark:divide-slate-700">
+              <thead className="bg-slate-200 dark:bg-slate-700">
+                <tr className="font-semibold uppercase text-sm text-left text-slate-700 dark:text-slate-300">
+                  <th scope="col" className="py-2 px-4">Product Name</th>
+                  <th scope="col" className="">Category</th>
+                  <th scope="col" className="">Brand</th>
+                  <th scope="col" className="">Price</th>
+                  <th scope="col" className="text-center">Status</th>
+                  <th scope="col" className="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700">
+                {isFetching ? (
+                  <tr>
+                    <td colSpan={6} className="p-4">
+                      <div className="flex items-center justify-center w-full py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : productsList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-4 text-center">
+                      <div className="py-8">
+                        <p className="text-slate-500 dark:text-slate-400 mb-4">No products found</p>
+                        <Link href="/admin/products/new">
+                          <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Your First Product
+                          </Button>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-4 text-center">
+                      <div className="py-8">
+                        <p className="text-slate-500 dark:text-slate-400 mb-2">No products match your search</p>
+                        <p className="text-sm text-slate-400 dark:text-slate-500">Try adjusting your search terms</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <ProductListItem key={product.id} data={product} requestReload={getProductsList} />
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : productsList.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-slate-500 dark:text-slate-400 mb-4">No products found</p>
-            <Link href="/admin/products/new">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                + Add Your First Product
-              </Button>
-            </Link>
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-slate-500 dark:text-slate-400 mb-2">No products match your search</p>
-            <p className="text-sm text-slate-400 dark:text-slate-500">Try adjusting your search terms</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            {/* Table Header */}
-            <div className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-6 px-6 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                <div className="whitespace-nowrap">Product Name</div>
-                <div className="whitespace-nowrap">Category</div>
-                <div className="whitespace-nowrap">Brand</div>
-                <div className="text-right whitespace-nowrap">Price</div>
-                <div className="text-center whitespace-nowrap">Status</div>
-                <div className="text-right whitespace-nowrap">Actions</div>
-              </div>
-            </div>
-
-            {/* Table Body */}
-            <div className="divide-y divide-slate-100 dark:divide-slate-700">
-              {filteredProducts.map((product) => (
-                <ProductListItem key={product.id} data={product} requestReload={getProductsList} />
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
