@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,18 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/shoppingCart";
+import { RootState, TCartState } from "@/store/shoppingCart";
+import { calculateShippingRate, ShippingRate } from "@/actions/shipping/shippingService";
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const cartItems = useSelector((state: RootState) => state.cart);
+
+  const cartItems: TCartState | undefined = useSelector((state: RootState) => state.cart);
   const [currentStep, setCurrentStep] = useState(1);
+  const [shippingCost, setShippingCost] = useState(15.0);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+  const [availableShippingRates, setAvailableShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedShippingRate, setSelectedShippingRate] = useState<ShippingRate | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -39,6 +45,65 @@ const CheckoutPage = () => {
     { number: 2, title: "Payment", icon: "💳" },
     { number: 3, title: "Review", icon: "✓" },
   ];
+
+  // Calculate shipping when address is complete
+  useEffect(() => {
+    const calculateShipping = async () => {
+      if (
+        formData.address &&
+        formData.city &&
+        formData.state &&
+        formData.zipCode &&
+        formData.country &&
+        cartItems.items &&
+        cartItems.items.length > 0
+      ) {
+        setIsCalculatingShipping(true);
+        try {
+          const shippingAddress = {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          };
+
+          const cartItemsForShipping = cartItems.items.map((item) => ({
+            productId: item.productId,
+            productName: item.productName,
+            price: item.dealPrice || item.price || 0,
+            quantity: item.quantity,
+          }));
+
+          const result = await calculateShippingRate(shippingAddress, cartItemsForShipping);
+          console.log("result>>", result);
+
+          if (result.success && result.rates && result.rates.length > 0) {
+            setAvailableShippingRates(result.rates);
+            // Sort rates by price and select the cheapest by default
+            const sortedRates = [...result.rates].sort((a, b) => a.rate - b.rate);
+            setSelectedShippingRate(sortedRates[0]);
+            setShippingCost(sortedRates[0].rate);
+          } else if (result.defaultRate) {
+            // Use default rate if API fails
+            setShippingCost(result.defaultRate);
+            setAvailableShippingRates([]);
+            setSelectedShippingRate(null);
+          }
+        } catch (error) {
+          console.error("Error calculating shipping:", error);
+          // Keep default shipping cost on error
+          setShippingCost(15.0);
+        } finally {
+          setIsCalculatingShipping(false);
+        }
+      }
+    };
+
+    calculateShipping();
+  }, [formData.address, formData.city, formData.state, formData.zipCode, formData.country, cartItems.items]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -93,7 +158,7 @@ const CheckoutPage = () => {
       return total + itemPrice * item.quantity;
     }, 0) || 0;
 
-  const shipping = 15.0;
+  const shipping = shippingCost;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
@@ -339,6 +404,107 @@ const CheckoutPage = () => {
                   />
                 </div>
               </div>
+
+              {/* Shipping Options Section */}
+              {isCalculatingShipping && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue-600"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <p className="text-sm font-medium text-blue-900">Calculating shipping rates...</p>
+                  </div>
+                </div>
+              )}
+
+              {!isCalculatingShipping && availableShippingRates.length > 0 && (
+                <div className="mt-6">
+                  <Label className="text-gray-700 font-medium mb-3 block">Select Shipping Method</Label>
+                  <div className="space-y-3">
+                    {availableShippingRates.map((rate, index) => (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          setSelectedShippingRate(rate);
+                          setShippingCost(rate.rate);
+                        }}
+                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                          selectedShippingRate === rate
+                            ? "border-blue-500 bg-blue-50 shadow-md"
+                            : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                selectedShippingRate === rate
+                                  ? "border-blue-500 bg-blue-500"
+                                  : "border-gray-300 bg-white"
+                              }`}
+                            >
+                              {selectedShippingRate === rate && (
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12">
+                                  <circle cx="6" cy="6" r="3" />
+                                </svg>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {rate.provider} - {rate.serviceName}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Estimated delivery: {rate.deliveryDays} business day{rate.deliveryDays !== 1 ? "s" : ""}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-gray-900">${rate.rate.toFixed(2)}</p>
+                            <p className="text-xs text-gray-500">{rate.currency}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!isCalculatingShipping && availableShippingRates.length === 0 && formData.zipCode && (
+                <div className="mt-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-yellow-900">Using standard shipping rate</p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Dynamic shipping rates unavailable. Standard rate of ${shippingCost.toFixed(2)} applied.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -843,9 +1009,35 @@ const CheckoutPage = () => {
                   <span className="text-gray-600">Subtotal</span>
                   <span className="text-gray-900 font-semibold">${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm items-center">
                   <span className="text-gray-600">Shipping</span>
-                  <span className="text-gray-900 font-semibold">${shipping.toFixed(2)}</span>
+                  {isCalculatingShipping ? (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin h-3 w-3 text-blue-600"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span className="text-blue-600 font-semibold text-xs">Calculating...</span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-900 font-semibold">${shipping.toFixed(2)}</span>
+                  )}
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Tax (8%)</span>
